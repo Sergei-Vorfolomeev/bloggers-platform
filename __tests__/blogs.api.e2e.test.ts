@@ -98,6 +98,53 @@ describe(PATHS.blogs, () => {
             .expect(200, [createdBlog])
     })
 
+
+    it('update blog with invalid data', async () => {
+        await request(app)
+            .put(`${PATHS.blogs}/${createdBlog.id}`)
+            .set('Authorization', `Basic ${credentials}`)
+            .send({
+                name: 'suchALongerName1234567890',
+                description: '',
+                websiteUrl: '12345'
+            })
+            .expect(HTTP_STATUS.BAD_REQUEST_400, [
+                {
+                    type: 'field',
+                    value: 'suchALongerName1234567890',
+                    msg: 'Length should be max 15 symbols',
+                    path: 'name',
+                    location: 'body'
+                },
+                {
+                    type: 'field',
+                    value: '',
+                    msg: 'Description is required',
+                    path: 'description',
+                    location: 'body'
+                },
+                {
+                    type: 'field',
+                    value: '12345',
+                    msg: 'Incorrect URL',
+                    path: 'websiteUrl',
+                    location: 'body'
+                },
+            ])
+    })
+
+    it('update blog with invalid id', async () => {
+        await request(app)
+            .put(`${PATHS.blogs}/8437535`)
+            .set('Authorization', `Basic ${credentials}`)
+            .send({
+                name: 'valid',
+                description: 'valid',
+                websiteUrl: 'https://valid.com'
+            })
+            .expect(HTTP_STATUS.NOT_FOUND_404)
+    })
+
     it('delete created blog with wrong id', async () => {
         await request(app)
             .delete(`${PATHS.blogs}/43785643`)

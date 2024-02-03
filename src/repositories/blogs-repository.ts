@@ -22,5 +22,14 @@ export const blogsRepository = {
             db.blogs.splice(blogIndex, 1)
             return true
         } else return false
+    },
+    updateBlog: (id: string, body: BlogInputModel) => {
+        const blog = db.blogs.find(b => b.id === id)
+        if (blog) {
+            Object.assign(blog, body)
+            return true
+        } else {
+            return false
+        }
     }
 }
