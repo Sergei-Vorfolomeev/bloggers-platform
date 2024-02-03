@@ -3,6 +3,8 @@ import {app, HTTP_STATUS, PATHS} from "../src";
 const request = require('supertest')
 
 describe(PATHS.blogs, () => {
+    const credentials = Buffer.from('admin:qwerty').toString('base64')
+
     beforeAll(async () => {
         await request(app)
             .delete(PATHS.__test__)
@@ -15,18 +17,30 @@ describe(PATHS.blogs, () => {
             .expect(200, [])
     })
 
+    it('create blog without auth', async () => {
+        const res = await request(app)
+            .post(PATHS.blogs)
+            .send({
+                name: 'Valid name',
+                description: 'Valid description',
+                websiteUrl: 'https://valid-site.com',
+            })
+            .expect(HTTP_STATUS.UNAUTHORIZED_401)
+    })
+
     it('create invalid blog', async () => {
         await request(app)
             .post(PATHS.blogs)
+            .set('Authorization', `Basic ${credentials}`)
             .send({
-                name: 'abcdefgklmn1234567890',
+                name: 'suchALongerName1234567890',
                 description: '',
                 websiteUrl: '12345'
             })
             .expect(HTTP_STATUS.BAD_REQUEST_400, [
                 {
                     type: 'field',
-                    value: 'abcdefgklmn1234567890',
+                    value: 'suchALongerName1234567890',
                     msg: 'Length should be max 15 symbols',
                     path: 'name',
                     location: 'body'
@@ -58,6 +72,7 @@ describe(PATHS.blogs, () => {
     it('create valid blog', async () => {
         const res = await request(app)
             .post(PATHS.blogs)
+            .set('Authorization', `Basic ${credentials}`)
             .send({
                 name: 'Valid name',
                 description: 'Valid description',
