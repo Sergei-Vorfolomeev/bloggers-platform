@@ -86,9 +86,35 @@ describe(PATHS.blogs, () => {
         })
     })
 
+    it('get created blog by id', async () => {
+        await request(app)
+            .get(`${PATHS.blogs}/${createdBlog.id}`)
+            .expect(HTTP_STATUS.OK_200, createdBlog)
+    })
+
     it('get blogs with created blog', async () => {
         await request(app)
             .get(PATHS.blogs)
             .expect(200, [createdBlog])
+    })
+
+    it('delete created blog with wrong id', async () => {
+        await request(app)
+            .delete(`${PATHS.blogs}/43785643`)
+            .set('Authorization', `Basic ${credentials}`)
+            .expect(HTTP_STATUS.NOT_FOUND_404)
+    })
+
+    it('delete blog without auth', async () => {
+        await request(app)
+            .delete(`${PATHS.blogs}/${createdBlog.id}`)
+            .expect(HTTP_STATUS.UNAUTHORIZED_401)
+    })
+
+    it('delete created blog', async () => {
+        await request(app)
+            .delete(`${PATHS.blogs}/${createdBlog.id}`)
+            .set('Authorization', `Basic ${credentials}`)
+            .expect(HTTP_STATUS.NO_CONTENT_204)
     })
 })

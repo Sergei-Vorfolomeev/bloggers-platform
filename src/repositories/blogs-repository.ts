@@ -15,5 +15,12 @@ export const blogsRepository = {
         }
         db.blogs.push(newBlog)
         return newBlog
+    },
+    deleteBlog: (id: string) => {
+        const blogIndex = db.blogs.findIndex(b => b.id === id)
+        if (blogIndex > -1) {
+            db.blogs.splice(blogIndex, 1)
+            return true
+        } else return false
     }
 }

@@ -52,7 +52,6 @@ blogsRouter.post('/',
     validateDescription(),
     validateWebsiteUrl(),
     (req: Request<any, BlogViewModel, BlogInputModel>, res: Response<BlogViewModel | ValidationError[]>) => {
-    const access = req.header('a')
     const errors = validationResult(req).array()
     if (!errors.length) {
         const newBlog = blogsRepository.createBlog(req.body)
@@ -61,3 +60,13 @@ blogsRouter.post('/',
         res.status(HTTP_STATUS.BAD_REQUEST_400).send(errors)
     }
 })
+
+blogsRouter.delete('/:id', authMiddleware, (req: Request, res: Response) => {
+    const isDeleted = blogsRepository.deleteBlog(req.params.id)
+    if (isDeleted) {
+        res.sendStatus(HTTP_STATUS.NO_CONTENT_204)
+    } else {
+        res.sendStatus(HTTP_STATUS.NOT_FOUND_404)
+    }
+})
+
