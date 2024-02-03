@@ -1,4 +1,5 @@
 import {app, HTTP_STATUS, PATHS} from "../src";
+
 const request = require('supertest')
 
 describe(PATHS.blogs, () => {
@@ -51,5 +52,28 @@ describe(PATHS.blogs, () => {
         await request(app)
             .get(PATHS.blogs)
             .expect(200, [])
+    })
+
+    let createdBlog: any = null
+    it('create valid blog', async () => {
+        const res = await request(app)
+            .post(PATHS.blogs)
+            .send({
+                name: 'Valid name',
+                description: 'Valid description',
+                websiteUrl: 'https://valid-site.com',
+            })
+            .expect(HTTP_STATUS.CREATED_201)
+        createdBlog = res.body
+        expect(createdBlog).toEqual({
+            id: expect.any(String),
+            ...createdBlog
+        })
+    })
+
+    it('get blogs with created blog', async () => {
+        await request(app)
+            .get(PATHS.blogs)
+            .expect(200, [createdBlog])
     })
 })
