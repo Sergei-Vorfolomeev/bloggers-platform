@@ -1,6 +1,8 @@
 import express from 'express'
-import {blogsRouter} from "./routers/blogsRouter";
-import {testRouter} from "./routers/testRouter";
+import {blogsRouter} from "./routers/blogs-router";
+import {testRouter} from "./routers/test-router";
+import {postsRouter} from "./routers/posts-router";
+import expressBasicAuth from "express-basic-auth";
 
 const PORT = process.env.PORT || 4200
 
@@ -23,6 +25,7 @@ export const app = express()
 
 app.use(express.json())
 app.use(PATHS.blogs, blogsRouter)
+app.use(PATHS.posts, postsRouter)
 app.use(PATHS.__test__, testRouter)
 
 app.listen(PORT, () => {

@@ -23,3 +23,10 @@ export type BlogInputModel = {
 	websiteUrl: string
 }
 
+export type PostInputModel = {
+	title: string
+	shortDescription: string
+	content: string
+	blogId: string
+}
+

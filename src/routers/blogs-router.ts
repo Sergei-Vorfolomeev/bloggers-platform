@@ -4,6 +4,7 @@ import {blogsRepository} from "../repositories/blogs-repository";
 import {BlogInputModel, BlogViewModel} from "../db/db.types";
 import {HTTP_STATUS} from "../index";
 import {body, ValidationError, validationResult} from "express-validator";
+import {authMiddleware} from "../middlewares/basic-auth";
 
 export const blogsRouter = Router()
 
@@ -23,13 +24,6 @@ const validateWebsiteUrl = () => body('websiteUrl')
     .isLength({max: 100}).withMessage('Length should be max 100 symbols')
     .isURL().withMessage('Incorrect URL')
 
-const authMiddleware = expressBasicAuth({
-    users: {
-        admin: 'qwerty'
-    },
-    challenge: true, // Для отправки запроса аутентификации, если данные не предоставлены
-    unauthorizedResponse: 'Unauthorized'
-})
 
 blogsRouter.get('/', (req: Request, res: Response<BlogViewModel[]>) => {
     const blogs = blogsRepository.getBlogs()
