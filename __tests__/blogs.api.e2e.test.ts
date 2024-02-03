@@ -1,4 +1,4 @@
-import {app, HTTP_STATUS, PATHS} from "../src";
+import {app, HTTP_STATUS, PATHS} from "../src/setting";
 
 const request = require('supertest')
 
@@ -8,13 +8,13 @@ describe(PATHS.blogs, () => {
     beforeAll(async () => {
         await request(app)
             .delete(PATHS.__test__)
-            .expect(204)
+            .expect(HTTP_STATUS.NO_CONTENT_204)
     })
 
     it('get empty blogs', async () => {
         await request(app)
             .get(PATHS.blogs)
-            .expect(200, [])
+            .expect(HTTP_STATUS.OK_200, [])
     })
 
     it('create blog without auth', async () => {

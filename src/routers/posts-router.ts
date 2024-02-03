@@ -1,10 +1,10 @@
 import {Router, Request, Response} from "express";
 import {postsRepository} from "../repositories/posts-repository";
-import {HTTP_STATUS} from "../index";
 import {PostInputModel, PostViewModel} from "../db/db.types";
 import {body, ValidationError, validationResult} from "express-validator";
 import {blogsRepository} from "../repositories/blogs-repository";
 import {authMiddleware} from "../middlewares/basic-auth";
+import {HTTP_STATUS} from "../setting";
 
 export const postsRouter = Router()
 
@@ -23,12 +23,12 @@ const validateContent = () => body('content')
     .notEmpty().withMessage('Content is required')
     .isLength({max: 1000}).withMessage('Max length is 1000 symbols')
 
-const validateBlogId = () => body('blogId').custom( blogId => {
-    const id = blogsRepository.getBlogById(blogId)
-    if (!id) {
-        throw new Error('Blog with this id does not exist')
+const validateBlogId = () => body('blogId').custom( async id => {
+    const blog = await blogsRepository.getBlogById(id)
+    if (!blog) {
+        throw new Error()
     }
-})
+}).withMessage('Blog with this id does not exist')
 
 postsRouter.get('/', (req: Request, res: Response) => {
     const posts = postsRepository.getPosts()
@@ -47,7 +47,7 @@ postsRouter.get('/:id', (req: Request, res: Response) => {
 postsRouter.delete('/:id', authMiddleware, (req: Request, res: Response) => {
     const isDeleted = postsRepository.deletePost(req.params.id)
     if (isDeleted) {
-        res.status(HTTP_STATUS.NO_CONTENT_204)
+        res.sendStatus(HTTP_STATUS.NO_CONTENT_204)
     } else {
         res.sendStatus(HTTP_STATUS.NOT_FOUND_404)
     }
@@ -55,10 +55,10 @@ postsRouter.delete('/:id', authMiddleware, (req: Request, res: Response) => {
 
 postsRouter.post('/',
     authMiddleware,
-    validateTitle,
-    validateShortDescription,
-    validateContent,
-    validateBlogId,
+    validateTitle(),
+    validateShortDescription(),
+    validateContent(),
+    validateBlogId(),
     (req: Request<any, PostViewModel, PostInputModel>, res: Response<PostViewModel | ValidationError[]>) => {
         const errors = validationResult(req)
         if (errors.isEmpty()) {
@@ -73,17 +73,17 @@ postsRouter.post('/',
 
 postsRouter.put('/:id',
     authMiddleware,
-    validateTitle,
-    validateShortDescription,
-    validateContent,
-    validateBlogId,
+    validateTitle(),
+    validateShortDescription(),
+    validateContent(),
+    validateBlogId(),
     (req: Request<any, ValidationError[], PostInputModel>, res: Response<ValidationError[]>) => {
         const errors = validationResult(req)
         if (errors.isEmpty()) {
             const isUpdated = postsRepository.updatePost(req.params.id, req.body)
             isUpdated
                 ? res.sendStatus(HTTP_STATUS.NO_CONTENT_204)
-                : res.sendStatus(HTTP_STATUS.BAD_REQUEST_400)
+                : res.sendStatus(HTTP_STATUS.NOT_FOUND_404)
         } else {
             res.status(HTTP_STATUS.BAD_REQUEST_400).send(errors.array())
         }

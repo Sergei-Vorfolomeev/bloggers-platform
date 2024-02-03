@@ -1,10 +1,9 @@
 import {Request, Response, Router} from "express";
-import expressBasicAuth from "express-basic-auth";
 import {blogsRepository} from "../repositories/blogs-repository";
 import {BlogInputModel, BlogViewModel} from "../db/db.types";
-import {HTTP_STATUS} from "../index";
 import {body, ValidationError, validationResult} from "express-validator";
 import {authMiddleware} from "../middlewares/basic-auth";
+import {HTTP_STATUS} from "../setting";
 
 export const blogsRouter = Router()
 
