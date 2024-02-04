@@ -63,36 +63,26 @@ describe(PATHS.posts, () => {
                 title: 'suchALongerName1234567890   suchALongerName1234567890',
                 shortDescription: '',
             })
-            .expect(HTTP_STATUS.BAD_REQUEST_400,[
-                {
-                    type: 'field',
-                    value: 'suchALongerName1234567890   suchALongerName1234567890',
-                    msg: 'Max length is 30 symbols',
-                    path: 'title',
-                    location: 'body'
-                },
-                {
-                    type: 'field',
-                    value: '',
-                    msg: 'Short description is required',
-                    path: 'shortDescription',
-                    location: 'body'
-                },
-                {
-                    type: 'field',
-                    value: '',
-                    msg: 'Content is required',
-                    path: 'content',
-                    location: 'body'
-                },
-                {
-                    type: 'field',
-                    value: '843753',
-                    msg: 'Blog with this id does not exist',
-                    path: 'blogId',
-                    location: 'body'
-                }
-            ])
+            .expect(HTTP_STATUS.BAD_REQUEST_400, {
+                errorsMessages: [
+                    {
+                        message: 'Max length is 30 symbols',
+                        field: 'title',
+                    },
+                    {
+                        message: 'Short description is required',
+                        field: 'shortDescription',
+                    },
+                    {
+                        message: 'Content is required',
+                        field: 'content',
+                    },
+                    {
+                        message: 'Blog with this id does not exist',
+                        field: 'blogId',
+                    }
+                ]
+            })
     })
 
     it('get posts without invalid post', async () => {
@@ -142,37 +132,25 @@ describe(PATHS.posts, () => {
                 title: 'suchALongerName1234567890 suchALongerName1234567890',
                 shortDescription: '',
             })
-            .expect(HTTP_STATUS.BAD_REQUEST_400, [
+            .expect(HTTP_STATUS.BAD_REQUEST_400, {
+                errorsMessages: [
                     {
-                        type: 'field',
-                        value: 'suchALongerName1234567890 suchALongerName1234567890',
-                        msg: 'Max length is 30 symbols',
-                        path: 'title',
-                        location: 'body'
+                        message: 'Max length is 30 symbols',
+                        field: 'title',
                     },
                     {
-                        type: 'field',
-                        value: '',
-                        msg: 'Short description is required',
-                        path: 'shortDescription',
-                        location: 'body'
+                        message: 'Short description is required',
+                        field: 'shortDescription',
                     },
                     {
-                        type: 'field',
-                        value: '',
-                        msg: 'Content is required',
-                        path: 'content',
-                        location: 'body'
+                        message: 'Content is required',
+                        field: 'content',
                     },
                     {
-                        type: 'field',
-                        value: '1',
-                        msg: 'Blog with this id does not exist',
-                        path: 'blogId',
-                        location: 'body'
-                    }
-                ]
-            )
+                        message: 'Blog with this id does not exist',
+                        field: 'blogId',
+                    }]
+            })
     })
 
     it('update post with invalid id', async () => {
@@ -189,7 +167,7 @@ describe(PATHS.posts, () => {
     })
 
     it('update post with valid data', async () => {
-       await request(app)
+        await request(app)
             .put(`${PATHS.posts}/${createdPost.id}`)
             .set('Authorization', `Basic ${credentials}`)
             .send({
@@ -207,7 +185,7 @@ describe(PATHS.posts, () => {
             .expect(HTTP_STATUS.OK_200)
             .expect({
                 id: createdPost.id,
-                blogId:  createdBlog.id,
+                blogId: createdBlog.id,
                 blogName: createdBlog.name,
                 title: 'Changed title',
                 shortDescription: 'Changed description',

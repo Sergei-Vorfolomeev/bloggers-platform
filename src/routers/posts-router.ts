@@ -1,34 +1,11 @@
-import {Router, Request, Response} from "express";
+import {Request, Response, Router} from "express";
 import {postsRepository} from "../repositories/posts-repository";
 import {PostInputModel, PostViewModel} from "../db/db.types";
-import {body, ValidationError, validationResult} from "express-validator";
-import {blogsRepository} from "../repositories/blogs-repository";
-import {authMiddleware} from "../middlewares/basic-auth";
+import {authMiddleware} from "../middlewares/auth-middleware";
 import {HTTP_STATUS} from "../setting";
+import {postValidators} from "../validators/post-validators";
 
 export const postsRouter = Router()
-
-const validateTitle = () => body('title')
-    .trim()
-    .notEmpty().withMessage('Title is required')
-    .isLength({max: 30}).withMessage('Max length is 30 symbols')
-
-const validateShortDescription = () => body('shortDescription')
-    .trim()
-    .notEmpty().withMessage('Short description is required')
-    .isLength({max: 100}).withMessage('Max length is 100 symbols')
-
-const validateContent = () => body('content')
-    .trim()
-    .notEmpty().withMessage('Content is required')
-    .isLength({max: 1000}).withMessage('Max length is 1000 symbols')
-
-const validateBlogId = () => body('blogId').custom( async id => {
-    const blog = await blogsRepository.getBlogById(id)
-    if (!blog) {
-        throw new Error()
-    }
-}).withMessage('Blog with this id does not exist')
 
 postsRouter.get('/', (req: Request, res: Response) => {
     const posts = postsRepository.getPosts()
@@ -53,38 +30,18 @@ postsRouter.delete('/:id', authMiddleware, (req: Request, res: Response) => {
     }
 })
 
-postsRouter.post('/',
-    authMiddleware,
-    validateTitle(),
-    validateShortDescription(),
-    validateContent(),
-    validateBlogId(),
-    (req: Request<any, PostViewModel, PostInputModel>, res: Response<PostViewModel | ValidationError[]>) => {
-        const errors = validationResult(req)
-        if (errors.isEmpty()) {
-            const newPost = postsRepository.createPost(req.body)
-            newPost
-                ? res.status(HTTP_STATUS.CREATED_201).send(newPost)
-                : res.sendStatus(HTTP_STATUS.BAD_REQUEST_400)
-        } else {
-            res.status(HTTP_STATUS.BAD_REQUEST_400).send(errors.array({ onlyFirstError: true }))
-        }
-})
+postsRouter.post('/', authMiddleware, postValidators(),
+    (req: Request<any, PostViewModel, PostInputModel>, res: Response<PostViewModel>) => {
+        const newPost = postsRepository.createPost(req.body)
+        newPost
+            ? res.status(HTTP_STATUS.CREATED_201).send(newPost)
+            : res.sendStatus(HTTP_STATUS.BAD_REQUEST_400)
+    })
 
-postsRouter.put('/:id',
-    authMiddleware,
-    validateTitle(),
-    validateShortDescription(),
-    validateContent(),
-    validateBlogId(),
-    (req: Request<any, ValidationError[], PostInputModel>, res: Response<ValidationError[]>) => {
-        const errors = validationResult(req)
-        if (errors.isEmpty()) {
-            const isUpdated = postsRepository.updatePost(req.params.id, req.body)
-            isUpdated
-                ? res.sendStatus(HTTP_STATUS.NO_CONTENT_204)
-                : res.sendStatus(HTTP_STATUS.NOT_FOUND_404)
-        } else {
-            res.status(HTTP_STATUS.BAD_REQUEST_400).send(errors.array({ onlyFirstError: true }))
-        }
+postsRouter.put('/:id', authMiddleware, postValidators(),
+    (req: Request<any, any, PostInputModel>, res: Response) => {
+        const isUpdated = postsRepository.updatePost(req.params.id, req.body)
+        isUpdated
+            ? res.sendStatus(HTTP_STATUS.NO_CONTENT_204)
+            : res.sendStatus(HTTP_STATUS.NOT_FOUND_404)
     })
