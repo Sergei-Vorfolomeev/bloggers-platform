@@ -21,12 +21,13 @@ export const postsRepository = {
     },
 
     createPost: (body: PostInputModel) => {
-        const blog = db.blogs.find(b => b.id === body.blogId)
+        const {title, shortDescription, content, blogId} = body
+        const blog = db.blogs.find(b => b.id === blogId)
         if (blog) {
             const newPost = {
                 id: Date.now().toString(),
                 blogName: blog.name,
-                ...body
+                title, shortDescription, content, blogId
             }
             db.posts.push(newPost)
             return newPost
@@ -35,11 +36,14 @@ export const postsRepository = {
     },
 
     updatePost: (id: string, body: PostInputModel) => {
-        const blog = db.blogs.find(b => b.id === body.blogId)
+        const {title, shortDescription, content, blogId} = body
+        const blog = db.blogs.find(b => b.id === blogId)
         if (blog) {
             const post = db.posts.find(p => p.id === id)
             if (post) {
-                Object.assign(post, body)
+                Object.assign(post, {
+                    title, shortDescription, content, blogId
+                })
                 return true
             }
             return false

@@ -9,9 +9,10 @@ export const blogsRepository = {
         return db.blogs.find(b => b.id === id)
     },
     createBlog: (body: BlogInputModel): BlogViewModel => {
+        const {name, description, websiteUrl} = body
         const newBlog = {
             id: Date.now().toString(),
-            ...body
+            name, description, websiteUrl
         }
         db.blogs.push(newBlog)
         return newBlog
@@ -24,9 +25,12 @@ export const blogsRepository = {
         } else return false
     },
     updateBlog: (id: string, body: BlogInputModel) => {
+        const {name, description, websiteUrl} = body
         const blog = db.blogs.find(b => b.id === id)
         if (blog) {
-            Object.assign(blog, body)
+            Object.assign(blog, {
+                name, description, websiteUrl
+            })
             return true
         } else {
             return false
