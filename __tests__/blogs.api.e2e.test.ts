@@ -37,29 +37,22 @@ describe(PATHS.blogs, () => {
                 description: '',
                 websiteUrl: '12345'
             })
-            .expect(HTTP_STATUS.BAD_REQUEST_400, [
-                {
-                    type: 'field',
-                    value: 'suchALongerName1234567890',
-                    msg: 'Length should be max 15 symbols',
-                    path: 'name',
-                    location: 'body'
-                },
-                {
-                    type: 'field',
-                    value: '',
-                    msg: 'Description is required',
-                    path: 'description',
-                    location: 'body'
-                },
-                {
-                    type: 'field',
-                    value: '12345',
-                    msg: 'Incorrect URL',
-                    path: 'websiteUrl',
-                    location: 'body'
-                },
-            ])
+            .expect(HTTP_STATUS.BAD_REQUEST_400, {
+                errorsMessages: [
+                    {
+                        message: 'Length should be max 15 symbols',
+                        field: 'name',
+                    },
+                    {
+                        message: 'Description is required',
+                        field: 'description',
+                    },
+                    {
+                        message: 'Incorrect URL',
+                        field: 'websiteUrl',
+                    },
+                ]
+            })
     })
 
     it('get blogs without invalid blog', async () => {
@@ -108,29 +101,22 @@ describe(PATHS.blogs, () => {
                 description: '',
                 websiteUrl: '12345'
             })
-            .expect(HTTP_STATUS.BAD_REQUEST_400, [
-                {
-                    type: 'field',
-                    value: 'suchALongerName1234567890',
-                    msg: 'Length should be max 15 symbols',
-                    path: 'name',
-                    location: 'body'
-                },
-                {
-                    type: 'field',
-                    value: '',
-                    msg: 'Description is required',
-                    path: 'description',
-                    location: 'body'
-                },
-                {
-                    type: 'field',
-                    value: '12345',
-                    msg: 'Incorrect URL',
-                    path: 'websiteUrl',
-                    location: 'body'
-                },
-            ])
+            .expect(HTTP_STATUS.BAD_REQUEST_400, {
+                errorsMessages: [
+                    {
+                        message: 'Length should be max 15 symbols',
+                        field: 'name',
+                    },
+                    {
+                        message: 'Description is required',
+                        field: 'description',
+                    },
+                    {
+                        message: 'Incorrect URL',
+                        field: 'websiteUrl',
+                    },
+                ]
+            })
     })
 
     it('update blog with invalid id', async () => {

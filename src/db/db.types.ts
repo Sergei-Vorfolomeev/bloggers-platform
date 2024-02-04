@@ -1,3 +1,10 @@
+import {
+	AlternativeValidationError,
+	GroupedAlternativeValidationError,
+	UnknownFieldsError,
+	ValidationError
+} from "express-validator";
+
 export type DBType = {
 	blogs: BlogViewModel[];
 	posts: PostViewModel[];
@@ -28,5 +35,13 @@ export type PostInputModel = {
 	shortDescription: string
 	content: string
 	blogId: string
+}
+
+export type FieldError = {
+	message: string
+	field: string
+}
+export type APIErrorResult = {
+	errorsMessages: FieldError[]
 }
 

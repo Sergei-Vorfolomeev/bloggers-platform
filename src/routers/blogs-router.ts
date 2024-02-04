@@ -1,9 +1,10 @@
 import {Request, Response, Router} from "express";
 import {blogsRepository} from "../repositories/blogs-repository";
 import {BlogInputModel, BlogViewModel} from "../db/db.types";
-import {body, ValidationError, validationResult} from "express-validator";
+import {body, Result, validationResult} from "express-validator";
 import {authMiddleware} from "../middlewares/basic-auth";
 import {HTTP_STATUS} from "../setting";
+import {formatError} from "../utils/formatError";
 
 export const blogsRouter = Router()
 
@@ -22,6 +23,7 @@ const validateWebsiteUrl = () => body('websiteUrl')
     .notEmpty().withMessage('WebsiteUrl is required')
     .isLength({max: 100}).withMessage('Length should be max 100 symbols')
     .isURL().withMessage('Incorrect URL')
+
 
 
 blogsRouter.get('/', (req: Request, res: Response<BlogViewModel[]>) => {
@@ -44,13 +46,14 @@ blogsRouter.post('/',
     validateName(),
     validateDescription(),
     validateWebsiteUrl(),
-    (req: Request<any, BlogViewModel, BlogInputModel>, res: Response<BlogViewModel | ValidationError[]>) => {
-        const errors = validationResult(req)
+    (req: Request<any, BlogViewModel, BlogInputModel>, res: Response) => {
+        const errors: Result = validationResult(req)
         if (errors.isEmpty()) {
             const newBlog = blogsRepository.createBlog(req.body)
             res.status(HTTP_STATUS.CREATED_201).send(newBlog)
         } else {
-            res.status(HTTP_STATUS.BAD_REQUEST_400).send(errors.array())
+            const formattedErrors = errors.array({ onlyFirstError: true }).map(el => formatError(el))
+            res.status(HTTP_STATUS.BAD_REQUEST_400).send({ errorsMessages: formattedErrors })
         }
     })
 
@@ -68,7 +71,7 @@ blogsRouter.put('/:id',
     validateName(),
     validateDescription(),
     validateWebsiteUrl(),
-    (req: Request<any, any, BlogInputModel>, res: Response<ValidationError[]>) => {
+    (req: Request<any, any, BlogInputModel>, res: Response) => {
         const errors = validationResult(req)
         if (errors.isEmpty()) {
             const isUpdated = blogsRepository.updateBlog(req.params.id, req.body)
@@ -78,6 +81,7 @@ blogsRouter.put('/:id',
                 res.sendStatus(HTTP_STATUS.NOT_FOUND_404)
             }
         } else {
-            res.status(HTTP_STATUS.BAD_REQUEST_400).send(errors.array())
+            const formattedErrors = errors.array({ onlyFirstError: true }).map(el => formatError(el))
+            res.status(HTTP_STATUS.BAD_REQUEST_400).send({ errorsMessages: formattedErrors })
         }
     })

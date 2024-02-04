@@ -67,7 +67,7 @@ postsRouter.post('/',
                 ? res.status(HTTP_STATUS.CREATED_201).send(newPost)
                 : res.sendStatus(HTTP_STATUS.BAD_REQUEST_400)
         } else {
-            res.status(HTTP_STATUS.BAD_REQUEST_400).send(errors.array())
+            res.status(HTTP_STATUS.BAD_REQUEST_400).send(errors.array({ onlyFirstError: true }))
         }
 })
 
@@ -85,6 +85,6 @@ postsRouter.put('/:id',
                 ? res.sendStatus(HTTP_STATUS.NO_CONTENT_204)
                 : res.sendStatus(HTTP_STATUS.NOT_FOUND_404)
         } else {
-            res.status(HTTP_STATUS.BAD_REQUEST_400).send(errors.array())
+            res.status(HTTP_STATUS.BAD_REQUEST_400).send(errors.array({ onlyFirstError: true }))
         }
     })
