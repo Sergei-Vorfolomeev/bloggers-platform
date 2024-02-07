@@ -10,7 +10,9 @@ export const postsRouter = Router()
 
 postsRouter.get('/', async (req: Request, res: Response) => {
     const posts = await postsRepository.getPosts()
-    res.status(200).send(posts)
+    posts
+        ? res.status(200).send(posts)
+        : res.sendStatus(500)
 })
 
 postsRouter.get('/:id',
@@ -21,11 +23,9 @@ postsRouter.get('/:id',
             return
         }
         const post = await postsRepository.getPostById(id)
-        if (!post) {
-            res.sendStatus(404)
-            return
-        }
-        res.status(200).send(post)
+        post
+            ? res.status(200).send(post)
+            : res.sendStatus(404)
     })
 
 postsRouter.post('/', authMiddleware, postValidators(),

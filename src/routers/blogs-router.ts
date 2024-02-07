@@ -8,9 +8,11 @@ import {ObjectId} from "mongodb";
 
 export const blogsRouter = Router()
 
-blogsRouter.get('/', async (req: Request, res: ResponseWithBody<BlogViewModel[]>) => {
+blogsRouter.get('/', async (req: Request, res: ResponseWithBody<BlogViewModel[] | null>) => {
     const blogs = await blogsRepository.getBlogs()
-    res.status(200).send(blogs)
+    blogs
+        ? res.status(200).send(blogs)
+        : res.sendStatus(500)
 })
 
 blogsRouter.get('/:id', async (req: RequestWithParams, res: ResponseWithBody<BlogViewModel>) => {

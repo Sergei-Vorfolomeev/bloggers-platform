@@ -4,38 +4,67 @@ import {postMapper} from "../utils/post-mapper";
 import {ObjectId} from "mongodb";
 
 export class postsRepository {
-    static async getPosts(): Promise<PostViewModel[]> {
-        const posts = await postsCollection.find({}).toArray()
-        return posts.map(postMapper)
-    }
-    static async getPostById(id: string): Promise<PostViewModel | null> {
-        const post = await postsCollection.findOne({_id: new ObjectId(id)})
-        if (!post) return null
-        return postMapper(post)
-    }
-    static async createPost(body: PostInputModel): Promise<PostViewModel | null> {
-        const {title, shortDescription, content, blogId} = body
-        const blog = await blogsCollection.findOne({_id: new ObjectId(blogId)})
-        if (!blog) return null
-        const { name: blogName } = blog
-        const newPost: PostDBModel = {
-            title, shortDescription, content, blogId, blogName,
-            createdAt: new Date().toISOString(),
+    static async getPosts(): Promise<PostViewModel[] | null> {
+        try {
+            const posts = await postsCollection.find({}).toArray()
+            return posts.map(postMapper)
+        } catch (e) {
+            console.log(e)
+            return null
         }
-        const res = await postsCollection.insertOne(newPost)
-        const post = await this.getPostById(res.insertedId.toString())
-        if (!post) return null
-        return post
     }
+
+    static async getPostById(id: string): Promise<PostViewModel | null> {
+        try {
+            const post = await postsCollection.findOne({_id: new ObjectId(id)})
+            if (!post) return null
+            return postMapper(post)
+        } catch (e) {
+            console.log(e)
+            return null
+        }
+    }
+
+    static async createPost(body: PostInputModel): Promise<PostViewModel | null> {
+        try {
+            const { title, shortDescription, content, blogId } = body
+            const blog = await blogsCollection.findOne({_id: new ObjectId(blogId)})
+            if (!blog) return null
+            const {name: blogName} = blog
+            const newPost: PostDBModel = {
+                title, shortDescription, content, blogId, blogName,
+                createdAt: new Date().toISOString(),
+            }
+            const res = await postsCollection.insertOne(newPost)
+            const post = await this.getPostById(res.insertedId.toString())
+            if (!post) return null
+            return post
+        } catch (e) {
+            console.log(e)
+            return null
+        }
+    }
+
     static async updatePost(id: string, body: PostInputModel): Promise<boolean> {
-        const {title, shortDescription, content, blogId} = body
-        const res = await postsCollection.updateOne({_id: new ObjectId(id)}, {
-            $set: {title, shortDescription, content, blogId}
-        })
-        return !!res.matchedCount
+        try {
+            const {title, shortDescription, content, blogId} = body
+            const res = await postsCollection.updateOne({_id: new ObjectId(id)}, {
+                $set: {title, shortDescription, content, blogId}
+            })
+            return !!res.matchedCount
+        } catch (e) {
+            console.log(e)
+            return false
+        }
     }
+
     static async deletePost(id: string): Promise<boolean> {
-        const res = await postsCollection.deleteOne({_id:  new ObjectId(id)})
-        return !!res.deletedCount
+        try {
+            const res = await postsCollection.deleteOne({_id: new ObjectId(id)})
+            return !!res.deletedCount
+        } catch (e) {
+            console.log(e)
+            return false
+        }
     }
 }
