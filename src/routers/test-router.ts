@@ -1,10 +1,10 @@
 import {Request, Response, Router} from "express";
-import {db} from "../db/db";
+import {blogsCollection, db, postsCollection} from "../db/db";
 
 export const testRouter = Router()
 
-testRouter.delete('/', (req: Request, res: Response) => {
-   db.blogs = []
-   db.posts = []
+testRouter.delete('/', async (req: Request, res: Response) => {
+   await blogsCollection.deleteMany({})
+   await postsCollection.deleteMany({})
     res.sendStatus(204)
 })

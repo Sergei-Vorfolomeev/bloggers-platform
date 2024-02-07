@@ -1,53 +1,38 @@
-import {db} from "../db/db";
-import {PostInputModel} from "../db/db.types";
+import {PostInputModel, PostViewModel} from "../db/db.types";
+import {blogsCollection, postsCollection} from "../db/db";
+import {postMapper} from "../utils/post-mapper";
+import {ObjectId} from "mongodb";
 
-export const postsRepository = {
-    getPosts: () => {
-        return db.posts
-    },
-
-    getPostsById: (id: string) => {
-        return db.posts.find(p => p.id === id)
-    },
-
-    deletePost: (id: string) => {
-        const postIndex = db.posts.findIndex(p => p.id === id)
-        if (postIndex > -1) {
-            db.posts.splice(postIndex, 1)
-            return true
-        } else {
-            return false
-        }
-    },
-
-    createPost: (body: PostInputModel) => {
+export class postsRepository {
+    static async getPosts(): Promise<PostViewModel[]> {
+        const posts = await postsCollection.find({}).toArray()
+        return posts.map(postMapper)
+    }
+    static async getPostById(id: string): Promise<PostViewModel | null> {
+        const post = await postsCollection.findOne({_id: new ObjectId(id)})
+        console.log(post)
+        if (!post) return null
+        return postMapper(post)
+    }
+    static async createPost(body: PostInputModel): Promise<PostViewModel | null> {
         const {title, shortDescription, content, blogId} = body
-        const blog = db.blogs.find(b => b.id === blogId)
-        if (blog) {
-            const newPost = {
-                id: Date.now().toString(),
-                blogName: blog.name,
-                title, shortDescription, content, blogId
-            }
-            db.posts.push(newPost)
-            return newPost
-        }
-        return null
-    },
-
-    updatePost: (id: string, body: PostInputModel) => {
+        const blog = await blogsCollection.findOne({_id: new ObjectId(blogId)})
+        if (!blog) return null
+        const { name: blogName } = blog
+        const res = await postsCollection.insertOne({title, shortDescription, content, blogId, blogName})
+        const post = await this.getPostById(res.insertedId.toString())
+        if (!post) return null
+        return post
+    }
+    static async updatePost(id: string, body: PostInputModel): Promise<boolean> {
         const {title, shortDescription, content, blogId} = body
-        const blog = db.blogs.find(b => b.id === blogId)
-        if (blog) {
-            const post = db.posts.find(p => p.id === id)
-            if (post) {
-                Object.assign(post, {
-                    title, shortDescription, content, blogId
-                })
-                return true
-            }
-            return false
-        }
-        return false
+        const res = await postsCollection.updateOne({_id: new ObjectId(id)}, {
+            $set: {title, shortDescription, content, blogId}
+        })
+        return !!res.matchedCount
+    }
+    static async deletePost(id: string): Promise<boolean> {
+        const res = await postsCollection.deleteOne({_id:  new ObjectId(id)})
+        return !!res.deletedCount
     }
 }

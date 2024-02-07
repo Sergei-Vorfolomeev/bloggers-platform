@@ -2,46 +2,62 @@ import {Request, Response, Router} from "express";
 import {postsRepository} from "../repositories/posts-repository";
 import {PostInputModel, PostViewModel} from "../db/db.types";
 import {authMiddleware} from "../middlewares/auth-middleware";
-import {HTTP_STATUS} from "../setting";
 import {postValidators} from "../validators/post-validators";
+import {RequestWithBody, RequestWithParams, RequestWithParamsAndBody, ResponseWithBody} from "./types";
+import {ObjectId} from "mongodb";
 
 export const postsRouter = Router()
 
-postsRouter.get('/', (req: Request, res: Response) => {
-    const posts = postsRepository.getPosts()
-    res.status(HTTP_STATUS.OK_200).send(posts)
+postsRouter.get('/', async (req: Request, res: Response) => {
+    const posts = await postsRepository.getPosts()
+    res.status(200).send(posts)
 })
 
-postsRouter.get('/:id', (req: Request, res: Response) => {
-    const post = postsRepository.getPostsById(req.params.id)
-    if (post) {
-        res.status(HTTP_STATUS.OK_200).send(post)
-    } else {
-        res.sendStatus(HTTP_STATUS.NOT_FOUND_404)
-    }
-})
-
-postsRouter.delete('/:id', authMiddleware, (req: Request, res: Response) => {
-    const isDeleted = postsRepository.deletePost(req.params.id)
-    if (isDeleted) {
-        res.sendStatus(HTTP_STATUS.NO_CONTENT_204)
-    } else {
-        res.sendStatus(HTTP_STATUS.NOT_FOUND_404)
-    }
-})
+postsRouter.get('/:id',
+    async (req: RequestWithParams, res: ResponseWithBody<PostViewModel>) => {
+        const {id} = req.params
+        if (!ObjectId.isValid(id)) {
+            res.sendStatus(404)
+            return
+        }
+        const post = await postsRepository.getPostById(id)
+        if (!post) {
+            res.sendStatus(404)
+            return
+        }
+        res.status(200).send(post)
+    })
 
 postsRouter.post('/', authMiddleware, postValidators(),
-    (req: Request<any, PostViewModel, PostInputModel>, res: Response<PostViewModel>) => {
-        const newPost = postsRepository.createPost(req.body)
+    async (req: RequestWithBody<PostInputModel>, res: ResponseWithBody<PostViewModel>) => {
+        const newPost = await postsRepository.createPost(req.body)
         newPost
-            ? res.status(HTTP_STATUS.CREATED_201).send(newPost)
-            : res.sendStatus(HTTP_STATUS.BAD_REQUEST_400)
+            ? res.status(201).send(newPost)
+            : res.sendStatus(400)
     })
 
 postsRouter.put('/:id', authMiddleware, postValidators(),
-    (req: Request<any, any, PostInputModel>, res: Response) => {
-        const isUpdated = postsRepository.updatePost(req.params.id, req.body)
+    async (req: RequestWithParamsAndBody<PostInputModel>, res: Response) => {
+        const {id} = req.params
+        if (!ObjectId.isValid(id)) {
+            res.sendStatus(404)
+            return
+        }
+        const isUpdated = await postsRepository.updatePost(id, req.body)
         isUpdated
-            ? res.sendStatus(HTTP_STATUS.NO_CONTENT_204)
-            : res.sendStatus(HTTP_STATUS.NOT_FOUND_404)
+            ? res.sendStatus(204)
+            : res.sendStatus(404)
+    })
+
+postsRouter.delete('/:id', authMiddleware,
+    async (req: RequestWithParams, res: Response) => {
+        const {id} = req.params
+        if (!ObjectId.isValid(id)) {
+            res.sendStatus(404)
+            return
+        }
+        const isDeleted = await postsRepository.deletePost(id)
+        isDeleted
+            ? res.sendStatus(204)
+            : res.sendStatus(404)
     })
