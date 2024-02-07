@@ -1,39 +1,39 @@
-import {db} from "../db/db";
+import {blogsCollection} from "../db/db";
 import {BlogInputModel, BlogViewModel} from "../db/db.types";
+import {ObjectId} from "mongodb";
+import {blogMapper} from "../utils/blog-mapper";
 
-export const blogsRepository = {
-    getBlogs: () => {
-        return db.blogs
-    },
-    getBlogById: (id: string) => {
-        return db.blogs.find(b => b.id === id)
-    },
-    createBlog: (body: BlogInputModel): BlogViewModel => {
+
+export class blogsRepository {
+    static async getBlogs(): Promise<BlogViewModel[]> {
+        const blogs = await blogsCollection.find({}).toArray()
+        return blogs.map(blogMapper)
+    }
+
+    static async getBlogById(id: string): Promise<BlogViewModel | null> {
+        const blog = await blogsCollection.findOne({_id: new ObjectId(id)})
+        if (!blog) return null
+        return blogMapper(blog)
+    }
+
+    static async createBlog(body: BlogInputModel): Promise<BlogViewModel | null> {
         const {name, description, websiteUrl} = body
-        const newBlog = {
-            id: Date.now().toString(),
-            name, description, websiteUrl
-        }
-        db.blogs.push(newBlog)
+        const res = await blogsCollection.insertOne({name, description, websiteUrl})
+        const newBlog = await this.getBlogById(res.insertedId.toString())
+        if (!newBlog) return null
         return newBlog
-    },
-    deleteBlog: (id: string) => {
-        const blogIndex = db.blogs.findIndex(b => b.id === id)
-        if (blogIndex > -1) {
-            db.blogs.splice(blogIndex, 1)
-            return true
-        } else return false
-    },
-    updateBlog: (id: string, body: BlogInputModel) => {
+    }
+
+    static async updateBlog(id: string, body: BlogInputModel): Promise<boolean> {
         const {name, description, websiteUrl} = body
-        const blog = db.blogs.find(b => b.id === id)
-        if (blog) {
-            Object.assign(blog, {
-                name, description, websiteUrl
-            })
-            return true
-        } else {
-            return false
-        }
+        const res = await blogsCollection.updateOne({_id: new ObjectId(id)}, {
+            $set: { name, description, websiteUrl }
+        })
+        return !!res.matchedCount
+    }
+
+    static async deleteBlog(id:string): Promise<boolean> {
+        const res = await blogsCollection.deleteOne({_id: new ObjectId(id)})
+        return !!res.deletedCount
     }
 }
