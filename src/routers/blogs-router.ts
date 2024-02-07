@@ -22,7 +22,7 @@ blogsRouter.get('/:id', async (req: RequestWithParams, res: ResponseWithBody<Blo
     const blog = await blogsRepository.getBlogById(id)
     blog
         ? res.status(200).send(blog)
-        : res.sendStatus(400)
+        : res.sendStatus(404)
 })
 
 blogsRouter.post('/', authMiddleware, blogValidators(), async (req: RequestWithBody<BlogInputModel>, res: Response) => {

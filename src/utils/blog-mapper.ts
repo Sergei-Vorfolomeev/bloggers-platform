@@ -7,5 +7,7 @@ export const blogMapper = (blog: WithId<BlogDBModel>): BlogViewModel => {
         name: blog.name,
         description: blog.description,
         websiteUrl: blog.websiteUrl,
+        createdAt: blog.createdAt,
+        isMembership: blog.isMembership,
     }
 }

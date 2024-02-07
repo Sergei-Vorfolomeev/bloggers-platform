@@ -13,12 +13,16 @@ export type BlogViewModel = {
 	name: string;
 	description: string;
 	websiteUrl: string;
+	createdAt: string
+	isMembership: boolean
 }
 
 export type BlogDBModel = {
 	name: string;
 	description: string;
 	websiteUrl: string;
+	createdAt: string
+	isMembership: boolean
 }
 
 export type PostInputModel = {
@@ -34,6 +38,7 @@ export type PostDBModel = {
 	content: string;
 	blogId: string;
 	blogName: string;
+	createdAt: string
 }
 
 export type PostViewModel = {
@@ -43,6 +48,7 @@ export type PostViewModel = {
 	content: string;
 	blogId: string;
 	blogName: string;
+	createdAt: string
 }
 
 

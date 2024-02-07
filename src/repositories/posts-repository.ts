@@ -1,4 +1,4 @@
-import {PostInputModel, PostViewModel} from "../db/db.types";
+import {PostDBModel, PostInputModel, PostViewModel} from "../db/db.types";
 import {blogsCollection, postsCollection} from "../db/db";
 import {postMapper} from "../utils/post-mapper";
 import {ObjectId} from "mongodb";
@@ -10,7 +10,6 @@ export class postsRepository {
     }
     static async getPostById(id: string): Promise<PostViewModel | null> {
         const post = await postsCollection.findOne({_id: new ObjectId(id)})
-        console.log(post)
         if (!post) return null
         return postMapper(post)
     }
@@ -19,7 +18,11 @@ export class postsRepository {
         const blog = await blogsCollection.findOne({_id: new ObjectId(blogId)})
         if (!blog) return null
         const { name: blogName } = blog
-        const res = await postsCollection.insertOne({title, shortDescription, content, blogId, blogName})
+        const newPost: PostDBModel = {
+            title, shortDescription, content, blogId, blogName,
+            createdAt: new Date().toISOString(),
+        }
+        const res = await postsCollection.insertOne(newPost)
         const post = await this.getPostById(res.insertedId.toString())
         if (!post) return null
         return post

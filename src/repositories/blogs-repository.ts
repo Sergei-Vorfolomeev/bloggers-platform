@@ -1,5 +1,5 @@
 import {blogsCollection} from "../db/db";
-import {BlogInputModel, BlogViewModel} from "../db/db.types";
+import {BlogDBModel, BlogInputModel, BlogViewModel} from "../db/db.types";
 import {ObjectId} from "mongodb";
 import {blogMapper} from "../utils/blog-mapper";
 
@@ -18,10 +18,15 @@ export class blogsRepository {
 
     static async createBlog(body: BlogInputModel): Promise<BlogViewModel | null> {
         const {name, description, websiteUrl} = body
-        const res = await blogsCollection.insertOne({name, description, websiteUrl})
-        const newBlog = await this.getBlogById(res.insertedId.toString())
-        if (!newBlog) return null
-        return newBlog
+        const newBlog: BlogDBModel = {
+            name, description, websiteUrl,
+            createdAt: new Date().toISOString(),
+            isMembership: false
+        }
+        const res = await blogsCollection.insertOne(newBlog)
+        const blog = await this.getBlogById(res.insertedId.toString())
+        if (!blog) return null
+        return blog
     }
 
     static async updateBlog(id: string, body: BlogInputModel): Promise<boolean> {

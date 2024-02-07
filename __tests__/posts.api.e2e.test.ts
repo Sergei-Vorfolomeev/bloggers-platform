@@ -190,6 +190,7 @@ describe(PATHS.posts, () => {
                 title: 'Changed title',
                 shortDescription: 'Changed description',
                 content: 'Post Content',
+                createdAt: createdPost.createdAt
             })
     })
 
