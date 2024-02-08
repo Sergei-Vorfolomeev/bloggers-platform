@@ -1,5 +1,5 @@
 import {body} from "express-validator";
-import {blogsRepository} from "../repositories/blogs-repository";
+import {BlogsRepository} from "../repositories/blogs-repository";
 import {inputValidationMiddleware} from "../middlewares/input-validation-middleware";
 
 const validateTitle = body('title')
@@ -21,7 +21,7 @@ const validateContent = body('content')
     .isLength({max: 1000}).withMessage('Max length is 1000 symbols')
 
 const validateBlogId = body('blogId').custom( async id => {
-    const blog = await blogsRepository.getBlogById(id)
+    const blog = await BlogsRepository.getBlogById(id)
     if (!blog) {
         throw new Error()
     }

@@ -51,14 +51,19 @@ export type PostViewModel = {
 	createdAt: string
 }
 
-
-
-
 export type FieldError = {
 	message: string
 	field: string
 }
 export type APIErrorResult = {
 	errorsMessages: FieldError[]
+}
+
+export type Paginator<T> = {
+	pagesCount: number
+	page: number
+	pageSize: number
+	totalCount: number
+	items: T
 }
 

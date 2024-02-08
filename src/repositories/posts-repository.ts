@@ -3,7 +3,7 @@ import {blogsCollection, postsCollection} from "../db/db";
 import {postMapper} from "../utils/post-mapper";
 import {ObjectId} from "mongodb";
 
-export class postsRepository {
+export class PostsRepository {
     static async getPosts(): Promise<PostViewModel[] | null> {
         try {
             const posts = await postsCollection.find({}).toArray()

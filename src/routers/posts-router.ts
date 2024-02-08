@@ -1,5 +1,5 @@
 import {Request, Response, Router} from "express";
-import {postsRepository} from "../repositories/posts-repository";
+import {PostsRepository} from "../repositories/posts-repository";
 import {PostInputModel, PostViewModel} from "../db/db.types";
 import {authMiddleware} from "../middlewares/auth-middleware";
 import {postValidators} from "../validators/post-validators";
@@ -9,7 +9,7 @@ import {ObjectId} from "mongodb";
 export const postsRouter = Router()
 
 postsRouter.get('/', async (req: Request, res: Response) => {
-    const posts = await postsRepository.getPosts()
+    const posts = await PostsRepository.getPosts()
     posts
         ? res.status(200).send(posts)
         : res.sendStatus(500)
@@ -22,7 +22,7 @@ postsRouter.get('/:id',
             res.sendStatus(404)
             return
         }
-        const post = await postsRepository.getPostById(id)
+        const post = await PostsRepository.getPostById(id)
         post
             ? res.status(200).send(post)
             : res.sendStatus(404)
@@ -30,7 +30,7 @@ postsRouter.get('/:id',
 
 postsRouter.post('/', authMiddleware, postValidators(),
     async (req: RequestWithBody<PostInputModel>, res: ResponseWithBody<PostViewModel>) => {
-        const newPost = await postsRepository.createPost(req.body)
+        const newPost = await PostsRepository.createPost(req.body)
         newPost
             ? res.status(201).send(newPost)
             : res.sendStatus(400)
@@ -43,7 +43,7 @@ postsRouter.put('/:id', authMiddleware, postValidators(),
             res.sendStatus(404)
             return
         }
-        const isUpdated = await postsRepository.updatePost(id, req.body)
+        const isUpdated = await PostsRepository.updatePost(id, req.body)
         isUpdated
             ? res.sendStatus(204)
             : res.sendStatus(404)
@@ -56,7 +56,7 @@ postsRouter.delete('/:id', authMiddleware,
             res.sendStatus(404)
             return
         }
-        const isDeleted = await postsRepository.deletePost(id)
+        const isDeleted = await PostsRepository.deletePost(id)
         isDeleted
             ? res.sendStatus(204)
             : res.sendStatus(404)
