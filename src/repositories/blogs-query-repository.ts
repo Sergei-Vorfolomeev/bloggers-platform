@@ -1,18 +1,12 @@
-import {BlogViewModel, Paginator} from "../db/db.types";
 import {blogsCollection} from "../db/db";
 import {blogMapper} from "../utils/blog-mapper";
-import {ObjectId, SortDirection} from "mongodb";
-
-type SortParams = {
-    searchNameTerm: string | null
-    sortBy: string
-    sortDirection: SortDirection
-    pageNumber: number
-    pageSize: number
-}
+import {ObjectId} from "mongodb";
+import {BlogsSortParams} from "./types";
+import {BlogViewModel} from "../services/types";
+import {Paginator} from "../routers/types";
 
 export class BlogsQueryRepository {
-    static async getBlogs(sortParams: SortParams): Promise<Paginator<BlogViewModel[]> | null> {
+    static async getBlogs(sortParams: BlogsSortParams): Promise<Paginator<BlogViewModel[]> | null> {
         try {
             const {searchNameTerm, sortBy, sortDirection, pageNumber, pageSize} = sortParams
             let filter = {}

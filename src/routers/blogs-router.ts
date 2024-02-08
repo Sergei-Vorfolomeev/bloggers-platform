@@ -1,23 +1,25 @@
 import {Router} from "express";
 import {BlogsRepository} from "../repositories/blogs-repository";
-import {BlogInputModel, BlogViewModel, Paginator} from "../db/db.types";
 import {authMiddleware} from "../middlewares/auth-middleware";
 import {blogValidators} from "../validators/blog-validators";
 import {
-    QueryParams,
+    BlogInputModel,
+    BlogsQueryParams, Paginator,
     RequestWithBody,
     RequestWithParams,
     RequestWithParamsAndBody,
-    RequestWithQuery, ResponseType,
+    RequestWithQuery,
+    ResponseType,
     ResponseWithBody
 } from "./types";
 import {ObjectId} from "mongodb";
 import {BlogsQueryRepository} from "../repositories/blogs-query-repository";
 import {BlogsService} from "../services/blogs-service";
+import {BlogViewModel} from "../services/types";
 
 export const blogsRouter = Router()
 
-blogsRouter.get('/', async (req: RequestWithQuery<QueryParams>, res: ResponseWithBody<Paginator<BlogViewModel[]> | null>) => {
+blogsRouter.get('/', async (req: RequestWithQuery<BlogsQueryParams>, res: ResponseWithBody<Paginator<BlogViewModel[]> | null>) => {
     const {searchNameTerm, sortBy, sortDirection, pageNumber, pageSize} = req.query
     const sortParams = {
         searchNameTerm: searchNameTerm ?? null,
@@ -44,10 +46,9 @@ blogsRouter.get('/:id', async (req: RequestWithParams, res: ResponseWithBody<Blo
         : res.sendStatus(404)
 })
 
-blogsRouter.post('/', authMiddleware, blogValidators(), async (req: RequestWithBody<BlogInputModel>, res: ResponseType) => {
-    const {name, description, websiteUrl} = req.body
-    const inputData = {name, description, websiteUrl}
-    const newBlog = await BlogsService.createBlog(inputData)
+blogsRouter.post('/', authMiddleware, blogValidators(),
+    async (req: RequestWithBody<BlogInputModel>, res: ResponseType) => {
+    const newBlog = await BlogsService.createBlog(req.body)
     if (!newBlog) res.sendStatus(400)
     res.status(201).send(newBlog)
 })

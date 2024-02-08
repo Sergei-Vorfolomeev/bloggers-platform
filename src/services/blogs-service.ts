@@ -1,11 +1,14 @@
-import {BlogDBModel, BlogInputModel, BlogViewModel} from "../db/db.types";
 import {BlogsRepository} from "../repositories/blogs-repository";
 import {BlogsQueryRepository} from "../repositories/blogs-query-repository";
+import {BlogDBModel} from "../repositories/types";
+import {BlogInputModel} from "../routers/types";
+import {BlogViewModel} from "./types";
 
 export class BlogsService {
     static async createBlog(inputData: BlogInputModel): Promise<BlogViewModel | null> {
+        const {name, description, websiteUrl} = inputData
         const newBlog: BlogDBModel = {
-            ...inputData,
+            name, description, websiteUrl,
             createdAt: new Date().toISOString(),
             isMembership: false
         }
@@ -30,7 +33,7 @@ export class BlogsService {
         }
         return await BlogsRepository.updateBlog(id, updatedBlog)
     }
-    static async deleteBlog(id: string): Promise<boolean | null> {
+    static async deleteBlog(id: string): Promise<boolean> {
         return await BlogsRepository.deleteBlog(id)
     }
 }

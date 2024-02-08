@@ -1,6 +1,6 @@
-import {BlogDBModel, PostDBModel} from "./db.types";
 import {MongoClient} from "mongodb";
 import dotenv from 'dotenv'
+import {BlogDBModel, PostDBModel} from "../repositories/types";
 
 dotenv.config()
 

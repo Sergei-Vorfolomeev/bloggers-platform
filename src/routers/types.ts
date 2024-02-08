@@ -4,8 +4,11 @@ import {SortDirection} from "mongodb";
 type ParamsType = {
     id: string
 }
-export type QueryParams = {
-    searchNameTerm?: string
+export type BlogsQueryParams = {
+    searchNameTerm? : string
+} & PostsQueryParams
+
+export type PostsQueryParams = {
     sortBy?: string
     sortDirection?: SortDirection
     pageNumber?: number
@@ -20,3 +23,33 @@ export type RequestWithQuery<Q> = Request<ParamsType, {}, {}, Q>
 
 export type ResponseType = Response
 export type ResponseWithBody<B> = Response<B>
+
+export type BlogInputModel = {
+    name: string
+    description: string
+    websiteUrl: string
+}
+
+export type PostInputModel = {
+    title: string
+    shortDescription: string
+    content: string
+    blogId: string
+}
+
+export type FieldError = {
+    message: string
+    field: string
+}
+
+export type APIErrorResult = {
+    errorsMessages: FieldError[]
+}
+
+export type Paginator<T> = {
+    pagesCount: number
+    page: number
+    pageSize: number
+    totalCount: number
+    items: T
+}

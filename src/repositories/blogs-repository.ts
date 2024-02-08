@@ -1,6 +1,7 @@
 import {blogsCollection} from "../db/db";
-import {BlogDBModel, BlogInputModel, BlogViewModel} from "../db/db.types";
 import {ObjectId} from "mongodb";
+import {BlogDBModel} from "./types";
+import {BlogInputModel} from "../routers/types";
 
 export class BlogsRepository {
     static async createBlog(blog: BlogDBModel): Promise<string | null> {
