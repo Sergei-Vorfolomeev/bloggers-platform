@@ -1,5 +1,6 @@
-import {PostDBModel, PostViewModel} from "../db/db.types";
 import {WithId} from "mongodb";
+import {PostDBModel} from "../repositories/types";
+import {PostViewModel} from "../services/types";
 
 export const postMapper = (post: WithId<PostDBModel>): PostViewModel => {
     return {

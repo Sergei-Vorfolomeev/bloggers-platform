@@ -1,9 +1,10 @@
 import {blogsCollection} from "../db/db";
 import {blogMapper} from "../utils/blog-mapper";
 import {ObjectId} from "mongodb";
-import {BlogsSortParams} from "./types";
-import {BlogViewModel} from "../services/types";
+import {BlogsSortParams, PostsSortParams} from "./types";
+import {BlogViewModel, PostViewModel} from "../services/types";
 import {Paginator} from "../routers/types";
+import {PostsQueryRepository} from "./posts-query-repository";
 
 export class BlogsQueryRepository {
     static async getBlogs(sortParams: BlogsSortParams): Promise<Paginator<BlogViewModel[]> | null> {
@@ -25,7 +26,7 @@ export class BlogsQueryRepository {
                 .sort(sortBy, sortDirection)
                 .toArray()
             const totalCount = await blogsCollection.countDocuments(filter)
-            const pagesCount = totalCount / pageSize
+            const pagesCount = Math.ceil(totalCount / pageSize)
             return {
                 items: blogs.map(blogMapper),
                 page: pageNumber,
@@ -34,7 +35,7 @@ export class BlogsQueryRepository {
                 totalCount
             }
         } catch (e) {
-            console.log(e)
+            console.error(e)
             return null
         }
     }
@@ -45,7 +46,20 @@ export class BlogsQueryRepository {
             if (!blog) return null
             return blogMapper(blog)
         } catch (e) {
-            console.log(e)
+            console.error(e)
+            return null
+        }
+    }
+
+    static async getPostsWithinBlog(id: string, sortParams: PostsSortParams): Promise<Paginator<PostViewModel[]> | null> {
+        try {
+            const blog = await this.getBlogById(id)
+            if (!blog) {
+                return null
+            }
+            return await PostsQueryRepository.getPosts(sortParams)
+        } catch (e) {
+            console.error(e)
             return null
         }
     }

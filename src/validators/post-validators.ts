@@ -28,3 +28,4 @@ const validateBlogId = body('blogId').custom( async id => {
 }).withMessage('Blog with this id does not exist')
 
 export const postValidators = () => [validateTitle, validateShortDescription, validateContent, validateBlogId, inputValidationMiddleware]
+export const postValidatorsWithoutBlogIdValidation = () => [validateTitle, validateShortDescription, validateContent, inputValidationMiddleware]

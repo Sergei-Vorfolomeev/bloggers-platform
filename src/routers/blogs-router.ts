@@ -4,10 +4,10 @@ import {authMiddleware} from "../middlewares/auth-middleware";
 import {blogValidators} from "../validators/blog-validators";
 import {
     BlogInputModel,
-    BlogsQueryParams, Paginator,
+    BlogsQueryParams, Paginator, PostInputModel, PostsQueryParams,
     RequestWithBody,
     RequestWithParams,
-    RequestWithParamsAndBody,
+    RequestWithParamsAndBody, RequestWithParamsAndQuery,
     RequestWithQuery,
     ResponseType,
     ResponseWithBody
@@ -15,7 +15,8 @@ import {
 import {ObjectId} from "mongodb";
 import {BlogsQueryRepository} from "../repositories/blogs-query-repository";
 import {BlogsService} from "../services/blogs-service";
-import {BlogViewModel} from "../services/types";
+import {BlogViewModel, PostViewModel} from "../services/types";
+import {postValidatorsWithoutBlogIdValidation} from "../validators/post-validators";
 
 export const blogsRouter = Router()
 
@@ -46,12 +47,35 @@ blogsRouter.get('/:id', async (req: RequestWithParams, res: ResponseWithBody<Blo
         : res.sendStatus(404)
 })
 
+blogsRouter.get('/:id/posts', async (req: RequestWithParamsAndQuery<PostsQueryParams>, res: ResponseWithBody<Paginator<PostViewModel[]> | null>) => {
+    const {id} = req.params
+    const {sortBy, sortDirection, pageNumber, pageSize} = req.query
+    const sortParams = {
+        sortBy: sortBy ?? 'createdAt',
+        sortDirection: sortDirection ?? 'desc',
+        pageNumber: pageNumber ? +pageNumber : 1,
+        pageSize: pageSize ? +pageSize : 10,
+    }
+    const posts = await BlogsQueryRepository.getPostsWithinBlog(id, sortParams)
+    posts
+        ? res.status(200).send(posts)
+        : res.sendStatus(404)
+})
+
 blogsRouter.post('/', authMiddleware, blogValidators(),
     async (req: RequestWithBody<BlogInputModel>, res: ResponseType) => {
-    const newBlog = await BlogsService.createBlog(req.body)
-    if (!newBlog) res.sendStatus(400)
-    res.status(201).send(newBlog)
-})
+        const newBlog = await BlogsService.createBlog(req.body)
+        if (!newBlog) res.sendStatus(400)
+        res.status(201).send(newBlog)
+    })
+
+blogsRouter.post('/:id/posts', authMiddleware, postValidatorsWithoutBlogIdValidation(),
+    async (req: RequestWithParamsAndBody<Omit<PostInputModel, 'blogId'>>, res: ResponseType) => {
+        const { id } = req.params
+        const newBlog = await BlogsService.createPostWithinBlog(id, req.body)
+        if (!newBlog) res.sendStatus(404)
+        res.status(201).send(newBlog)
+    })
 
 blogsRouter.put('/:id', authMiddleware, blogValidators(), async (req: RequestWithParamsAndBody<BlogInputModel>, res: ResponseType) => {
     const {id} = req.params

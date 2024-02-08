@@ -19,6 +19,7 @@ export type RequestType = Request<{}, {}, {}, {}>
 export type RequestWithParams = Request<ParamsType, {}, {}, {}>
 export type RequestWithBody<B> = Request<{}, {}, B, {}>
 export type RequestWithParamsAndBody<B> = Request<ParamsType, {}, B, {}>
+export type RequestWithParamsAndQuery<Q> = Request<ParamsType, {}, {}, Q>
 export type RequestWithQuery<Q> = Request<ParamsType, {}, {}, Q>
 
 export type ResponseType = Response

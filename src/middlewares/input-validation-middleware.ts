@@ -1,7 +1,7 @@
 import {Request, Response, NextFunction} from "express";
 import {validationResult} from "express-validator";
 import {HTTP_STATUS} from "../setting";
-import {APIErrorResult} from "../db/db.types";
+import {APIErrorResult} from "../routers/types";
 
 export const inputValidationMiddleware = (req: Request, res: Response<APIErrorResult>, next: NextFunction) => {
     const formattedErrors = validationResult(req).formatWith(error => ({
