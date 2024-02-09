@@ -14,7 +14,7 @@ describe(PATHS.blogs, () => {
     it('get empty blogs', async () => {
         await request(app)
             .get(PATHS.blogs)
-            .expect(HTTP_STATUS.OK_200, [])
+            .expect(HTTP_STATUS.OK_200, { items: [], page: 1, pageSize: 10, pagesCount: 1, totalCount: 0 })
     })
 
     it('create blog without auth', async () => {
@@ -58,7 +58,7 @@ describe(PATHS.blogs, () => {
     it('get blogs without invalid blog', async () => {
         await request(app)
             .get(PATHS.blogs)
-            .expect(200, [])
+            .expect(200, { items: [], page: 1, pageSize: 10, pagesCount: 1, totalCount: 0 })
     })
 
     let createdBlog: any = null
@@ -88,7 +88,13 @@ describe(PATHS.blogs, () => {
     it('get blogs with created blog', async () => {
         await request(app)
             .get(PATHS.blogs)
-            .expect(200, [createdBlog])
+            .expect(200, {
+                items: [createdBlog],
+                page: 1,
+                pageSize: 10,
+                pagesCount: 1,
+                totalCount: 1
+            })
     })
 
 

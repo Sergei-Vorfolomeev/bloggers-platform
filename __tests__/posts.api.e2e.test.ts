@@ -14,7 +14,7 @@ describe(PATHS.posts, () => {
     it('get empty posts', async () => {
         await request(app)
             .get(PATHS.posts)
-            .expect(HTTP_STATUS.OK_200, [])
+            .expect(HTTP_STATUS.OK_200, { items: [], page: 1, pageSize: 10, pagesCount: 1, totalCount: 0 })
     })
 
     let createdBlog: any = null
@@ -88,7 +88,7 @@ describe(PATHS.posts, () => {
     it('get posts without invalid post', async () => {
         await request(app)
             .get(PATHS.posts)
-            .expect(HTTP_STATUS.OK_200, [])
+            .expect(HTTP_STATUS.OK_200, { items: [], page: 1, pageSize: 10, pagesCount: 1, totalCount: 0 })
     })
 
     let createdPost: any = null
@@ -120,7 +120,13 @@ describe(PATHS.posts, () => {
     it('get posts with created post', async () => {
         await request(app)
             .get(PATHS.posts)
-            .expect(HTTP_STATUS.OK_200, [createdPost])
+            .expect(HTTP_STATUS.OK_200, {
+                items: [createdPost],
+                page: 1,
+                pageSize: 10,
+                pagesCount: 1,
+                totalCount: 1
+            })
     })
 
     it('update post with invalid data', async () => {
