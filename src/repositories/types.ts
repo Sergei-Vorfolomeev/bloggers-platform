@@ -17,11 +17,23 @@ export type BlogDBModel = {
     isMembership: boolean
 }
 
+export type UserDBModel = {
+    email: string
+    login: string
+    password: string
+    createdAt: string
+}
+
+export type UsersSortParams = {
+    searchLoginTerm: string | null
+    searchEmailTerm: string | null
+} & SortParams
+
 export type BlogsSortParams = {
     searchNameTerm: string | null
-} & PostsSortParams
+} & SortParams
 
-export type PostsSortParams = {
+export type SortParams = {
     sortBy: string
     sortDirection: SortDirection
     pageNumber: number

@@ -7,7 +7,7 @@ import {
     BlogsQueryParams,
     Paginator,
     PostInputModel,
-    PostsQueryParams,
+    QueryParams,
     RequestWithBody,
     RequestWithParams,
     RequestWithParamsAndBody,
@@ -52,7 +52,7 @@ blogsRouter.get('/:id', async (req: RequestWithParams, res: ResponseWithBody<Blo
         : res.sendStatus(404)
 })
 
-blogsRouter.get('/:id/posts', async (req: RequestWithParamsAndQuery<PostsQueryParams>, res: ResponseWithBody<Paginator<PostViewModel[]> | null>) => {
+blogsRouter.get('/:id/posts', async (req: RequestWithParamsAndQuery<QueryParams>, res: ResponseWithBody<Paginator<PostViewModel[]> | null>) => {
     const {id} = req.params
     const {sortBy, sortDirection, pageNumber, pageSize} = req.query
     if (!ObjectId.isValid(id)) {

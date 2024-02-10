@@ -4,11 +4,16 @@ import {SortDirection} from "mongodb";
 type ParamsType = {
     id: string
 }
+export type UsersQueryParams = {
+    searchLoginTerm? : string
+    searchEmailTerm? : string
+} & QueryParams
+
 export type BlogsQueryParams = {
     searchNameTerm? : string
-} & PostsQueryParams
+} & QueryParams
 
-export type PostsQueryParams = {
+export type QueryParams = {
     sortBy?: string
     sortDirection?: SortDirection
     pageNumber?: number
@@ -57,5 +62,11 @@ export type Paginator<T> = {
 
 export type LoginInputModel = {
     loginOrEmail: string
+    password: string
+}
+
+export type UserInputModel = {
+    login: string
+    email: string
     password: string
 }

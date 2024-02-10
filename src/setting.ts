@@ -3,12 +3,14 @@ import {blogsRouter} from "./routers/blogs-router";
 import {postsRouter} from "./routers/posts-router";
 import {testRouter} from "./routers/test-router";
 import {authRouter} from "./routers/auth-router";
+import {usersRouter} from "./routers/users-router";
 
 export const PATHS = {
     __test__: '/testing/all-data',
     auth: '/auth',
     blogs: '/blogs',
-    posts: '/posts'
+    posts: '/posts',
+    users: '/users'
 }
 
 export const HTTP_STATUS = {
@@ -23,7 +25,8 @@ export const HTTP_STATUS = {
 export const app = express()
 
 app.use(express.json())
-app.use(PATHS.blogs, authRouter)
+app.use(PATHS.auth, authRouter)
 app.use(PATHS.blogs, blogsRouter)
 app.use(PATHS.posts, postsRouter)
+app.use(PATHS.users, usersRouter)
 app.use(PATHS.__test__, testRouter)

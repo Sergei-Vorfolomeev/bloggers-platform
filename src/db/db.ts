@@ -1,6 +1,6 @@
 import {MongoClient} from "mongodb";
 import dotenv from 'dotenv'
-import {BlogDBModel, PostDBModel} from "../repositories/types";
+import {BlogDBModel, PostDBModel, UserDBModel} from "../repositories/types";
 
 dotenv.config()
 
@@ -10,6 +10,7 @@ const client = new MongoClient(mongoURI)
 const dataBase = client.db('bloggers-platform')
 export const blogsCollection = dataBase.collection<BlogDBModel>('blogs')
 export const postsCollection = dataBase.collection<PostDBModel>('posts')
+export const usersCollection = dataBase.collection<UserDBModel>('users')
 
 export const runDB = async () => {
     try {

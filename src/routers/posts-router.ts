@@ -3,7 +3,7 @@ import {authMiddleware} from "../middlewares/auth-middleware";
 import {postValidators} from "../validators/post-validators";
 import {
     PostInputModel,
-    PostsQueryParams,
+    QueryParams,
     RequestWithBody,
     RequestWithParams,
     RequestWithParamsAndBody,
@@ -18,7 +18,7 @@ import {PostsService} from "../services/posts-service";
 
 export const postsRouter = Router()
 
-postsRouter.get('/', async (req: RequestWithQuery<PostsQueryParams>, res: ResponseType) => {
+postsRouter.get('/', async (req: RequestWithQuery<QueryParams>, res: ResponseType) => {
     const {sortBy, sortDirection, pageNumber, pageSize} = req.query
     const sortParams = {
         sortBy: sortBy ?? 'createdAt',

@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest -i",
+    "test": "jest -i --detectOpenHandles",
     "dev": "pnpm nodemon --inspect dist/index.js",
     "watch": "tsc -w"
   },

@@ -1,4 +1,5 @@
 import {app, HTTP_STATUS, PATHS} from "../src/setting";
+import {ObjectId} from "mongodb";
 
 const request = require('supertest')
 
@@ -8,13 +9,13 @@ describe(PATHS.blogs, () => {
     beforeAll(async () => {
         await request(app)
             .delete(PATHS.__test__)
-            .expect(HTTP_STATUS.NO_CONTENT_204)
+            .expect(204)
     })
 
     it('get empty blogs', async () => {
         await request(app)
             .get(PATHS.blogs)
-            .expect(HTTP_STATUS.OK_200, { items: [], page: 1, pageSize: 10, pagesCount: 1, totalCount: 0 })
+            .expect(200, { items: [], page: 1, pageSize: 10, pagesCount: 1, totalCount: 0 })
     })
 
     it('create blog without auth', async () => {
@@ -25,7 +26,7 @@ describe(PATHS.blogs, () => {
                 description: 'Valid description',
                 websiteUrl: 'https://valid-site.com',
             })
-            .expect(HTTP_STATUS.UNAUTHORIZED_401)
+            .expect(401)
     })
 
     it('create invalid blog', async () => {
@@ -125,9 +126,10 @@ describe(PATHS.blogs, () => {
             })
     })
 
-    it('update blog with invalid id', async () => {
+    it('update blog with non-existing id', async () => {
+        const validMongoID = new ObjectId().toHexString();
         await request(app)
-            .put(`${PATHS.blogs}/65c77432fafeaccf224bb552`)
+            .put(`${PATHS.blogs}/${validMongoID}`)
             .set('Authorization', `Basic ${credentials}`)
             .send({
                 name: 'valid',
@@ -137,9 +139,10 @@ describe(PATHS.blogs, () => {
             .expect(HTTP_STATUS.NOT_FOUND_404)
     })
 
-    it('delete created blog with wrong id', async () => {
+    it('delete created blog with non-existing id', async () => {
+        const validMongoID = new ObjectId().toHexString();
         await request(app)
-            .delete(`${PATHS.blogs}/65c77432fafeaccf224bb552`)
+            .delete(`${PATHS.blogs}/${validMongoID}`)
             .set('Authorization', `Basic ${credentials}`)
             .expect(HTTP_STATUS.NOT_FOUND_404)
     })

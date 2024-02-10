@@ -16,3 +16,10 @@ export type PostViewModel = {
     blogName: string;
     createdAt: string
 }
+
+export type UserViewModel = {
+    id: string
+    email: string
+    login: string
+    createdAt?: string
+}

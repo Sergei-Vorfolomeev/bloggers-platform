@@ -1,4 +1,5 @@
 import {app, HTTP_STATUS, PATHS} from "../src/setting";
+import {ObjectId} from "mongodb";
 
 const request = require('supertest')
 
@@ -55,11 +56,12 @@ describe(PATHS.posts, () => {
     })
 
     it('create invalid post', async () => {
+        const mongoId = new ObjectId().toHexString();
         await request(app)
             .post(PATHS.posts)
             .set('Authorization', `Basic ${credentials}`)
             .send({
-                blogId: '843753',
+                blogId: mongoId,
                 title: 'suchALongerName1234567890   suchALongerName1234567890',
                 shortDescription: '',
             })
@@ -130,11 +132,12 @@ describe(PATHS.posts, () => {
     })
 
     it('update post with invalid data', async () => {
+        const mongoId = new ObjectId().toHexString();
         await request(app)
-            .put(`${PATHS.posts}/65c77432fafeaccf324bb552`)
+            .put(`${PATHS.posts}/605c77432fafeaccf424bb55`)
             .set('Authorization', `Basic ${credentials}`)
             .send({
-                blogId: '1',
+                blogId: mongoId,
                 title: 'suchALongerName1234567890 suchALongerName1234567890',
                 shortDescription: '',
             })
@@ -159,12 +162,14 @@ describe(PATHS.posts, () => {
             })
     })
 
-    it('update post with invalid id', async () => {
+    it('update post with non-existing id', async () => {
+        const mongoIdForPost = new ObjectId().toHexString();
+        const mongoIdForBlog = new ObjectId().toHexString();
         await request(app)
-            .put(`${PATHS.posts}/65c77432fafeaccf324bb552`)
+            .put(`${PATHS.posts}/${mongoIdForPost}`)
             .set('Authorization', `Basic ${credentials}`)
             .send({
-                blogId: '1',
+                blogId: mongoIdForBlog,
                 title: 'Valid title',
                 shortDescription: 'Valid description',
                 content: 'Valid content',
@@ -200,9 +205,10 @@ describe(PATHS.posts, () => {
             })
     })
 
-    it('delete created post with wrong id', async () => {
+    it('delete created post with non-existing id', async () => {
+        const mongoId = new ObjectId().toHexString();
         await request(app)
-            .delete(`${PATHS.posts}/65c77432fafeaccf324bb552`)
+            .delete(`${PATHS.posts}/${mongoId}`)
             .set('Authorization', `Basic ${credentials}`)
             .expect(HTTP_STATUS.NOT_FOUND_404)
     })
