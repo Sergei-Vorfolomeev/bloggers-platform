@@ -1,4 +1,4 @@
-import {blogsCollection} from "../db/db";
+import {blogsCollection, postsCollection} from "../db/db";
 import {ObjectId} from "mongodb";
 import {BlogDBModel} from "./types";
 import {BlogInputModel} from "../routers/types";
@@ -29,6 +29,10 @@ export class BlogsRepository {
     static async deleteBlog(id: string): Promise<boolean> {
         try {
             const res = await blogsCollection.deleteOne({_id: new ObjectId(id)})
+            if (!!res.deletedCount) {
+                return false
+            }
+            await postsCollection.deleteMany({blogId: id})
             return !!res.deletedCount
         } catch (e) {
             console.log(e)
