@@ -37,7 +37,7 @@ blogsRouter.get('/', async (req: RequestWithQuery<BlogsQueryParams>, res: Respon
     const blogs = await BlogsQueryRepository.getBlogs(sortParams)
     blogs
         ? res.status(200).send(blogs)
-        : res.sendStatus(500)
+        : res.sendStatus(555)
 })
 
 blogsRouter.get('/:id', async (req: RequestWithParams, res: ResponseWithBody<BlogViewModel>) => {

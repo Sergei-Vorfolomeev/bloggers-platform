@@ -41,7 +41,6 @@ export class BlogsQueryRepository {
     static async getBlogById(id: string): Promise<BlogViewModel | null> {
         try {
             const blog = await blogsCollection.findOne({_id: new ObjectId(id)})
-            console.log(id)
             if (!blog) return null
             return blogMapper(blog)
         } catch (e) {

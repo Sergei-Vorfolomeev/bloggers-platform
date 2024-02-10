@@ -54,3 +54,8 @@ export type Paginator<T> = {
     totalCount: number
     items: T
 }
+
+export type LoginInputModel = {
+    loginOrEmail: string
+    password: string
+}

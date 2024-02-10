@@ -127,7 +127,7 @@ describe(PATHS.blogs, () => {
 
     it('update blog with invalid id', async () => {
         await request(app)
-            .put(`${PATHS.blogs}/8437535`)
+            .put(`${PATHS.blogs}/65c77432fafeaccf224bb552`)
             .set('Authorization', `Basic ${credentials}`)
             .send({
                 name: 'valid',
@@ -139,7 +139,7 @@ describe(PATHS.blogs, () => {
 
     it('delete created blog with wrong id', async () => {
         await request(app)
-            .delete(`${PATHS.blogs}/43785643`)
+            .delete(`${PATHS.blogs}/65c77432fafeaccf224bb552`)
             .set('Authorization', `Basic ${credentials}`)
             .expect(HTTP_STATUS.NOT_FOUND_404)
     })

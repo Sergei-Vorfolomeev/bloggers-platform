@@ -131,7 +131,7 @@ describe(PATHS.posts, () => {
 
     it('update post with invalid data', async () => {
         await request(app)
-            .put(`${PATHS.posts}/1`)
+            .put(`${PATHS.posts}/65c77432fafeaccf324bb552`)
             .set('Authorization', `Basic ${credentials}`)
             .send({
                 blogId: '1',
@@ -161,7 +161,7 @@ describe(PATHS.posts, () => {
 
     it('update post with invalid id', async () => {
         await request(app)
-            .put(`${PATHS.posts}/8437535`)
+            .put(`${PATHS.posts}/65c77432fafeaccf324bb552`)
             .set('Authorization', `Basic ${credentials}`)
             .send({
                 blogId: '1',
@@ -202,7 +202,7 @@ describe(PATHS.posts, () => {
 
     it('delete created post with wrong id', async () => {
         await request(app)
-            .delete(`${PATHS.posts}/43785643`)
+            .delete(`${PATHS.posts}/65c77432fafeaccf324bb552`)
             .set('Authorization', `Basic ${credentials}`)
             .expect(HTTP_STATUS.NOT_FOUND_404)
     })

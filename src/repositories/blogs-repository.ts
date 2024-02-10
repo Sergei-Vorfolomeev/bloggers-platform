@@ -9,7 +9,7 @@ export class BlogsRepository {
             const res = await blogsCollection.insertOne(blog)
             return res.insertedId.toString()
         } catch (e) {
-            console.log(e)
+            console.error(e)
             return null
         }
     }
@@ -21,7 +21,7 @@ export class BlogsRepository {
             })
             return !!res.matchedCount
         } catch (e) {
-            console.log(e)
+            console.error(e)
             return false
         }
     }
@@ -29,13 +29,13 @@ export class BlogsRepository {
     static async deleteBlog(id: string): Promise<boolean> {
         try {
             const res = await blogsCollection.deleteOne({_id: new ObjectId(id)})
-            if (!!res.deletedCount) {
+            if (res.deletedCount === 0) {
                 return false
             }
             await postsCollection.deleteMany({blogId: id})
-            return !!res.deletedCount
+            return res.deletedCount === 1
         } catch (e) {
-            console.log(e)
+            console.error(e)
             return false
         }
     }
