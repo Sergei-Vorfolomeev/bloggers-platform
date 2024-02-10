@@ -19,7 +19,7 @@ describe(PATHS.blogs, () => {
     })
 
     it('create blog without auth', async () => {
-        const res = await request(app)
+        await request(app)
             .post(PATHS.blogs)
             .send({
                 name: 'Valid name',

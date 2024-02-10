@@ -14,4 +14,13 @@ export class UsersRepository {
            return null
        }
     }
+    static async deleteUser(id: string): Promise<boolean> {
+        try {
+            const res = await usersCollection.deleteOne({_id: new ObjectId(id)})
+            return !!res.deletedCount
+        } catch (e) {
+            console.error(e)
+            return false
+        }
+    }
 }

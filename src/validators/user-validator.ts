@@ -1,4 +1,5 @@
 import {body} from "express-validator";
+import {inputValidationMiddleware} from "../middlewares/input-validation-middleware";
 
 const validateLogin = body('login')
     .notEmpty().withMessage('Field is required')
@@ -12,7 +13,7 @@ const validateLogin = body('login')
 const validateEmail = body('email')
     .notEmpty().withMessage('Field is required')
     .isString().trim().withMessage('Field must be string')
-    .matches('^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$\n').withMessage('Field is incorrect')
+    .isEmail().withMessage('Field is incorrect')
 
 const validatePassword = body('password')
     .notEmpty().withMessage('Field is required')
@@ -20,4 +21,4 @@ const validatePassword = body('password')
     .isLength({min: 6, max: 20}).withMessage('Length must be from 6 to 20 symbols')
 
 
-export const userValidator = () => [validateLogin, validateEmail, validatePassword]
+export const userValidator = () => [validateLogin, validateEmail, validatePassword, inputValidationMiddleware]

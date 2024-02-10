@@ -1,8 +1,8 @@
 import {Router} from "express";
 import {
     Paginator,
-    RequestWithBody,
-    RequestWithQuery,
+    RequestWithBody, RequestWithParams,
+    RequestWithQuery, ResponseType,
     ResponseWithBody,
     UserInputModel,
     UsersQueryParams
@@ -12,24 +12,39 @@ import {userValidator} from "../validators/user-validator";
 import {authMiddleware} from "../middlewares/auth-middleware";
 import {UsersService} from "../services/users-service";
 import {UsersQueryRepository} from "../repositories/users-query-repository";
+import {ObjectId} from "mongodb";
 
 export const usersRouter = Router()
 
-usersRouter.get('/', async (req: RequestWithQuery<UsersQueryParams>, res: ResponseWithBody<Paginator<UserViewModel[]>>) => {
-    const {searchLoginTerm, searchEmailTerm, sortBy, sortDirection, pageSize, pageNumber} = req.query
-    const sortParams = {
-        searchLoginTerm: searchLoginTerm ?? null,
-        searchEmailTerm: searchEmailTerm ?? null,
-        sortBy: sortBy ?? 'createdAt',
-        sortDirection: sortDirection ?? 'desc',
-        pageSize: pageSize ? +pageSize : 10,
-        pageNumber: pageNumber ? +pageNumber : 1,
-    }
-    const users = await UsersQueryRepository.getUsers(sortParams)
-    users
-        ? res.status(200).send(users)
-        : res.sendStatus(555)
-})
+usersRouter.get('/',
+    async (req: RequestWithQuery<UsersQueryParams>, res: ResponseWithBody<Paginator<UserViewModel[]>>) => {
+        const {searchLoginTerm, searchEmailTerm, sortBy, sortDirection, pageSize, pageNumber} = req.query
+        const sortParams = {
+            searchLoginTerm: searchLoginTerm ?? null,
+            searchEmailTerm: searchEmailTerm ?? null,
+            sortBy: sortBy ?? 'createdAt',
+            sortDirection: sortDirection ?? 'desc',
+            pageSize: pageSize ? +pageSize : 10,
+            pageNumber: pageNumber ? +pageNumber : 1,
+        }
+        const users = await UsersQueryRepository.getUsers(sortParams)
+        users
+            ? res.status(200).send(users)
+            : res.sendStatus(555)
+    })
+
+usersRouter.get('/:id',
+    async (req: RequestWithParams, res: ResponseWithBody<UserViewModel>) => {
+        const {id} = req.params
+        if (!ObjectId.isValid(id)) {
+            res.sendStatus(404)
+            return
+        }
+        const user = await UsersQueryRepository.getUserById(id)
+        user
+            ? res.status(200).send(user)
+            : res.sendStatus(404)
+    })
 
 usersRouter.post('/',
     authMiddleware,
@@ -40,4 +55,18 @@ usersRouter.post('/',
         user
             ? res.status(201).send(user)
             : res.sendStatus(400)
+    })
+
+usersRouter.delete('/:id',
+    authMiddleware,
+    async (req: RequestWithParams, res: ResponseType) => {
+        const {id} = req.params
+        if (!ObjectId.isValid(id)) {
+            res.sendStatus(404)
+            return
+        }
+        const isDeleted = await UsersService.deleteUser(id)
+        isDeleted
+            ? res.sendStatus(204)
+            : res.sendStatus(404)
     })

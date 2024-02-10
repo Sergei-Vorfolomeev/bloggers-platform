@@ -22,4 +22,7 @@ export class UsersService {
         }
         return createdUser
     }
+    static async deleteUser(id: string): Promise<boolean> {
+        return await UsersRepository.deleteUser(id)
+    }
 }
