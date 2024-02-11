@@ -9,6 +9,9 @@ authRouter.post(
     '/login',
     validateLoginOrEmail(),
     async (req: RequestWithBody<LoginInputModel>, res: ResponseType) => {
-    const {loginOrEmail, password} = req.body
-    await UsersService.checkUser(loginOrEmail, password)
-})
+        const {loginOrEmail, password} = req.body
+        const hasAccess = await UsersService.checkUser(loginOrEmail, password)
+        hasAccess
+            ? res.sendStatus(204)
+            : res.sendStatus(401)
+    })

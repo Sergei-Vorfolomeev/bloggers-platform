@@ -2,7 +2,7 @@ import {UserViewModel} from "../services/types";
 import {usersCollection} from "../db/db";
 import {ObjectId} from "mongodb";
 import {userMapper} from "../utils/user-mapper";
-import {UsersSortParams} from "./types";
+import {UserDBModel, UsersSortParams} from "./types";
 import {Paginator} from "../routers/types";
 
 export class UsersQueryRepository {
@@ -50,5 +50,12 @@ export class UsersQueryRepository {
             return null
         }
         return userMapper(user)
+    }
+    static async getUserByLoginOrEmail(loginOrEmail: string): Promise<UserDBModel| null> {
+        const user = await usersCollection.findOne({$or: [{login: loginOrEmail}, {password: loginOrEmail}]})
+        if (!user) {
+            return null
+        }
+        return user
     }
 }
