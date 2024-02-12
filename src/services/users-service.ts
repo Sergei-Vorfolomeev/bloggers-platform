@@ -5,12 +5,12 @@ import {BcryptService} from "./bcrypt-service";
 import {UserViewModel} from "./types";
 
 export class UsersService {
-    static async checkUser(loginOrEmail: string, password: string): Promise<boolean> {
+    static async checkUserCredentials(loginOrEmail: string, password: string): Promise<boolean> {
         const user = await UsersQueryRepository.getUserByLoginOrEmail(loginOrEmail)
         if (!user) {
             return false
         }
-        return await BcryptService.compareHash(password, user.password)
+        return await BcryptService.comparePasswords(password, user.password)
     }
 
     static async createUser(login: string, email: string, password: string): Promise<UserViewModel | null> {

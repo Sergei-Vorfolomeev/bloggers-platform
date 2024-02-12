@@ -56,36 +56,36 @@ describe(PATHS.users, () => {
             })
     })
 
-    // let createdUser: any = null
-    // it('create valid user', async () => {
-    //     const res = await request(app)
-    //         .post(PATHS.users)
-    //         .set('Authorization', `Basic ${credentials}`)
-    //         .send({
-    //             login: 'VALID',
-    //             email: 'valid@gmail.com',
-    //             password: 'validPassword',
-    //         })
-    //         .expect(201)
-    //     createdUser = res.body
-    //     expect(createdUser).toEqual({
-    //         id: expect.any(String),
-    //         ...createdUser
-    //     })
-    // })
-    //
-    // it('get created user by id', async () => {
-    //     await request(app)
-    //         .get(`${PATHS.users}/${createdUser.id}`)
-    //         .expect(200, createdUser)
-    // })
-    //
-    // it('delete created user', async () => {
-    //     await request(app)
-    //         .delete(`${PATHS.users}/${createdUser.id}`)
-    //         .set('Authorization', `Basic ${credentials}`)
-    //         .expect(204)
-    // })
+    let createdUser: any = null
+    it('create valid user', async () => {
+        const res = await request(app)
+            .post(PATHS.users)
+            .set('Authorization', `Basic ${credentials}`)
+            .send({
+                login: 'VALID',
+                email: 'valid@gmail.com',
+                password: 'validPassword',
+            })
+            .expect(201)
+        createdUser = res.body
+        expect(createdUser).toEqual({
+            id: expect.any(String),
+            ...createdUser
+        })
+    })
+
+    it('get created user by id', async () => {
+        await request(app)
+            .get(`${PATHS.users}/${createdUser.id}`)
+            .expect(200, createdUser)
+    })
+
+    it('delete created user', async () => {
+        await request(app)
+            .delete(`${PATHS.users}/${createdUser.id}`)
+            .set('Authorization', `Basic ${credentials}`)
+            .expect(204)
+    })
     let users: any[] = []
     it('create many users', async () => {
         users = await createUsers(app, 15)
@@ -111,7 +111,11 @@ describe(PATHS.users, () => {
                 pageSize: 5
             })
             .expect(200, {
-                items: expectedResponse, page: 2, pageSize: 5, pagesCount: 3, totalCount: 15
+                items: expectedResponse,
+                page: 2,
+                pageSize: 5,
+                pagesCount: 3,
+                totalCount: 15
             })
     })
 
@@ -127,7 +131,11 @@ describe(PATHS.users, () => {
                 pageSize: 5
             })
             .expect(200, {
-                items: expectedResponse, page: 1, pageSize: 5, pagesCount: 2, totalCount: 6
+                items: expectedResponse,
+                page: 1,
+                pageSize: 5,
+                pagesCount: 2,
+                totalCount: 6
             })
     })
 })

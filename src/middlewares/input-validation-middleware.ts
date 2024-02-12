@@ -1,6 +1,5 @@
 import {Request, Response, NextFunction} from "express";
 import {validationResult} from "express-validator";
-import {HTTP_STATUS} from "../setting";
 import {APIErrorResult} from "../routers/types";
 
 export const inputValidationMiddleware = (req: Request, res: Response<APIErrorResult>, next: NextFunction) => {
@@ -10,7 +9,7 @@ export const inputValidationMiddleware = (req: Request, res: Response<APIErrorRe
     }))
     if (!formattedErrors.isEmpty()) {
         const errorsMessages = formattedErrors.array({onlyFirstError: true})
-        res.status(HTTP_STATUS.BAD_REQUEST_400).send({errorsMessages: errorsMessages})
+        res.status(400).send({errorsMessages: errorsMessages})
     } else {
         next()
     }

@@ -9,9 +9,7 @@ const validateLogin = body('login')
     .matches('^[a-zA-Z0-9_-]*$').withMessage('Field is incorrect')
     .custom(async login => {
         const user = await UsersQueryRepository.getUserByLoginOrEmail(login)
-        if (user) {
-            throw new Error('User with such login already exists')
-        }
+        if (user) throw new Error()
     }).withMessage('User with such login already exists')
 
 const validateEmail = body('email')
@@ -20,9 +18,7 @@ const validateEmail = body('email')
     .isEmail().withMessage('Field is incorrect')
     .custom(async email => {
         const user = await UsersQueryRepository.getUserByLoginOrEmail(email)
-        if (user) {
-            throw new Error('User with such email already exists')
-        }
+        if (user) throw new Error()
     }).withMessage('User with such email already exists')
 
 const validatePassword = body('password')
