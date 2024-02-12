@@ -17,7 +17,7 @@ export class PostsQueryRepository {
                 .sort(sortBy, sortDirection)
                 .toArray()
             const totalCount = await postsCollection.countDocuments(filter)
-            const pagesCount = Math.ceil(totalCount / pageSize) === 0 ? 1 : Math.ceil(totalCount / pageSize)
+            const pagesCount = totalCount === 0 ? 1 : Math.ceil(totalCount / pageSize)
             return {
                 items: posts.map(postMapper),
                 page: pageNumber,

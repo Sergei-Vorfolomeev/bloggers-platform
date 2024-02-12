@@ -25,7 +25,7 @@ export class BlogsQueryRepository {
                 .sort(sortBy, sortDirection)
                 .toArray()
             const totalCount = await blogsCollection.countDocuments(filter)
-            const pagesCount = Math.ceil(totalCount / pageSize) === 0 ? 1 : Math.ceil(totalCount / pageSize)
+            const pagesCount = totalCount === 0 ? 1 : Math.ceil(totalCount / pageSize)
             return {
                 items: blogs.map(blogMapper),
                 page: pageNumber,

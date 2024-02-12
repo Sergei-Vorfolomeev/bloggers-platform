@@ -2,6 +2,7 @@ import {UserDBModel} from "../repositories/types";
 import {UsersRepository} from "../repositories/users-repository";
 import {UsersQueryRepository} from "../repositories/users-query-repository";
 import {BcryptService} from "./bcrypt-service";
+import {UserViewModel} from "./types";
 
 export class UsersService {
     static async checkUser(loginOrEmail: string, password: string): Promise<boolean> {
@@ -12,8 +13,11 @@ export class UsersService {
         return await BcryptService.compareHash(password, user.password)
     }
 
-    static async createUser(login: string, email: string, password: string) {
+    static async createUser(login: string, email: string, password: string): Promise<UserViewModel | null> {
         const hashedPassword = await BcryptService.generateHash(password)
+        if (!hashedPassword) {
+            return null
+        }
         const newUser: UserDBModel = {
             login, email,
             password: hashedPassword,

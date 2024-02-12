@@ -9,25 +9,23 @@ export class UsersQueryRepository {
     static async getUsers(sortParams: UsersSortParams): Promise<Paginator<UserViewModel[]> | null> {
         try {
             const {searchLoginTerm, searchEmailTerm, sortBy, sortDirection, pageSize, pageNumber} = sortParams
-            const filter = {}
+            const filter: any = {}
             if (searchLoginTerm) {
-                const propertyForFilter = {
-                    login: {
-                        $regex: searchLoginTerm,
-                    }
-                }
-                Object.assign(filter, propertyForFilter)
+                filter.$or = [
+                    {login: {$regex: searchLoginTerm, $options: 'i'}}
+                ];
             }
             if (searchEmailTerm) {
-                const propertyForFilter = {
-                    email: {
-                        $regex: searchEmailTerm,
-                    }
+                if (filter.$or) {
+                    filter.$or.push({email: {$regex: searchEmailTerm, $options: 'i'}});
+                } else {
+                    filter.$or = [
+                        {email: {$regex: searchEmailTerm, $options: 'i'}}
+                    ]
                 }
-                Object.assign(filter, propertyForFilter)
             }
             const totalCount = await usersCollection.countDocuments(filter)
-            const pagesCount = Math.ceil(totalCount / pageSize) === 0 ? 1 : Math.ceil(totalCount / pageSize)
+            const pagesCount = totalCount === 0 ? 1 : Math.ceil(totalCount / pageSize)
             const users = await usersCollection
                 .find(filter)
                 .skip((pageNumber - 1) * pageSize)
@@ -44,6 +42,7 @@ export class UsersQueryRepository {
             return null
         }
     }
+
     static async getUserById(id: string): Promise<UserViewModel | null> {
         const user = await usersCollection.findOne({_id: new ObjectId(id)})
         if (!user) {
@@ -51,11 +50,32 @@ export class UsersQueryRepository {
         }
         return userMapper(user)
     }
-    static async getUserByLoginOrEmail(loginOrEmail: string): Promise<UserDBModel| null> {
-        const user = await usersCollection.findOne({$or: [{login: loginOrEmail}, {password: loginOrEmail}]})
+
+    static async getUserByLoginOrEmail(loginOrEmail: string): Promise<UserDBModel | null> {
+        const user = await usersCollection.findOne({$or: [{login: loginOrEmail}, {email: loginOrEmail}]})
         if (!user) {
             return null
         }
         return user
     }
 }
+
+
+// if (searchLoginTerm) {
+//     const propertyForFilter = {
+//         login: {
+//             $regex: searchLoginTerm,
+//             $options: 'i'
+//         }
+//     }
+//     Object.assign(filter, propertyForFilter)
+// }
+// if (searchEmailTerm) {
+//     const propertyForFilter = {
+//         email: {
+//             $regex: searchEmailTerm,
+//             $options: 'i'
+//         }
+//     }
+//     Object.assign(filter, propertyForFilter)
+// }
