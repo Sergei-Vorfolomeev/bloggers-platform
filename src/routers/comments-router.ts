@@ -1,19 +1,54 @@
 import {Router} from "express";
-import {RequestWithParams, ResponseWithBody} from "./types";
+import {RequestWithParams, ResponseWithBody, ResponseType, RequestWithParamsAndBody, CommentInputModel} from "./types";
 import {CommentViewModel} from "../services/types";
 import {ObjectId} from "mongodb";
 import {CommentsQueryRepository} from "../repositories/comments-query-repository";
+import {CommentsService} from "../services/comments-service";
+import {accessTokenGuard} from "../middlewares/access-token-guard";
+import {ResultCode} from "../utils/result";
 
 export const commentsRouter = Router()
 
-commentsRouter.get('/:id', async (req: RequestWithParams, res: ResponseWithBody<CommentViewModel>) => {
-    const {id} = req.params
-    if (!ObjectId.isValid(id)) {
-        res.sendStatus(404)
-        return
-    }
-    const comment = await CommentsQueryRepository.getCommentById(id)
-    comment
-        ? res.status(200).send(comment)
-        : res.sendStatus(404)
-})
+commentsRouter.get('/:id',
+    async (req: RequestWithParams, res: ResponseWithBody<CommentViewModel>) => {
+        const {id} = req.params
+        if (!ObjectId.isValid(id)) {
+            res.sendStatus(404)
+            return
+        }
+        const comment = await CommentsQueryRepository.getCommentById(id)
+        comment
+            ? res.status(200).send(comment)
+            : res.sendStatus(404)
+    })
+
+commentsRouter.delete('/:id', accessTokenGuard,
+    async (req: RequestWithParams, res: ResponseType) => {
+        const {id} = req.params
+        if (!ObjectId.isValid(id)) {
+            res.sendStatus(404)
+            return
+        }
+        const isDeleted = await CommentsService.deleteComment(id)
+        isDeleted
+            ? res.sendStatus(204)
+            : res.sendStatus(404)
+    })
+
+commentsRouter.put('/:id', accessTokenGuard,
+    async (req: RequestWithParamsAndBody<CommentInputModel>, res: ResponseType) => {
+        const {id: commentId} = req.params
+        const {content} = req.body
+        const {id: userId} = req.user
+        if (!ObjectId.isValid(commentId)) {
+            res.sendStatus(404)
+            return
+        }
+        const result = await CommentsService.updateComment(commentId, userId, content)
+        switch (result.resultCode) {
+            case ResultCode.NOT_FOUND: res.sendStatus(404); break
+            case ResultCode.FORBIDDEN: res.sendStatus(403); break
+            case ResultCode.SERVER_ERROR: res.sendStatus(500); break
+            case ResultCode.SUCCESS: res.sendStatus(204); break
+        }
+    })

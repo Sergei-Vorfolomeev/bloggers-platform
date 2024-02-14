@@ -9,9 +9,9 @@ describe(PATHS.comments, () => {
             .expect(204)
     })
 
-    // it('get empty comments', async () => {
-    //     await request(app)
-    //         .get(PATHS.comments)
-    //         .expect(200, [])
-    // })
+    it('get empty comments', async () => {
+        await request(app)
+            .get(PATHS.comments)
+            .expect(200, [])
+    })
 })

@@ -2,6 +2,7 @@ import {Router} from "express";
 import {basicAuthGuard} from "../middlewares/basic-auth-guard";
 import {postValidators} from "../validators/post-validators";
 import {
+    CommentInputModel,
     Paginator,
     PostInputModel,
     QueryParams,
@@ -20,6 +21,7 @@ import {CommentsQueryRepository} from "../repositories/comments-query-repository
 import {commentValidator} from "../validators/comment-validator";
 import {CommentsService} from "../services/comments-service";
 import {accessTokenGuard} from "../middlewares/access-token-guard";
+import {ResultCode} from "../utils/result";
 
 export const postsRouter = Router()
 
@@ -105,7 +107,7 @@ postsRouter.get('/:id/comments',
     })
 
 postsRouter.post('/:id/comments', accessTokenGuard, commentValidator(),
-    async (req: RequestWithParamsAndBody<{ content: string }>, res: ResponseWithBody<CommentViewModel>) => {
+    async (req: RequestWithParamsAndBody<CommentInputModel>, res: ResponseWithBody<CommentViewModel>) => {
         const {id: postId} = req.params
         const {content} = req.body
         const {id: userId} = req.user
@@ -113,10 +115,11 @@ postsRouter.post('/:id/comments', accessTokenGuard, commentValidator(),
             res.sendStatus(404)
             return
         }
-        const createdComment = await CommentsService.createComment(postId, userId, content)
-        if (!createdComment) {
-            return null
+        const result = await CommentsService.createComment(postId, userId, content)
+        switch (result.resultCode) {
+            case ResultCode.NOT_FOUND: res.sendStatus(404); break
+            case ResultCode.SERVER_ERROR: res.sendStatus(500); break
+            case ResultCode.SUCCESS: res.status(200).send(result.data); break
         }
-        return createdComment
     })
 
