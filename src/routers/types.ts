@@ -71,6 +71,13 @@ export type UserInputModel = {
     password: string
 }
 
+export type UserOutputModel = {
+    login: string
+    email: string
+    userId: string
+}
+
 export type CommentInputModel = {
     content: string
 }
+
