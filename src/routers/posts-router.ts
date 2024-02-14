@@ -119,7 +119,7 @@ postsRouter.post('/:id/comments', accessTokenGuard, commentValidator(),
         switch (result.resultCode) {
             case ResultCode.NOT_FOUND: res.sendStatus(404); break
             case ResultCode.SERVER_ERROR: res.sendStatus(500); break
-            case ResultCode.SUCCESS: res.status(200).send(result.data); break
+            case ResultCode.SUCCESS: res.status(201).send(result.data); break
         }
     })
 

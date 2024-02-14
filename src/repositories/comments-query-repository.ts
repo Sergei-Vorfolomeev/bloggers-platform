@@ -34,7 +34,7 @@ export class CommentsQueryRepository {
                 .sort(sortBy, sortDirection)
                 .toArray()
             const totalCount = await commentsCollection.countDocuments({postId: {$eq: id}})
-            const pagesCount = totalCount === 0 ? 1 : totalCount / pageSize
+            const pagesCount = totalCount === 0 ? 1 : Math.ceil(totalCount / pageSize)
             return {
                 items: comments.map(commentMapper),
                 page: pageNumber,

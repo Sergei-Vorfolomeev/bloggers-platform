@@ -25,15 +25,19 @@ commentsRouter.get('/:id',
 
 commentsRouter.delete('/:id', accessTokenGuard,
     async (req: RequestWithParams, res: ResponseType) => {
-        const {id} = req.params
-        if (!ObjectId.isValid(id)) {
+        const {id: commentId} = req.params
+        const {id: userId} = req.user
+        if (!ObjectId.isValid(commentId)) {
             res.sendStatus(404)
             return
         }
-        const isDeleted = await CommentsService.deleteComment(id)
-        isDeleted
-            ? res.sendStatus(204)
-            : res.sendStatus(404)
+        const result = await CommentsService.deleteComment(commentId, userId)
+        switch(result.resultCode) {
+            case ResultCode.NOT_FOUND: res.sendStatus(404); break
+            case ResultCode.FORBIDDEN: res.sendStatus(403); break
+            case ResultCode.SERVER_ERROR: res.sendStatus(500); break
+            case ResultCode.SUCCESS: res.sendStatus(204); break
+        }
     })
 
 commentsRouter.put('/:id', accessTokenGuard, commentValidator(),

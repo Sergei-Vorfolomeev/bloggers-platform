@@ -36,8 +36,20 @@ export class CommentsService {
         return new Result(ResultCode.SUCCESS, null, createdComment)
     }
 
-    static async deleteComment(id: string): Promise<boolean> {
-        return await CommentsRepository.deleteCommentById(id)
+    static async deleteComment(commentId: string, userId: string): Promise<Result> {
+        const comment = await CommentsQueryRepository.getCommentById(commentId)
+        if (!comment) {
+            return new Result(ResultCode.NOT_FOUND, 'The comment with provided id haven\'t been found')
+        }
+        if (comment.commentatorInfo.userId !== userId) {
+            return new Result(ResultCode.FORBIDDEN, 'This user does not have credentials')
+        }
+        const res = await CommentsRepository.deleteCommentById(commentId)
+        if (!res) {
+            return new Result(ResultCode.SERVER_ERROR, 'The comment haven\'t been deleted')
+        }
+        return new Result(ResultCode.SUCCESS)
+
     }
 
     static async updateComment(commentId: string, userId: string, content: string): Promise<Result> {

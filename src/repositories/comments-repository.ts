@@ -29,7 +29,7 @@ export class CommentsRepository {
         try {
             const res = await commentsCollection.updateOne(
                 {_id: new ObjectId(id)},
-                updatedComment
+                {$set: updatedComment}
             )
             return res.matchedCount === 1
         } catch (error) {
