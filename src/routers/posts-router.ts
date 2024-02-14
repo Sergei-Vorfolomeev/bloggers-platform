@@ -1,20 +1,25 @@
 import {Router} from "express";
-import {authMiddleware} from "../middlewares/auth-middleware";
+import {basicAuthGuard} from "../middlewares/basic-auth-guard";
 import {postValidators} from "../validators/post-validators";
 import {
+    Paginator,
     PostInputModel,
     QueryParams,
     RequestWithBody,
     RequestWithParams,
-    RequestWithParamsAndBody,
+    RequestWithParamsAndBody, RequestWithParamsAndQuery,
     RequestWithQuery,
     ResponseType,
     ResponseWithBody
 } from "./types";
 import {ObjectId} from "mongodb";
 import {PostsQueryRepository} from "../repositories/posts-query-repository";
-import {PostViewModel} from "../services/types";
+import {CommentViewModel, PostViewModel} from "../services/types";
 import {PostsService} from "../services/posts-service";
+import {CommentsQueryRepository} from "../repositories/comments-query-repository";
+import {commentValidator} from "../validators/comment-validator";
+import {CommentsService} from "../services/comments-service";
+import {accessTokenGuard} from "../middlewares/access-token-guard";
 
 export const postsRouter = Router()
 
@@ -45,7 +50,7 @@ postsRouter.get('/:id',
             : res.sendStatus(404)
     })
 
-postsRouter.post('/', authMiddleware, postValidators(),
+postsRouter.post('/', basicAuthGuard, postValidators(),
     async (req: RequestWithBody<PostInputModel>, res: ResponseWithBody<PostViewModel>) => {
         const newPost = await PostsService.createPost(req.body)
         newPost
@@ -53,7 +58,7 @@ postsRouter.post('/', authMiddleware, postValidators(),
             : res.sendStatus(400)
     })
 
-postsRouter.put('/:id', authMiddleware, postValidators(),
+postsRouter.put('/:id', basicAuthGuard, postValidators(),
     async (req: RequestWithParamsAndBody<PostInputModel>, res: ResponseType) => {
         const {id} = req.params
         if (!ObjectId.isValid(id)) {
@@ -66,7 +71,7 @@ postsRouter.put('/:id', authMiddleware, postValidators(),
             : res.sendStatus(404)
     })
 
-postsRouter.delete('/:id', authMiddleware,
+postsRouter.delete('/:id', basicAuthGuard,
     async (req: RequestWithParams, res: ResponseType) => {
         const {id} = req.params
         if (!ObjectId.isValid(id)) {
@@ -78,3 +83,40 @@ postsRouter.delete('/:id', authMiddleware,
             ? res.sendStatus(204)
             : res.sendStatus(404)
     })
+
+postsRouter.get('/:id/comments',
+    async (req: RequestWithParamsAndQuery<QueryParams>, res: ResponseWithBody<Paginator<CommentViewModel[]>>) => {
+        const {id} = req.params
+        const {sortBy, sortDirection, pageNumber, pageSize} = req.query
+        if (!ObjectId.isValid(id)) {
+            res.sendStatus(404)
+            return
+        }
+        const sortParams = {
+            sortBy: sortBy ?? 'createdAt',
+            sortDirection: sortDirection ?? 'desc',
+            pageNumber: pageNumber ? +pageNumber : 1,
+            pageSize: pageSize ? +pageSize : 10,
+        }
+        const comments = await CommentsQueryRepository.getCommentsByPostId(id, sortParams)
+        comments
+            ? res.status(200).send(comments)
+            : res.sendStatus(404)
+    })
+
+postsRouter.post('/:id/comments', accessTokenGuard, commentValidator(),
+    async (req: RequestWithParamsAndBody<{ content: string }>, res: ResponseWithBody<CommentViewModel>) => {
+        const {id: postId} = req.params
+        const {content} = req.body
+        const {id: userId} = req.user
+        if (!ObjectId.isValid(postId)) {
+            res.sendStatus(404)
+            return
+        }
+        const createdComment = await CommentsService.createComment(postId, userId, content)
+        if (!createdComment) {
+            return null
+        }
+        return createdComment
+    })
+

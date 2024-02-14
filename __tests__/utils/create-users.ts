@@ -1,5 +1,5 @@
-import {PATHS} from "../../src/setting";
-import {ADMIN_LOGIN, ADMIN_PASSWORD} from "../../src/middlewares/auth-middleware";
+import {PATHS} from "../../src/app";
+import {ADMIN_LOGIN, ADMIN_PASSWORD} from "../../src/middlewares/basic-auth-guard";
 
 const request = require('supertest')
 

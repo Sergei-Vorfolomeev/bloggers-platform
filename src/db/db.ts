@@ -1,16 +1,14 @@
 import {MongoClient} from "mongodb";
-import dotenv from 'dotenv'
-import {BlogDBModel, PostDBModel, UserDBModel} from "../repositories/types";
+import {BlogDBModel, CommentDBModel, PostDBModel, UserDBModel} from "../repositories/types";
+import {settings} from "../settings";
 
-dotenv.config()
-
-const mongoURI = process.env.MONGO_URL || 'mongodb://localhost:27017'
-const client = new MongoClient(mongoURI)
+const client = new MongoClient(settings.MONGO_URI)
 
 const dataBase = client.db('bloggers-platform')
 export const blogsCollection = dataBase.collection<BlogDBModel>('blogs')
 export const postsCollection = dataBase.collection<PostDBModel>('posts')
 export const usersCollection = dataBase.collection<UserDBModel>('users')
+export const commentsCollection = dataBase.collection<CommentDBModel>('comments')
 
 export const runDB = async () => {
     try {

@@ -1,4 +1,5 @@
 import {SortDirection} from "mongodb";
+import {CommentatorInfo} from "../services/types";
 
 export type PostDBModel = {
     title: string;
@@ -21,6 +22,13 @@ export type UserDBModel = {
     email: string
     login: string
     password: string
+    createdAt: string
+}
+
+export type CommentDBModel = {
+    content: string
+    commentatorInfo: CommentatorInfo
+    postId: string
     createdAt: string
 }
 

@@ -3,14 +3,19 @@ import {UsersRepository} from "../repositories/users-repository";
 import {UsersQueryRepository} from "../repositories/users-query-repository";
 import {BcryptService} from "./bcrypt-service";
 import {UserViewModel} from "./types";
+import {JwtService} from "./jwt-service";
 
 export class UsersService {
-    static async checkUserCredentials(loginOrEmail: string, password: string): Promise<boolean> {
+    static async checkUserCredentials(loginOrEmail: string, password: string): Promise<string | null> {
         const user = await UsersQueryRepository.getUserByLoginOrEmail(loginOrEmail)
         if (!user) {
-            return false
+            return null
         }
-        return await BcryptService.comparePasswords(password, user.password)
+        const isMatched = await BcryptService.comparePasswords(password, user.password)
+        if (!isMatched) {
+            return null
+        }
+        return JwtService.createToken(user)
     }
 
     static async createUser(login: string, email: string, password: string): Promise<UserViewModel | null> {

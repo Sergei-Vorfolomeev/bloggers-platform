@@ -4,13 +4,15 @@ import {postsRouter} from "./routers/posts-router";
 import {testRouter} from "./routers/test-router";
 import {authRouter} from "./routers/auth-router";
 import {usersRouter} from "./routers/users-router";
+import {commentsRouter} from "./routers/comments-router";
 
 export const PATHS = {
     __test__: '/testing/all-data',
     auth: '/auth',
     blogs: '/blogs',
     posts: '/posts',
-    users: '/users'
+    users: '/users',
+    comments: '/comments'
 }
 
 export const HTTP_STATUS = {
@@ -29,4 +31,5 @@ app.use(PATHS.auth, authRouter)
 app.use(PATHS.blogs, blogsRouter)
 app.use(PATHS.posts, postsRouter)
 app.use(PATHS.users, usersRouter)
+app.use(PATHS.comments, commentsRouter)
 app.use(PATHS.__test__, testRouter)

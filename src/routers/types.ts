@@ -5,12 +5,12 @@ type ParamsType = {
     id: string
 }
 export type UsersQueryParams = {
-    searchLoginTerm? : string
-    searchEmailTerm? : string
+    searchLoginTerm?: string
+    searchEmailTerm?: string
 } & QueryParams
 
 export type BlogsQueryParams = {
-    searchNameTerm? : string
+    searchNameTerm?: string
 } & QueryParams
 
 export type QueryParams = {
@@ -69,4 +69,8 @@ export type UserInputModel = {
     login: string
     email: string
     password: string
+}
+
+export type CommentInputModel = {
+    content: string
 }

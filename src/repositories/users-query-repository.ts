@@ -1,6 +1,6 @@
 import {UserViewModel} from "../services/types";
 import {usersCollection} from "../db/db";
-import {ObjectId} from "mongodb";
+import {ObjectId, WithId} from "mongodb";
 import {userMapper} from "../utils/user-mapper";
 import {UserDBModel, UsersSortParams} from "./types";
 import {Paginator} from "../routers/types";
@@ -51,7 +51,7 @@ export class UsersQueryRepository {
         return userMapper(user)
     }
 
-    static async getUserByLoginOrEmail(loginOrEmail: string): Promise<UserDBModel | null> {
+    static async getUserByLoginOrEmail(loginOrEmail: string): Promise<WithId<UserDBModel> | null> {
         const user = await usersCollection.findOne({$or: [{login: loginOrEmail}, {email: loginOrEmail}]})
         if (!user) {
             return null

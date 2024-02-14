@@ -1,4 +1,4 @@
-import {app, HTTP_STATUS, PATHS} from "../src/setting";
+import {app, HTTP_STATUS, PATHS} from "../src/app";
 import {ObjectId} from "mongodb";
 
 const request = require('supertest')

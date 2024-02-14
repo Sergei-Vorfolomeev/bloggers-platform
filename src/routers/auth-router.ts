@@ -1,5 +1,5 @@
 import {Router} from "express";
-import {LoginInputModel, RequestWithBody, ResponseType} from "./types";
+import {LoginInputModel, RequestWithBody, ResponseWithBody} from "./types";
 import {UsersService} from "../services/users-service";
 import {validateLoginOrEmail} from "../validators/login-or-email-validator";
 
@@ -8,10 +8,15 @@ export const authRouter = Router()
 authRouter.post(
     '/login',
     validateLoginOrEmail(),
-    async (req: RequestWithBody<LoginInputModel>, res: ResponseType) => {
+    async (req: RequestWithBody<LoginInputModel>, res: ResponseWithBody<{accessToken: string}>) => {
         const {loginOrEmail, password} = req.body
-        const hasAccess = await UsersService.checkUserCredentials(loginOrEmail, password)
-        hasAccess
-            ? res.sendStatus(204)
-            : res.sendStatus(401)
+        const token = await UsersService.checkUserCredentials(loginOrEmail, password)
+        if (!token) {
+            res.sendStatus(401)
+            return
+        }
+        const response = {
+            accessToken: token
+        }
+        res.status(200).send(response)
     })

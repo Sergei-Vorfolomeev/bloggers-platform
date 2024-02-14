@@ -1,6 +1,6 @@
 import {Router} from "express";
 import {BlogsRepository} from "../repositories/blogs-repository";
-import {authMiddleware} from "../middlewares/auth-middleware";
+import {basicAuthGuard} from "../middlewares/basic-auth-guard";
 import {blogValidators} from "../validators/blog-validators";
 import {
     BlogInputModel,
@@ -71,7 +71,7 @@ blogsRouter.get('/:id/posts', async (req: RequestWithParamsAndQuery<QueryParams>
         : res.sendStatus(404)
 })
 
-blogsRouter.post('/', authMiddleware, blogValidators(),
+blogsRouter.post('/', basicAuthGuard, blogValidators(),
     async (req: RequestWithBody<BlogInputModel>, res: ResponseType) => {
         const newBlog = await BlogsService.createBlog(req.body)
         newBlog
@@ -79,7 +79,7 @@ blogsRouter.post('/', authMiddleware, blogValidators(),
             : res.sendStatus(400)
     })
 
-blogsRouter.post('/:id/posts', authMiddleware, postValidatorsWithoutBlogIdValidation(),
+blogsRouter.post('/:id/posts', basicAuthGuard, postValidatorsWithoutBlogIdValidation(),
     async (req: RequestWithParamsAndBody<Omit<PostInputModel, 'blogId'>>, res: ResponseType) => {
         const {id} = req.params
         if (!ObjectId.isValid(id)) {
@@ -92,7 +92,7 @@ blogsRouter.post('/:id/posts', authMiddleware, postValidatorsWithoutBlogIdValida
             : res.sendStatus(404)
     })
 
-blogsRouter.put('/:id', authMiddleware, blogValidators(),
+blogsRouter.put('/:id', basicAuthGuard, blogValidators(),
     async (req: RequestWithParamsAndBody<BlogInputModel>, res: ResponseType) => {
         const {id} = req.params
         const {name, description, websiteUrl} = req.body
@@ -107,7 +107,7 @@ blogsRouter.put('/:id', authMiddleware, blogValidators(),
             : res.sendStatus(404)
     })
 
-blogsRouter.delete('/:id', authMiddleware,
+blogsRouter.delete('/:id', basicAuthGuard,
     async (req: RequestWithParams, res: ResponseType) => {
         const {id} = req.params
         if (!ObjectId.isValid(id)) {

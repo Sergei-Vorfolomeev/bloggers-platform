@@ -9,7 +9,7 @@ import {
 } from "./types";
 import {UserViewModel} from "../services/types";
 import {userValidator} from "../validators/user-validator";
-import {authMiddleware} from "../middlewares/auth-middleware";
+import {basicAuthGuard} from "../middlewares/basic-auth-guard";
 import {UsersService} from "../services/users-service";
 import {UsersQueryRepository} from "../repositories/users-query-repository";
 import {ObjectId} from "mongodb";
@@ -47,7 +47,7 @@ usersRouter.get('/:id',
     })
 
 usersRouter.post('/',
-    authMiddleware,
+    basicAuthGuard,
     userValidator(),
     async (req: RequestWithBody<UserInputModel>, res: ResponseWithBody<UserViewModel>) => {
         const {login, email, password} = req.body
@@ -58,7 +58,7 @@ usersRouter.post('/',
     })
 
 usersRouter.delete('/:id',
-    authMiddleware,
+    basicAuthGuard,
     async (req: RequestWithParams, res: ResponseType) => {
         const {id} = req.params
         if (!ObjectId.isValid(id)) {
