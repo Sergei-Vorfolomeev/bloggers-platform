@@ -26,7 +26,7 @@ export const createUsers = async (app: any, count: number) => {
                 .send({
                     login: `test-${i}`,
                     email: `test-${i}-@gmail.com`,
-                    password: `test-${i}-pass`,
+                    password: `test-pass`,
                 })
                 .expect(201)
             users.push(response.body)
@@ -35,4 +35,13 @@ export const createUsers = async (app: any, count: number) => {
         }
     }
     return users.reverse()
+}
+
+export const meRequest = async (app: any, token: string) => {
+    const res = await request(app)
+        .get(`${PATHS.auth}/me`)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200)
+
+    return res.body
 }

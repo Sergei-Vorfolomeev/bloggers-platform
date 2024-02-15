@@ -33,7 +33,7 @@ authRouter.get('/me', accessTokenGuard,
         }
         res.status(200).send({
             userId: user.id,
-            login: user.id,
+            login: user.login,
             email: user.email,
         })
     })
