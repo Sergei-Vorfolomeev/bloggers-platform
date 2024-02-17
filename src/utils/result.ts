@@ -1,5 +1,7 @@
-export enum ResultCode {
+export enum StatusCode {
     SUCCESS = 200,
+    CREATED = 201,
+    NO_CONTENT = 204,
     UNAUTHORIZED = 401,
     FORBIDDEN = 403,
     BAD_REQUEST = 400,
@@ -8,11 +10,11 @@ export enum ResultCode {
 }
 
 export class Result<T = null> {
-    resultCode: ResultCode;
+    statusCode: StatusCode;
     errorMessage: string | null | undefined
     data: T | undefined
-    constructor(resultCode: ResultCode, errorMessage?: string | null, data?: T) {
-        this.resultCode = resultCode
+    constructor(statusCode: StatusCode, errorMessage?: string | null, data?: T) {
+        this.statusCode = statusCode
         this.errorMessage = errorMessage
         this.data = data
     }

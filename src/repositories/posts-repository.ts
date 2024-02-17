@@ -1,4 +1,4 @@
-import {postsCollection} from "../db/db";
+import {client, commentsCollection, postsCollection} from "../db/db";
 import {ObjectId} from "mongodb";
 import {PostDBModel} from "./types";
 import {PostInputModel} from "../routers/types";
@@ -27,12 +27,18 @@ export class PostsRepository {
     }
 
     static async deletePost(id: string): Promise<boolean> {
+        const session = await client.startSession()
+        await session.startTransaction()
         try {
-            const res = await postsCollection.deleteOne({_id: new ObjectId(id)})
-            return !!res.deletedCount
+           const res =  await postsCollection.deleteOne({_id: new ObjectId(id)})
+            await commentsCollection.deleteMany({postId: id})
+            await session.commitTransaction()
+            return res.deletedCount === 1
         } catch (e) {
             console.log(e)
             return false
+        } finally {
+            await session.endSession()
         }
     }
 }

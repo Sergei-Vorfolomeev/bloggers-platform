@@ -25,6 +25,16 @@ export class CommentsRepository {
         }
     }
 
+    static async deleteCommentsByPostId(postId: string): Promise<boolean> {
+        try {
+            const res = await commentsCollection.deleteMany({postId: postId})
+            return res.acknowledged
+        } catch (error) {
+            console.error(error)
+            return false
+        }
+    }
+
     static async updateComment(id: string, updatedComment: CommentViewModel): Promise<boolean> {
         try {
             const res = await commentsCollection.updateOne(

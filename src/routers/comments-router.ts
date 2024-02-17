@@ -5,7 +5,7 @@ import {ObjectId} from "mongodb";
 import {CommentsQueryRepository} from "../repositories/comments-query-repository";
 import {CommentsService} from "../services/comments-service";
 import {accessTokenGuard} from "../middlewares/access-token-guard";
-import {ResultCode} from "../utils/result";
+import {StatusCode} from "../utils/result";
 import {commentValidator} from "../validators/comment-validator";
 
 export const commentsRouter = Router()
@@ -32,11 +32,11 @@ commentsRouter.delete('/:id', accessTokenGuard,
             return
         }
         const result = await CommentsService.deleteComment(commentId, userId)
-        switch(result.resultCode) {
-            case ResultCode.NOT_FOUND: res.sendStatus(404); break
-            case ResultCode.FORBIDDEN: res.sendStatus(403); break
-            case ResultCode.SERVER_ERROR: res.sendStatus(500); break
-            case ResultCode.SUCCESS: res.sendStatus(204); break
+        switch(result.statusCode) {
+            case StatusCode.NOT_FOUND: res.sendStatus(404); break
+            case StatusCode.FORBIDDEN: res.sendStatus(403); break
+            case StatusCode.SERVER_ERROR: res.sendStatus(500); break
+            case StatusCode.SUCCESS: res.sendStatus(204); break
         }
     })
 
@@ -50,10 +50,10 @@ commentsRouter.put('/:id', accessTokenGuard, commentValidator(),
             return
         }
         const result = await CommentsService.updateComment(commentId, userId, content)
-        switch (result.resultCode) {
-            case ResultCode.NOT_FOUND: res.sendStatus(404); break
-            case ResultCode.FORBIDDEN: res.sendStatus(403); break
-            case ResultCode.SERVER_ERROR: res.sendStatus(500); break
-            case ResultCode.SUCCESS: res.sendStatus(204); break
+        switch (result.statusCode) {
+            case StatusCode.NOT_FOUND: res.sendStatus(404); break
+            case StatusCode.FORBIDDEN: res.sendStatus(403); break
+            case StatusCode.SERVER_ERROR: res.sendStatus(500); break
+            case StatusCode.SUCCESS: res.sendStatus(204); break
         }
     })

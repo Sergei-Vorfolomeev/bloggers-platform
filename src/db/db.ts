@@ -2,7 +2,7 @@ import {MongoClient} from "mongodb";
 import {BlogDBModel, CommentDBModel, PostDBModel, UserDBModel} from "../repositories/types";
 import {settings} from "../settings";
 
-const client = new MongoClient(settings.MONGO_URI)
+export const client = new MongoClient(settings.MONGO_URI)
 
 const dataBase = client.db('bloggers-platform')
 export const blogsCollection = dataBase.collection<BlogDBModel>('blogs')

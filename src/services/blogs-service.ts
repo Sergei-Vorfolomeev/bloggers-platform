@@ -4,6 +4,7 @@ import {BlogDBModel} from "../repositories/types";
 import {BlogInputModel, PostInputModel} from "../routers/types";
 import {BlogViewModel, PostViewModel} from "./types";
 import {PostsService} from "./posts-service";
+import {PostsRepository} from "../repositories/posts-repository";
 
 export class BlogsService {
     static async createBlog(inputData: BlogInputModel): Promise<BlogViewModel | null> {
@@ -23,6 +24,7 @@ export class BlogsService {
         }
         return blog
     }
+
     static async updateBlog(id: string, inputData: BlogInputModel): Promise<boolean | null> {
         const blog = await BlogsQueryRepository.getBlogById(id)
         if (!blog) {
@@ -34,9 +36,11 @@ export class BlogsService {
         }
         return await BlogsRepository.updateBlog(id, updatedBlog)
     }
+
     static async deleteBlog(id: string): Promise<boolean> {
         return await BlogsRepository.deleteBlog(id)
     }
+
     static async createPostWithinBlog(id: string, inputData: Omit<PostInputModel, 'blogId'>): Promise<PostViewModel | null> {
         const blog = await BlogsQueryRepository.getBlogById(id)
         if (!blog) {
