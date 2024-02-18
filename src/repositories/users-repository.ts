@@ -1,8 +1,15 @@
 import {UserDBModel} from "./types";
 import {usersCollection} from "../db/db";
-import {ObjectId} from "mongodb";
+import {ObjectId, WithId} from "mongodb";
 
 export class UsersRepository {
+    static async findUserByLoginOrEmail(loginOrEmail: string): Promise<WithId<UserDBModel> | null> {
+        const user = await usersCollection.findOne({$or: [{login: loginOrEmail}, {email: loginOrEmail}]})
+        if (!user) {
+            return null
+        }
+        return user
+    }
     static async createUser(user: UserDBModel): Promise<string | null> {
         try {
             const res = await usersCollection.insertOne(user)
@@ -37,6 +44,18 @@ export class UsersRepository {
         try {
             const res = await usersCollection.updateOne({_id: userId}, {
                 $set: {'emailConfirmation.isConfirmed': true}
+            })
+            return res.matchedCount === 1
+        } catch (e) {
+            console.error(e)
+            return null
+        }
+    }
+
+    static async updateConfirmationCode(userId: ObjectId, newCode: string): Promise<boolean | null> {
+        try {
+            const res = await usersCollection.updateOne({_id: userId}, {
+                $set: {'emailConfirmation.confirmationCode': newCode}
             })
             return res.matchedCount === 1
         } catch (e) {

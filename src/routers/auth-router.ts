@@ -1,6 +1,6 @@
 import {Router} from "express";
 import {
-    LoginInputModel, RegistrationConfirmationCodeModel,
+    LoginInputModel, RegistrationConfirmationCodeModel, RegistrationEmailResendingModel,
     RequestType,
     RequestWithBody,
     ResponseType,
@@ -15,6 +15,7 @@ import {UsersQueryRepository} from "../repositories/users-query-repository";
 import {userValidator} from "../validators/user-validator";
 import {AuthService} from "../services/auth-service";
 import {StatusCode} from "../utils/result";
+import {emailValidator} from "../validators/email-validator";
 
 export const authRouter = Router()
 
@@ -67,6 +68,23 @@ authRouter.post('/registration-confirmation',
     async (req: RequestWithBody<RegistrationConfirmationCodeModel>, res: ResponseType) => {
         const {code} = req.body
         const response = await AuthService.confirmEmailByCode(code)
+        switch (response.statusCode) {
+            case StatusCode.NO_CONTENT:
+                res.sendStatus(204);
+                break
+            case StatusCode.BAD_REQUEST:
+                res.sendStatus(400);
+                break
+            case StatusCode.SERVER_ERROR:
+                res.sendStatus(555);
+                break
+        }
+    })
+
+authRouter.post('/registration-email-resending', emailValidator(),
+    async (req: RequestWithBody<RegistrationEmailResendingModel>, res: ResponseType) => {
+        const {email} = req.body
+        const response = await AuthService.resendConfirmationCode(email)
         switch (response.statusCode) {
             case StatusCode.NO_CONTENT:
                 res.sendStatus(204);

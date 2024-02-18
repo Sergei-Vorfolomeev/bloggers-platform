@@ -7,7 +7,7 @@ import {JwtService} from "./jwt-service";
 
 export class UsersService {
     static async checkUserCredentials(loginOrEmail: string, password: string): Promise<string | null> {
-        const user = await UsersQueryRepository.getUserByLoginOrEmail(loginOrEmail)
+        const user = await UsersRepository.findUserByLoginOrEmail(loginOrEmail)
         if (!user) {
             return null
         }

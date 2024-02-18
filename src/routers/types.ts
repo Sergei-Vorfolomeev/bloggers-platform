@@ -85,3 +85,7 @@ export type RegistrationConfirmationCodeModel = {
     code: string
 }
 
+export type RegistrationEmailResendingModel = {
+    email: string
+}
+

@@ -55,4 +55,31 @@ export class AuthService {
         }
         return new Result(StatusCode.NO_CONTENT)
     }
+
+    static async resendConfirmationCode(email: string) {
+        const user = await UsersRepository.findUserByLoginOrEmail(email)
+        if (!user) {
+            return new Result(StatusCode.BAD_REQUEST, 'User with provided email doesn\'t exist')
+        }
+        if (user.emailConfirmation.isConfirmed) {
+            return new Result(StatusCode.BAD_REQUEST, 'Email is already confirmed')
+        }
+        const newCode = randomUUID()
+        const userWithUpdatedCode = {
+            ...user,
+            emailConfirmation: {
+                ...user.emailConfirmation,
+                confirmationCode: newCode
+            }
+        }
+        const info =  await nodemailerService.sendEmail(email, 'Confirm your email', template(newCode))
+        if (!info) {
+            return new Result(StatusCode.SERVER_ERROR, 'Error with sending email')
+        }
+        const isUpdated = await UsersRepository.updateConfirmationCode(user._id, newCode)
+        if (!isUpdated) {
+            return new Result(StatusCode.SERVER_ERROR, 'Confirmation code wasn\'t updated')
+        }
+        return new Result(StatusCode.NO_CONTENT)
+    }
 }

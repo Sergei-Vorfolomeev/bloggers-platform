@@ -50,14 +50,6 @@ export class UsersQueryRepository {
         }
         return userMapper(user)
     }
-
-    static async getUserByLoginOrEmail(loginOrEmail: string): Promise<WithId<UserDBModel> | null> {
-        const user = await usersCollection.findOne({$or: [{login: loginOrEmail}, {email: loginOrEmail}]})
-        if (!user) {
-            return null
-        }
-        return user
-    }
 }
 
 
