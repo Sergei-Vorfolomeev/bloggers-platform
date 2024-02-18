@@ -47,7 +47,7 @@ export class AuthService {
             return new Result(StatusCode.BAD_REQUEST, 'Confirmation code is already been applied')
         }
         if (new Date() > user.emailConfirmation.expirationDate) {
-            return new Result(StatusCode.BAD_REQUEST, 'Confirmation code expired')
+            return new Result(StatusCode.BAD_REQUEST, 'Confirmation code is expired')
         }
         const isUpdated = await UsersRepository.confirmEmail(user._id)
         if (!isUpdated) {

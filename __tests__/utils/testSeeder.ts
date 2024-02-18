@@ -2,23 +2,33 @@ import {UserDBModel} from "../../src/repositories/types";
 import {randomUUID} from "crypto";
 import {add} from "date-fns/add";
 import {usersCollection} from "../../src/db/db";
-import {UserViewModel} from "../../src/services/types";
+
+type RegisterUserDtoType = {
+    login: string
+    email: string
+    password: string
+    code?: string
+    expirationDate?: Date
+    isConfirmed?: boolean
+}
 
 export const testSeeder = {
     createUserDto() {
         return {
             login: 'test',
             email: 'test@gmail.com',
-            password: 'test-pass'
+            password: 'test-pass',
         }
     },
-    async registerUser(login: string,
-                       email: string,
-                       password: string,
-                       code?: string,
-                       expirationDate?: Date,
-                       isConfirmed?: boolean
-    ): Promise<UserViewModel> {
+    async registerUser({
+                           login,
+                           email,
+                           password,
+                           code,
+                           expirationDate,
+                           isConfirmed
+                       }: RegisterUserDtoType
+    ) {
         const newUser: UserDBModel = {
             login,
             email,

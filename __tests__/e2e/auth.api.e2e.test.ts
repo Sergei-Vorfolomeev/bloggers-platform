@@ -3,7 +3,7 @@ import {nodemailerService} from "../../src/services/nodemailer-service";
 
 const request = require('supertest')
 
-describe(PATHS.auth, () => {
+describe('AUTH-e2e', () => {
     nodemailerService.sendEmail = jest.fn().mockImplementation(() => true)
 
     beforeAll(async () => {
@@ -14,7 +14,7 @@ describe(PATHS.auth, () => {
 
     let user: any = null
     it('register user', async () => {
-        const res = request(app)
+        request(app)
             .post(`${PATHS.auth}/registration`)
             .send({
                 login: 'test-login',
@@ -22,7 +22,6 @@ describe(PATHS.auth, () => {
                 password: 'test-pass'
             })
             .expect(204)
-        user = res.body
     })
 
     it('get registered user', async () => {
@@ -42,7 +41,7 @@ describe(PATHS.auth, () => {
     })
 
     it('shouldn\'t create user twice', async () => {
-        const res = request(app)
+        request(app)
             .post(`${PATHS.auth}/registration`)
             .send({
                 login: 'test-login',
@@ -61,6 +60,5 @@ describe(PATHS.auth, () => {
                     }
                 ]
             })
-        user = res.body
     })
 })

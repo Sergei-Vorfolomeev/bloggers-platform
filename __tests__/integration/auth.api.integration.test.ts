@@ -5,6 +5,9 @@ import {testSeeder} from "../utils/testSeeder";
 import {Result, StatusCode} from "../../src/utils/result";
 import {client, usersCollection} from "../../src/db/db";
 import {nodemailerService} from "../../src/services/nodemailer-service";
+import {beforeEach} from "node:test";
+import {sub} from "date-fns";
+import {randomUUID} from "crypto";
 
 
 describe('AUTH-INTEGRATION', () => {
@@ -18,6 +21,10 @@ describe('AUTH-INTEGRATION', () => {
         await client.close()
     })
 
+    beforeEach(async () => {
+        await usersCollection.drop()
+    })
+
     describe('user registration', () => {
         const registerUserUseCase = AuthService.registerUser
         nodemailerService.sendEmail = jest.fn().mockImplementation((email: string, subject: string, message: string) => {
@@ -29,6 +36,40 @@ describe('AUTH-INTEGRATION', () => {
             const result = await registerUserUseCase(login, email, password)
             expect(result).toEqual(new Result(StatusCode.NO_CONTENT))
             expect(nodemailerService.sendEmail).toBeCalledTimes(1)
+        })
+    })
+
+    describe('code confirmation', () => {
+        const confirmEmailByCodeUseCase = AuthService.confirmEmailByCode
+
+        it('confirm user email by valid code', async () => {
+            const {emailConfirmation} = await testSeeder.registerUser(testSeeder.createUserDto())
+            const result = await confirmEmailByCodeUseCase(emailConfirmation.confirmationCode)
+            expect(result).toEqual(new Result(StatusCode.NO_CONTENT))
+        })
+
+        it('failed confirmation because of the code is expired', async () => {
+            const {emailConfirmation} = await testSeeder.registerUser({
+                ...testSeeder.createUserDto(),
+                expirationDate: sub(new Date(), {minutes: 30})
+            })
+            const result = await confirmEmailByCodeUseCase(emailConfirmation.confirmationCode)
+            expect(result).toEqual(new Result(StatusCode.BAD_REQUEST, "Confirmation code is expired"))
+        })
+
+        it('failed confirmation because of the code is already been applied', async () => {
+            const {emailConfirmation} = await testSeeder.registerUser({
+                ...testSeeder.createUserDto(),
+                isConfirmed: true
+            })
+            const result = await confirmEmailByCodeUseCase(emailConfirmation.confirmationCode)
+            expect(result).toEqual(new Result(StatusCode.BAD_REQUEST, 'Confirmation code is already been applied'))
+        })
+
+        it('failed confirmation because of the code is incorrect', async () => {
+            const code = randomUUID()
+            const result = await confirmEmailByCodeUseCase(code)
+            expect(result).toEqual(new Result(StatusCode.BAD_REQUEST, 'Confirmation code is incorrect'))
         })
     })
 })
