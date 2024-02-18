@@ -4,7 +4,7 @@ import {settings} from "../settings";
 
 export const client = new MongoClient(settings.MONGO_URI)
 
-const dataBase = client.db('bloggers-platform')
+export const dataBase = client.db('bloggers-platform')
 export const blogsCollection = dataBase.collection<BlogDBModel>('blogs')
 export const postsCollection = dataBase.collection<PostDBModel>('posts')
 export const usersCollection = dataBase.collection<UserDBModel>('users')

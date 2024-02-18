@@ -1,6 +1,6 @@
-import {app, PATHS} from "../src/app";
-import {createPost} from "./utils/create-posts";
-import {createUser, createUsers, meRequest} from "./utils/create-users";
+import {app, PATHS} from "../../src/app";
+import {createPost} from "../utils/create-posts";
+import {createUser, createUsers, meRequest} from "../utils/create-users";
 
 const request = require('supertest')
 

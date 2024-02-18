@@ -26,7 +26,12 @@ export class UsersService {
         const newUser: UserDBModel = {
             login, email,
             password: hashedPassword,
-            createdAt: new Date().toISOString()
+            createdAt: new Date().toISOString(),
+            emailConfirmation: {
+                confirmationCode: '',
+                expirationDate: new Date(),
+                isConfirmed: false
+            }
         }
         const createdUserId = await UsersRepository.createUser(newUser)
         if (!createdUserId) {

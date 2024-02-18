@@ -23,6 +23,13 @@ export type UserDBModel = {
     login: string
     password: string
     createdAt: string
+    emailConfirmation: EmailConfirmationType
+}
+
+type EmailConfirmationType = {
+    confirmationCode: string,
+    expirationDate: Date,
+    isConfirmed: boolean
 }
 
 export type CommentDBModel = {

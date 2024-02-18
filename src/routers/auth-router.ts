@@ -1,9 +1,20 @@
 import {Router} from "express";
-import {LoginInputModel, RequestType, RequestWithBody, ResponseWithBody, UserOutputModel} from "./types";
+import {
+    LoginInputModel, RegistrationConfirmationCodeModel,
+    RequestType,
+    RequestWithBody,
+    ResponseType,
+    ResponseWithBody,
+    UserInputModel,
+    UserOutputModel
+} from "./types";
 import {UsersService} from "../services/users-service";
 import {validateLoginOrEmail} from "../validators/login-or-email-validator";
 import {accessTokenGuard} from "../middlewares/access-token-guard";
 import {UsersQueryRepository} from "../repositories/users-query-repository";
+import {userValidator} from "../validators/user-validator";
+import {AuthService} from "../services/auth-service";
+import {StatusCode} from "../utils/result";
 
 export const authRouter = Router()
 
@@ -36,4 +47,35 @@ authRouter.get('/me', accessTokenGuard,
             login: user.login,
             email: user.email,
         })
+    })
+
+authRouter.post('/registration', userValidator(),
+    async (req: RequestWithBody<UserInputModel>, res: ResponseType) => {
+        const {login, email, password} = req.body
+        const response = await AuthService.registerUser(login, email, password)
+        switch (response.statusCode) {
+            case StatusCode.NO_CONTENT:
+                res.sendStatus(204);
+                break
+            case StatusCode.SERVER_ERROR:
+                res.sendStatus(555);
+                break
+        }
+    })
+
+authRouter.post('/registration-confirmation',
+    async (req: RequestWithBody<RegistrationConfirmationCodeModel>, res: ResponseType) => {
+        const {code} = req.body
+        const response = await AuthService.confirmEmailByCode(code)
+        switch (response.statusCode) {
+            case StatusCode.NO_CONTENT:
+                res.sendStatus(204);
+                break
+            case StatusCode.BAD_REQUEST:
+                res.sendStatus(400);
+                break
+            case StatusCode.SERVER_ERROR:
+                res.sendStatus(555);
+                break
+        }
     })

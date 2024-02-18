@@ -1,7 +1,5 @@
-import {app, HTTP_STATUS, PATHS} from "../src/app";
+import {app, HTTP_STATUS, PATHS} from "../../src/app";
 import {ObjectId} from "mongodb";
-import {createPost} from "./utils/create-posts";
-import {createUser, meRequest} from "./utils/create-users";
 
 const request = require('supertest')
 
