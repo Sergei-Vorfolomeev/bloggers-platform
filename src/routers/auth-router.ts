@@ -1,5 +1,6 @@
 import {Router} from "express";
 import {
+    APIErrorResult,
     LoginInputModel, RegistrationConfirmationCodeModel, RegistrationEmailResendingModel,
     RequestType,
     RequestWithBody,
@@ -65,7 +66,7 @@ authRouter.post('/registration', userValidator(),
     })
 
 authRouter.post('/registration-confirmation',
-    async (req: RequestWithBody<RegistrationConfirmationCodeModel>, res: ResponseType) => {
+    async (req: RequestWithBody<RegistrationConfirmationCodeModel>, res: ResponseWithBody<APIErrorResult | string | null>) => {
         const {code} = req.body
         const response = await AuthService.confirmEmailByCode(code)
         switch (response.statusCode) {
@@ -73,16 +74,16 @@ authRouter.post('/registration-confirmation',
                 res.sendStatus(204);
                 break
             case StatusCode.BAD_REQUEST:
-                res.sendStatus(400);
+                res.status(400).send(response.errorsMessages);
                 break
             case StatusCode.SERVER_ERROR:
-                res.sendStatus(555);
+                res.status(555).send(response.errorsMessages);
                 break
         }
     })
 
 authRouter.post('/registration-email-resending', emailValidator(),
-    async (req: RequestWithBody<RegistrationEmailResendingModel>, res: ResponseType) => {
+    async (req: RequestWithBody<RegistrationEmailResendingModel>, res: ResponseWithBody<APIErrorResult | string | null>) => {
         const {email} = req.body
         const response = await AuthService.resendConfirmationCode(email)
         switch (response.statusCode) {
@@ -90,10 +91,10 @@ authRouter.post('/registration-email-resending', emailValidator(),
                 res.sendStatus(204);
                 break
             case StatusCode.BAD_REQUEST:
-                res.sendStatus(400);
+                res.status(400).send(response.errorsMessages);
                 break
             case StatusCode.SERVER_ERROR:
-                res.sendStatus(555);
+                res.status(555).send(response.errorsMessages);
                 break
         }
     })

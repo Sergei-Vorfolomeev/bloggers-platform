@@ -30,7 +30,7 @@ export class UsersService {
             emailConfirmation: {
                 confirmationCode: '',
                 expirationDate: new Date(),
-                isConfirmed: false
+                isConfirmed: true
             }
         }
         const createdUserId = await UsersRepository.createUser(newUser)

@@ -4,11 +4,7 @@ import {ObjectId, WithId} from "mongodb";
 
 export class UsersRepository {
     static async findUserByLoginOrEmail(loginOrEmail: string): Promise<WithId<UserDBModel> | null> {
-        const user = await usersCollection.findOne({$or: [{login: loginOrEmail}, {email: loginOrEmail}]})
-        if (!user) {
-            return null
-        }
-        return user
+        return await usersCollection.findOne({$or: [{login: loginOrEmail}, {email: loginOrEmail}]})
     }
     static async createUser(user: UserDBModel): Promise<string | null> {
         try {

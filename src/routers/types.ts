@@ -43,13 +43,13 @@ export type PostInputModel = {
     blogId: string
 }
 
-export type FieldError = {
+export type FieldErrorType = {
     message: string
     field: string
 }
 
 export type APIErrorResult = {
-    errorsMessages: FieldError[]
+    errorsMessages: FieldErrorType[]
 }
 
 export type Paginator<T> = {

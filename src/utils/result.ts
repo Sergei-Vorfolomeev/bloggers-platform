@@ -1,3 +1,5 @@
+import {ErrorsMessages} from "./errors-messages";
+
 export enum StatusCode {
     SUCCESS = 200,
     CREATED = 201,
@@ -11,11 +13,11 @@ export enum StatusCode {
 
 export class Result<T = null> {
     statusCode: StatusCode;
-    errorMessage: string | null | undefined
+    errorsMessages: ErrorsMessages | string | null | undefined
     data: T | undefined
-    constructor(statusCode: StatusCode, errorMessage?: string | null, data?: T) {
+    constructor(statusCode: StatusCode, errorsMessages?: ErrorsMessages | string | null, data?: T) {
         this.statusCode = statusCode
-        this.errorMessage = errorMessage
+        this.errorsMessages = errorsMessages
         this.data = data
     }
 }

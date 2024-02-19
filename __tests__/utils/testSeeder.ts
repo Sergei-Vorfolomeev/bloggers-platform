@@ -14,9 +14,10 @@ type RegisterUserDtoType = {
 
 export const testSeeder = {
     createUserDto() {
+        const random = Math.floor(Math.random()*1000)
         return {
-            login: 'test',
-            email: 'test@gmail.com',
+            login: `test${random}`,
+            email: `test${random}@gmail.com`,
             password: 'test-pass',
         }
     },

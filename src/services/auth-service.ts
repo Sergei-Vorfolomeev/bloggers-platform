@@ -6,6 +6,7 @@ import {UsersRepository} from "../repositories/users-repository";
 import {Result, StatusCode} from "../utils/result";
 import {nodemailerService} from "./nodemailer-service";
 import {template} from "../utils/template";
+import {ErrorsMessages, FieldError} from "../utils/errors-messages";
 
 export class AuthService {
     static async registerUser(login: string, email: string, password: string): Promise<Result> {
@@ -31,7 +32,7 @@ export class AuthService {
         if (!userId) {
             return new Result(StatusCode.SERVER_ERROR, 'Error with creating user in db')
         }
-        const info =  await nodemailerService.sendEmail(email, 'Confirm your email', template(newUser.emailConfirmation.confirmationCode))
+        const info = await nodemailerService.sendEmail(email, 'Confirm your email', template(newUser.emailConfirmation.confirmationCode))
         if (!info) {
             return new Result(StatusCode.SERVER_ERROR, 'Error with sending email')
         }
@@ -41,17 +42,29 @@ export class AuthService {
     static async confirmEmailByCode(code: string): Promise<Result> {
         const user = await UsersRepository.findByConfirmationCode(code)
         if (!user) {
-            return new Result(StatusCode.BAD_REQUEST, 'Confirmation code is incorrect')
+            return new Result(
+                StatusCode.BAD_REQUEST,
+                new ErrorsMessages(new FieldError('code', 'Confirmation code is incorrect'))
+            )
         }
         if (user.emailConfirmation.isConfirmed) {
-            return new Result(StatusCode.BAD_REQUEST, 'Confirmation code is already been applied')
+            return new Result(
+                StatusCode.BAD_REQUEST,
+                new ErrorsMessages(new FieldError('code', 'Confirmation code is already been applied'))
+            )
         }
         if (new Date() > user.emailConfirmation.expirationDate) {
-            return new Result(StatusCode.BAD_REQUEST, 'Confirmation code is expired')
+            return new Result(
+                StatusCode.BAD_REQUEST,
+                new ErrorsMessages(new FieldError('code', 'Confirmation code is expired'))
+            )
         }
         const isUpdated = await UsersRepository.confirmEmail(user._id)
         if (!isUpdated) {
-            return new Result(StatusCode.SERVER_ERROR, 'Confirmation code wasn\'t updated')
+            return new Result(
+                StatusCode.SERVER_ERROR,
+                new ErrorsMessages(new FieldError('code', 'Confirmation code wasn\'t updated'))
+            )
         }
         return new Result(StatusCode.NO_CONTENT)
     }
@@ -59,26 +72,31 @@ export class AuthService {
     static async resendConfirmationCode(email: string) {
         const user = await UsersRepository.findUserByLoginOrEmail(email)
         if (!user) {
-            return new Result(StatusCode.BAD_REQUEST, 'User with provided email doesn\'t exist')
+            return new Result(
+                StatusCode.BAD_REQUEST,
+                new ErrorsMessages(new FieldError('email', 'Email is incorrect'))
+            )
         }
         if (user.emailConfirmation.isConfirmed) {
-            return new Result(StatusCode.BAD_REQUEST, 'Email is already confirmed')
+            return new Result(
+                StatusCode.BAD_REQUEST,
+                new ErrorsMessages(new FieldError('email', 'Email is already confirmed'))
+            )
         }
         const newCode = randomUUID()
-        const userWithUpdatedCode = {
-            ...user,
-            emailConfirmation: {
-                ...user.emailConfirmation,
-                confirmationCode: newCode
-            }
-        }
-        const info =  await nodemailerService.sendEmail(email, 'Confirm your email', template(newCode))
+        const info = await nodemailerService.sendEmail(email, 'Confirm your email', template(newCode))
         if (!info) {
-            return new Result(StatusCode.SERVER_ERROR, 'Error with sending email')
+            return new Result(
+                StatusCode.SERVER_ERROR,
+                new ErrorsMessages(new FieldError('email', 'Error with sending email'))
+            )
         }
         const isUpdated = await UsersRepository.updateConfirmationCode(user._id, newCode)
         if (!isUpdated) {
-            return new Result(StatusCode.SERVER_ERROR, 'Confirmation code wasn\'t updated')
+            return new Result(
+                StatusCode.SERVER_ERROR,
+                new ErrorsMessages(new FieldError('code', 'Confirmation code wasn\'t updated'))
+            )
         }
         return new Result(StatusCode.NO_CONTENT)
     }

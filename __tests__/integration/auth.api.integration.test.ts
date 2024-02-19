@@ -8,6 +8,7 @@ import {nodemailerService} from "../../src/services/nodemailer-service";
 import {beforeEach} from "node:test";
 import {sub} from "date-fns";
 import {randomUUID} from "crypto";
+import {ErrorsMessages, FieldError} from "../../src/utils/errors-messages";
 
 
 describe('AUTH-INTEGRATION', () => {
@@ -27,7 +28,7 @@ describe('AUTH-INTEGRATION', () => {
 
     describe('user registration', () => {
         const registerUserUseCase = AuthService.registerUser
-        nodemailerService.sendEmail = jest.fn().mockImplementation((email: string, subject: string, message: string) => {
+        nodemailerService.sendEmail = jest.fn().mockImplementation(() => {
             return true
         })
 
@@ -54,7 +55,10 @@ describe('AUTH-INTEGRATION', () => {
                 expirationDate: sub(new Date(), {minutes: 30})
             })
             const result = await confirmEmailByCodeUseCase(emailConfirmation.confirmationCode)
-            expect(result).toEqual(new Result(StatusCode.BAD_REQUEST, "Confirmation code is expired"))
+            expect(result).toEqual(new Result(
+                StatusCode.BAD_REQUEST,
+                new ErrorsMessages(new FieldError('code', 'Confirmation code is expired'))
+            ))
         })
 
         it('failed confirmation because of the code is already been applied', async () => {
@@ -63,13 +67,51 @@ describe('AUTH-INTEGRATION', () => {
                 isConfirmed: true
             })
             const result = await confirmEmailByCodeUseCase(emailConfirmation.confirmationCode)
-            expect(result).toEqual(new Result(StatusCode.BAD_REQUEST, 'Confirmation code is already been applied'))
+            expect(result).toEqual(new Result(
+                StatusCode.BAD_REQUEST,
+                new ErrorsMessages(new FieldError('code', 'Confirmation code is already been applied'))
+            ))
         })
 
         it('failed confirmation because of the code is incorrect', async () => {
             const code = randomUUID()
             const result = await confirmEmailByCodeUseCase(code)
-            expect(result).toEqual(new Result(StatusCode.BAD_REQUEST, 'Confirmation code is incorrect'))
+            expect(result).toEqual(new Result(
+                StatusCode.BAD_REQUEST,
+                new ErrorsMessages(new FieldError('code', 'Confirmation code is incorrect'))
+            ))
+        })
+    })
+
+    describe('resend confirmation code', () => {
+        const resendConfirmationCodeUseCase = AuthService.resendConfirmationCode
+        nodemailerService.sendEmail = jest.fn().mockImplementation(() => true)
+
+        it('resend confirmation code to user with invalid email', async () => {
+            const result = await resendConfirmationCodeUseCase('invalid@gmail.com')
+            expect(result).toEqual(new Result(
+                StatusCode.BAD_REQUEST,
+                new ErrorsMessages(new FieldError('email', 'Email is incorrect'))
+            ))
+        })
+
+        it('resend confirmation code to the user with confirmed email', async () => {
+            const {email} = await testSeeder.registerUser({
+                ...testSeeder.createUserDto(),
+                isConfirmed: true
+            })
+            const result = await resendConfirmationCodeUseCase(email)
+            expect(result).toEqual(new Result(
+                StatusCode.BAD_REQUEST,
+                new ErrorsMessages(new FieldError('email', 'Email is already confirmed'))
+            ))
+        })
+
+        it('resend confirmation code to user with valid email', async () => {
+            const {email} = await testSeeder.registerUser(testSeeder.createUserDto())
+            const result = await resendConfirmationCodeUseCase(email)
+            expect(result).toEqual(new Result(StatusCode.NO_CONTENT))
+            expect(nodemailerService.sendEmail).toBeCalled()
         })
     })
 })
