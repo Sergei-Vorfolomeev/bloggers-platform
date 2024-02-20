@@ -36,3 +36,7 @@ export type CommentatorInfo = {
     userLogin: string
 }
 
+export type TokensPayload = {
+    accessToken: string
+    refreshToken: string
+}

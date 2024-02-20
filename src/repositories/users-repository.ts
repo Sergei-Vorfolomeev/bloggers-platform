@@ -6,6 +6,7 @@ export class UsersRepository {
     static async findUserByLoginOrEmail(loginOrEmail: string): Promise<WithId<UserDBModel> | null> {
         return await usersCollection.findOne({$or: [{login: loginOrEmail}, {email: loginOrEmail}]})
     }
+
     static async createUser(user: UserDBModel): Promise<string | null> {
         try {
             const res = await usersCollection.insertOne(user)
@@ -58,5 +59,12 @@ export class UsersRepository {
             console.error(e)
             return null
         }
+    }
+
+    static async saveRefreshToken(userId: ObjectId, refreshTokenHash: string): Promise<boolean> {
+        const res = await usersCollection.updateOne({_id: userId}, {
+            $set: {refreshToken: refreshTokenHash}
+        })
+        return res.matchedCount === 1
     }
 }

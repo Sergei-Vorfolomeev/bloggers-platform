@@ -26,7 +26,8 @@ export class AuthService {
                     minutes: 30,
                 }),
                 isConfirmed: false
-            }
+            },
+            refreshToken: null
         }
         const userId = await UsersRepository.createUser(newUser)
         if (!userId) {

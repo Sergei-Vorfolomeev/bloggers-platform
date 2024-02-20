@@ -25,15 +25,19 @@ authRouter.post(
     validateLoginOrEmail(),
     async (req: RequestWithBody<LoginInputModel>, res: ResponseWithBody<{ accessToken: string }>) => {
         const {loginOrEmail, password} = req.body
-        const token = await UsersService.checkUserCredentials(loginOrEmail, password)
-        if (!token) {
+        const result = await UsersService.checkUserCredentials(loginOrEmail, password)
+        if (result.statusCode === StatusCode.UNAUTHORIZED) {
             res.sendStatus(401)
             return
         }
-        const response = {
-            accessToken: token
+        if (result.statusCode === StatusCode.SERVER_ERROR) {
+            res.sendStatus(555)
+            return
         }
-        res.status(200).send(response)
+        if (result.statusCode === StatusCode.SUCCESS) {
+            res.cookie('token', result.data!.refreshToken, {httpOnly: true, secure: true})
+            res.status(200).send({accessToken: result.data!.accessToken})
+        }
     })
 
 authRouter.get('/me', accessTokenGuard,

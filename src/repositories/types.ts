@@ -24,6 +24,7 @@ export type UserDBModel = {
     password: string
     createdAt: string
     emailConfirmation: EmailConfirmationType
+    refreshToken: string | null
 }
 
 type EmailConfirmationType = {

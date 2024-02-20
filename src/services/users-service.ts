@@ -2,20 +2,26 @@ import {UserDBModel} from "../repositories/types";
 import {UsersRepository} from "../repositories/users-repository";
 import {UsersQueryRepository} from "../repositories/users-query-repository";
 import {BcryptService} from "./bcrypt-service";
-import {UserViewModel} from "./types";
+import {TokensPayload, UserViewModel} from "./types";
 import {JwtService} from "./jwt-service";
+import {WithId} from "mongodb";
+import {Result, StatusCode} from "../utils/result";
 
 export class UsersService {
-    static async checkUserCredentials(loginOrEmail: string, password: string): Promise<string | null> {
+    static async checkUserCredentials(loginOrEmail: string, password: string): Promise<Result<TokensPayload>> {
         const user = await UsersRepository.findUserByLoginOrEmail(loginOrEmail)
         if (!user) {
-            return null
+            return new Result(StatusCode.UNAUTHORIZED)
         }
         const isMatched = await BcryptService.comparePasswords(password, user.password)
         if (!isMatched) {
-            return null
+            return new Result(StatusCode.UNAUTHORIZED)
         }
-        return JwtService.createToken(user)
+        const tokens = await this.generateTokens(user)
+        if (!tokens) {
+            return new Result(StatusCode.SERVER_ERROR, 'Error with generating or saving tokens')
+        }
+        return new Result(StatusCode.SUCCESS, null, tokens)
     }
 
     static async createUser(login: string, email: string, password: string): Promise<UserViewModel | null> {
@@ -31,7 +37,8 @@ export class UsersService {
                 confirmationCode: '',
                 expirationDate: new Date(),
                 isConfirmed: true
-            }
+            },
+            refreshToken: null
         }
         const createdUserId = await UsersRepository.createUser(newUser)
         if (!createdUserId) {
@@ -43,7 +50,22 @@ export class UsersService {
         }
         return createdUser
     }
+
     static async deleteUser(id: string): Promise<boolean> {
         return await UsersRepository.deleteUser(id)
+    }
+
+    static async generateTokens(user: WithId<UserDBModel>): Promise<TokensPayload | null> {
+        const accessToken = JwtService.createToken(user, 'access')
+        const refreshToken = JwtService.createToken(user, 'refresh')
+        const refreshTokenHash = await BcryptService.generateHash(refreshToken)
+        if (!refreshTokenHash) {
+            return null
+        }
+        const isSaved = await UsersRepository.saveRefreshToken(user._id, refreshTokenHash)
+        if (!isSaved) {
+            return null
+        }
+        return {accessToken, refreshToken}
     }
 }
