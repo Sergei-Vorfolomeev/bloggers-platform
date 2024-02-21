@@ -107,12 +107,11 @@ export class AuthService {
 
     static async login(loginOrEmail: string, password: string): Promise<Result<TokensPayload>> {
         const user = await UsersRepository.findUserByLoginOrEmail(loginOrEmail)
-        //console.log(`userEmail ${loginOrEmail} ` + user) // здесь все хорошо
         if (!user) {
             return new Result(
                 StatusCode.UNAUTHORIZED,
                 new ErrorsMessages(
-                    new FieldError('login, email', 'Login or email is incorrect')
+                    new FieldError('login, email, password', 'Login, email or password is incorrect')
                 )
             )
         }
@@ -121,7 +120,7 @@ export class AuthService {
             return new Result(
                 StatusCode.UNAUTHORIZED,
                 new ErrorsMessages(
-                    new FieldError('password', 'Password is incorrect')
+                    new FieldError('login, email, password', 'Login, email or password is incorrect')
                 )
             )
         }
