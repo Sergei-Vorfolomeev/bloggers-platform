@@ -20,15 +20,17 @@ describe('LOGOUT_INTEGRATION', () => {
         await usersCollection.deleteMany({})
     })
 
+    const logoutUseCase = AuthService.logout
+
     it('successful logout', async () => {
         const {refreshToken} = await testSeeder.loginUser()
-        const result = await AuthService.logout(refreshToken)
+        const result = await logoutUseCase(refreshToken)
         expect(result).toEqual(new Result(StatusCode.NO_CONTENT))
     })
 
     it('logout with invalid refresh token', async () => {
         await testSeeder.loginUser()
-        const result = await AuthService.logout('invalid.refresh.token')
+        const result = await logoutUseCase('invalid.refresh.token')
         expect(result).toEqual(new Result(StatusCode.UNAUTHORIZED))
     })
 
@@ -39,7 +41,7 @@ describe('LOGOUT_INTEGRATION', () => {
                 resolve(1)
             }, 21000)
         })
-        const result = await AuthService.logout(refreshToken)
+        const result = await logoutUseCase(refreshToken)
         expect(result).toEqual(new Result(StatusCode.UNAUTHORIZED))
     })
 })
