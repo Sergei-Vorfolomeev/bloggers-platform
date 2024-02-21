@@ -101,4 +101,11 @@ export class AuthService {
         }
         return new Result(StatusCode.NO_CONTENT)
     }
+
+    static async updateTokens(refreshToken: string) {
+        const user = await UsersRepository.findUserByRefreshToken(refreshToken)
+        if (!user) {
+            return new Result(StatusCode.UNAUTHORIZED)
+        }
+    }
 }

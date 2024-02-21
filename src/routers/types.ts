@@ -89,3 +89,7 @@ export type RegistrationEmailResendingModel = {
     email: string
 }
 
+export type LoginSuccessViesModel = {
+    accessToken: string
+}
+

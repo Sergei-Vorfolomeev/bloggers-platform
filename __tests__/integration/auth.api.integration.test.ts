@@ -3,9 +3,8 @@ import {settings} from "../../src/settings";
 import {AuthService} from "../../src/services/auth-service";
 import {testSeeder} from "../utils/testSeeder";
 import {Result, StatusCode} from "../../src/utils/result";
-import {client, usersCollection} from "../../src/db/db";
+import {client, dataBase, usersCollection} from "../../src/db/db";
 import {nodemailerService} from "../../src/services/nodemailer-service";
-import {beforeEach} from "node:test";
 import {sub} from "date-fns";
 import {randomUUID} from "crypto";
 import {ErrorsMessages, FieldError} from "../../src/utils/errors-messages";
@@ -18,13 +17,13 @@ describe('AUTH-INTEGRATION', () => {
     })
 
     afterAll(async () => {
-        await usersCollection.drop()
+        await usersCollection.deleteMany({})
         await client.close()
     })
 
     beforeEach(async () => {
-        await usersCollection.drop()
-    })
+        await usersCollection.deleteMany({})
+    });
 
     describe('user registration', () => {
         const registerUserUseCase = AuthService.registerUser

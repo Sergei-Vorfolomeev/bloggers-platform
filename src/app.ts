@@ -5,6 +5,7 @@ import {testRouter} from "./routers/test-router";
 import {authRouter} from "./routers/auth-router";
 import {usersRouter} from "./routers/users-router";
 import {commentsRouter} from "./routers/comments-router";
+import cookieParser from "cookie-parser";
 
 export const PATHS = {
     __test__: '/testing/all-data',
@@ -27,6 +28,7 @@ export const HTTP_STATUS = {
 export const app = express()
 
 app.use(express.json())
+app.use(cookieParser())
 app.use(PATHS.auth, authRouter)
 app.use(PATHS.blogs, blogsRouter)
 app.use(PATHS.posts, postsRouter)

@@ -67,4 +67,8 @@ export class UsersRepository {
         })
         return res.matchedCount === 1
     }
+
+    static async findUserByRefreshToken(refreshToken: string): Promise<UserDBModel | null> {
+        return await usersCollection.findOne({refreshToken})
+    }
 }

@@ -6,18 +6,29 @@ import {TokensPayload, UserViewModel} from "./types";
 import {JwtService} from "./jwt-service";
 import {WithId} from "mongodb";
 import {Result, StatusCode} from "../utils/result";
+import {ErrorsMessages, FieldError} from "../utils/errors-messages";
 
 export class UsersService {
     static async checkUserCredentials(loginOrEmail: string, password: string): Promise<Result<TokensPayload>> {
         const user = await UsersRepository.findUserByLoginOrEmail(loginOrEmail)
         if (!user) {
-            return new Result(StatusCode.UNAUTHORIZED)
+            return new Result(
+                StatusCode.UNAUTHORIZED,
+                new ErrorsMessages(
+                    new FieldError('login, email', 'Login or email is incorrect')
+                )
+            )
         }
         const isMatched = await BcryptService.comparePasswords(password, user.password)
         if (!isMatched) {
-            return new Result(StatusCode.UNAUTHORIZED)
+            return new Result(
+                StatusCode.UNAUTHORIZED,
+                new ErrorsMessages(
+                    new FieldError('password', 'Password is incorrect')
+                )
+            )
         }
-        const tokens = await this.generateTokens(user)
+        const tokens = await UsersService.generateTokens(user)
         if (!tokens) {
             return new Result(StatusCode.SERVER_ERROR, 'Error with generating or saving tokens')
         }
@@ -66,6 +77,6 @@ export class UsersService {
         if (!isSaved) {
             return null
         }
-        return {accessToken, refreshToken}
+        return {accessToken: accessToken, refreshToken: refreshToken}
     }
 }

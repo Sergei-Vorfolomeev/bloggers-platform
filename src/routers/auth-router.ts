@@ -1,7 +1,7 @@
 import {Router} from "express";
 import {
     APIErrorResult,
-    LoginInputModel, RegistrationConfirmationCodeModel, RegistrationEmailResendingModel,
+    LoginInputModel, LoginSuccessViesModel, RegistrationConfirmationCodeModel, RegistrationEmailResendingModel,
     RequestType,
     RequestWithBody,
     ResponseType,
@@ -23,7 +23,7 @@ export const authRouter = Router()
 authRouter.post(
     '/login',
     validateLoginOrEmail(),
-    async (req: RequestWithBody<LoginInputModel>, res: ResponseWithBody<{ accessToken: string }>) => {
+    async (req: RequestWithBody<LoginInputModel>, res: ResponseWithBody<LoginSuccessViesModel>) => {
         const {loginOrEmail, password} = req.body
         const result = await UsersService.checkUserCredentials(loginOrEmail, password)
         if (result.statusCode === StatusCode.UNAUTHORIZED) {
@@ -102,3 +102,8 @@ authRouter.post('/registration-email-resending', emailValidator(),
                 break
         }
     })
+
+authRouter.post('/refresh-token', async (req: RequestType, res: ResponseWithBody<LoginSuccessViesModel>) => {
+    const refreshToken = req.cookies.refreshToken
+   // await AuthService.updateTokens(refreshToken)
+})
