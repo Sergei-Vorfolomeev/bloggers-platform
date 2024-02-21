@@ -61,14 +61,14 @@ export class UsersRepository {
         }
     }
 
-    static async saveRefreshToken(userId: ObjectId, refreshTokenHash: string): Promise<boolean> {
+    static async saveRefreshToken(userId: ObjectId, refreshTokenHash: string | null): Promise<boolean> {
         const res = await usersCollection.updateOne({_id: userId}, {
             $set: {refreshToken: refreshTokenHash}
         })
         return res.matchedCount === 1
     }
 
-    static async findUserByRefreshToken(refreshToken: string): Promise<UserDBModel | null> {
-        return await usersCollection.findOne({refreshToken})
+    static async findUserByUserId(userId: string): Promise<WithId<UserDBModel> | null> {
+        return await usersCollection.findOne({_id: new ObjectId(userId)})
     }
 }

@@ -7,6 +7,9 @@ import {Result, StatusCode} from "../utils/result";
 import {nodemailerService} from "./nodemailer-service";
 import {template} from "../utils/template";
 import {ErrorsMessages, FieldError} from "../utils/errors-messages";
+import {TokensPayload} from "./types";
+import {JwtService} from "./jwt-service";
+import {WithId} from "mongodb";
 
 export class AuthService {
     static async registerUser(login: string, email: string, password: string): Promise<Result> {
@@ -102,10 +105,84 @@ export class AuthService {
         return new Result(StatusCode.NO_CONTENT)
     }
 
-    static async updateTokens(refreshToken: string) {
-        const user = await UsersRepository.findUserByRefreshToken(refreshToken)
+    static async login(loginOrEmail: string, password: string): Promise<Result<TokensPayload>> {
+        const user = await UsersRepository.findUserByLoginOrEmail(loginOrEmail)
+        //console.log(`userEmail ${loginOrEmail} ` + user) // здесь все хорошо
+        if (!user) {
+            return new Result(
+                StatusCode.UNAUTHORIZED,
+                new ErrorsMessages(
+                    new FieldError('login, email', 'Login or email is incorrect')
+                )
+            )
+        }
+        const isMatched = await BcryptService.comparePasswords(password, user.password)
+        if (!isMatched) {
+            return new Result(
+                StatusCode.UNAUTHORIZED,
+                new ErrorsMessages(
+                    new FieldError('password', 'Password is incorrect')
+                )
+            )
+        }
+        const tokens = await AuthService.generateTokens(user)
+        if (!tokens) {
+            return new Result(StatusCode.SERVER_ERROR, 'Error with generating or saving tokens')
+        }
+        return new Result(StatusCode.SUCCESS, null, tokens)
+    }
+
+    static async generateTokens(user: WithId<UserDBModel>): Promise<TokensPayload | null> {
+        const accessToken = JwtService.createToken(user, 'access')
+        const refreshToken = JwtService.createToken(user, 'refresh')
+        const refreshTokenHash = await BcryptService.generateHash(refreshToken)
+        if (!refreshTokenHash) {
+            return null
+        }
+        const isSaved = await UsersRepository.saveRefreshToken(user._id, refreshTokenHash)
+        if (!isSaved) {
+            return null
+        }
+        return {accessToken: accessToken, refreshToken: refreshToken}
+    }
+
+    static async updateTokens(refreshToken: string): Promise<Result<TokensPayload>> {
+        const user = await AuthService.findUserByRefreshToken(refreshToken)
         if (!user) {
             return new Result(StatusCode.UNAUTHORIZED)
         }
+        const tokens = await AuthService.generateTokens(user)
+        if (!tokens) {
+            return new Result(StatusCode.SERVER_ERROR, 'Error with generating or saving tokens')
+        }
+        return new Result(StatusCode.SUCCESS, null, tokens)
+    }
+
+    static async logout(refreshToken: string): Promise<Result> {
+        const user = await AuthService.findUserByRefreshToken(refreshToken)
+        if (!user) {
+            return new Result(StatusCode.UNAUTHORIZED)
+        }
+        const isSaved = await UsersRepository.saveRefreshToken(user._id, null)
+        if (!isSaved) {
+            return new Result(StatusCode.SERVER_ERROR)
+        }
+        return new Result(StatusCode.NO_CONTENT)
+    }
+
+    static async findUserByRefreshToken(refreshToken: string): Promise<WithId<UserDBModel> | null> {
+        const payload = await JwtService.verifyToken(refreshToken, 'refresh')
+        if (!payload) {
+            return null
+        }
+        const user = await UsersRepository.findUserByUserId(payload.userId)
+        if (!user) {
+            return null
+        }
+        const isMatched = await BcryptService.comparePasswords(refreshToken, user.refreshToken as string)
+        if (!isMatched) {
+            return null
+        }
+        return user
     }
 }

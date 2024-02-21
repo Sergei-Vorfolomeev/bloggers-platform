@@ -3,14 +3,14 @@ import {settings} from "../../src/settings";
 import {AuthService} from "../../src/services/auth-service";
 import {testSeeder} from "../utils/testSeeder";
 import {Result, StatusCode} from "../../src/utils/result";
-import {client, dataBase, usersCollection} from "../../src/db/db";
+import {client, usersCollection} from "../../src/db/db";
 import {nodemailerService} from "../../src/services/nodemailer-service";
 import {sub} from "date-fns";
 import {randomUUID} from "crypto";
 import {ErrorsMessages, FieldError} from "../../src/utils/errors-messages";
 
 
-describe('AUTH-INTEGRATION', () => {
+describe('REGISTRATION_INTEGRATION', () => {
     beforeAll(async () => {
         const mongoServer = await MongoMemoryServer.create()
         settings.MONGO_URI = mongoServer.getUri()

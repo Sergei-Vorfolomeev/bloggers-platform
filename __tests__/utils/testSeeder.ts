@@ -3,6 +3,7 @@ import {randomUUID} from "crypto";
 import {add} from "date-fns/add";
 import {usersCollection} from "../../src/db/db";
 import {BcryptService} from "../../src/services/bcrypt-service";
+import {AuthService} from "../../src/services/auth-service";
 
 type RegisterUserDtoType = {
     login: string
@@ -54,6 +55,17 @@ export const testSeeder = {
             id: res.insertedId.toString(),
             ...newUser,
             password: password,
+        }
+    },
+    async loginUser() {
+        const user = await testSeeder.registerUser(testSeeder.createUserDto())
+        const response = await AuthService.login(user.email, user.password)
+        return {
+            email: user.email,
+            login: user.login,
+            password: user.password,
+            accessToken: response.data!.accessToken,
+            refreshToken: response.data!.refreshToken,
         }
     }
 }
