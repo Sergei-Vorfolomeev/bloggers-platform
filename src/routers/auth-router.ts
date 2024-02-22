@@ -132,7 +132,7 @@ authRouter.post('/logout', async (req: RequestType, res: ResponseType) => {
         case StatusCode.SERVER_ERROR:
             res.sendStatus(555)
             break
-        case StatusCode.SUCCESS:
+        case StatusCode.NO_CONTENT:
             res.sendStatus(204)
             break
     }

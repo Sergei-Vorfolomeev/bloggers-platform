@@ -101,10 +101,10 @@ describe('AUTH-e2e', () => {
         expect(res.body.accessToken).toContain('.')
     })
 
-    // it('logout', async () => {
-    //     await request(app)
-    //         .post(`${PATHS.auth}/logout`)
-    //         .set('Cookie', `token=${refreshToken}`)
-    //         .expect(204)
-    // })
+    it('logout', async () => {
+        await request(app)
+            .post(`${PATHS.auth}/logout`)
+            .set('Cookie', `token=${refreshToken}`)
+            .expect(204)
+    })
 })
