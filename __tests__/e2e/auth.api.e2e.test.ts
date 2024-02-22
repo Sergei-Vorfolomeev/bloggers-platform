@@ -3,6 +3,7 @@ import {nodemailerService} from "../../src/services/nodemailer-service";
 import {MongoMemoryServer} from "mongodb-memory-server";
 import {settings} from "../../src/settings";
 import {client, usersCollection} from "../../src/db/db";
+import {SentMessageInfo} from "nodemailer";
 
 const request = require('supertest')
 
@@ -20,7 +21,7 @@ describe('AUTH-e2e', () => {
         await client.close()
     })
 
-    nodemailerService.sendEmail = jest.fn().mockImplementation(() => true)
+    jest.spyOn(nodemailerService, 'sendEmail').mockReturnValueOnce(Promise.resolve(true as SentMessageInfo))
 
     let user: any = null
     it('register user', async () => {
@@ -69,7 +70,8 @@ describe('AUTH-e2e', () => {
             })
     })
 
-    let refreshToken: any = null
+    let validRefreshToken: any = null
+    let inValidRefreshToken: any = null
     it('login user', async () => {
         const res = await request(app)
             .post(`${PATHS.auth}/login`)
@@ -80,31 +82,53 @@ describe('AUTH-e2e', () => {
             .expect(200)
 
         const cookieHeader = res.headers['set-cookie']
-        refreshToken = cookieHeader[0].split(';')[0].split('=')[1]
-        expect(refreshToken).toEqual(expect.any(String))
-        expect(refreshToken).toContain('.')
+        validRefreshToken = cookieHeader[0].split(';')[0].split('=')[1]
+        expect(validRefreshToken).toEqual(expect.any(String))
+        expect(validRefreshToken).toContain('.')
         expect(res.body.accessToken).toEqual(expect.any(String))
         expect(res.body.accessToken).toContain('.')
+        await new Promise(resolve => {
+            setTimeout(() => {
+                resolve(1)
+            }, 1000)
+        })
     })
 
     it('refresh all tokens', async () => {
         const res = await request(app)
             .post(`${PATHS.auth}/refresh-token`)
-            .set('Cookie', `token=${refreshToken}`)
+            .set('Cookie', `refreshToken=${validRefreshToken}`)
             .expect(200)
 
+        inValidRefreshToken = validRefreshToken
         const cookieHeader = res.headers['set-cookie']
-        refreshToken = cookieHeader[0].split(';')[0].split('=')[1]
-        expect(refreshToken).toEqual(expect.any(String))
-        expect(refreshToken).toContain('.')
+        validRefreshToken = cookieHeader[0].split(';')[0].split('=')[1]
+        expect(validRefreshToken).toEqual(expect.any(String))
+        expect(validRefreshToken).toContain('.')
+       expect(validRefreshToken).not.toBe(inValidRefreshToken)
         expect(res.body.accessToken).toEqual(expect.any(String))
         expect(res.body.accessToken).toContain('.')
+    })
+
+
+    it('refresh all tokens with invalid refresh token', async () => {
+        await request(app)
+            .post(`${PATHS.auth}/refresh-token`)
+            .set('Cookie', `refreshToken=${inValidRefreshToken}`)
+            .expect(401)
     })
 
     it('logout', async () => {
         await request(app)
             .post(`${PATHS.auth}/logout`)
-            .set('Cookie', `token=${refreshToken}`)
+            .set('Cookie', `refreshToken=${validRefreshToken}`)
             .expect(204)
+    })
+
+    it('try to refresh tokens after logout', async () => {
+        await request(app)
+            .post(`${PATHS.auth}/refresh-token`)
+            .set('Cookie', `refreshToken=${validRefreshToken}`)
+            .expect(401)
     })
 })

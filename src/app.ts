@@ -27,8 +27,8 @@ export const HTTP_STATUS = {
 
 export const app = express()
 
-app.use(express.json())
 app.use(cookieParser())
+app.use(express.json())
 app.use(PATHS.auth, authRouter)
 app.use(PATHS.blogs, blogsRouter)
 app.use(PATHS.posts, postsRouter)

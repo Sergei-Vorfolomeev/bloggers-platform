@@ -10,6 +10,7 @@ import {ErrorsMessages, FieldError} from "../utils/errors-messages";
 import {TokensPayload} from "./types";
 import {JwtService} from "./jwt-service";
 import {WithId} from "mongodb";
+import {CryptoService} from "./crypto-service";
 
 export class AuthService {
     static async registerUser(login: string, email: string, password: string): Promise<Result> {
@@ -134,15 +135,12 @@ export class AuthService {
     static async generateTokens(user: WithId<UserDBModel>): Promise<TokensPayload | null> {
         const accessToken = JwtService.createToken(user, 'access')
         const refreshToken = JwtService.createToken(user, 'refresh')
-        const refreshTokenHash = await BcryptService.generateHash(refreshToken)
-        if (!refreshTokenHash) {
-            return null
-        }
-        const isSaved = await UsersRepository.saveRefreshToken(user._id, refreshTokenHash)
+        const encryptedToken = CryptoService.encrypt(refreshToken)
+        const isSaved = await UsersRepository.saveRefreshToken(user._id, encryptedToken)
         if (!isSaved) {
             return null
         }
-        return {accessToken: accessToken, refreshToken: refreshToken}
+        return {accessToken, refreshToken}
     }
 
     static async updateTokens(refreshToken: string): Promise<Result<TokensPayload>> {
@@ -157,6 +155,23 @@ export class AuthService {
         return new Result(StatusCode.SUCCESS, null, tokens)
     }
 
+    static async findUserByRefreshToken(refreshToken: string): Promise<WithId<UserDBModel> | null> {
+        const payload = await JwtService.verifyToken(refreshToken, 'refresh')
+        if (!payload) {
+            return null
+        }
+        const user = await UsersRepository.findUserByUserId(payload.userId)
+        if (!user || !user.refreshToken) {
+            return null
+        }
+        const decryptedRefreshToken = CryptoService.decrypt(user.refreshToken)
+        const isMatched = refreshToken === decryptedRefreshToken
+        if (!isMatched) {
+            return null
+        }
+        return user
+    }
+
     static async logout(refreshToken: string): Promise<Result> {
         const user = await AuthService.findUserByRefreshToken(refreshToken)
         if (!user) {
@@ -167,21 +182,5 @@ export class AuthService {
             return new Result(StatusCode.SERVER_ERROR)
         }
         return new Result(StatusCode.NO_CONTENT)
-    }
-
-    static async findUserByRefreshToken(refreshToken: string): Promise<WithId<UserDBModel> | null> {
-        const payload = await JwtService.verifyToken(refreshToken, 'refresh')
-        if (!payload) {
-            return null
-        }
-        const user = await UsersRepository.findUserByUserId(payload.userId)
-        if (!user) {
-            return null
-        }
-        const isMatched = await BcryptService.comparePasswords(refreshToken, user.refreshToken as string)
-        if (!isMatched) {
-            return null
-        }
-        return user
     }
 }

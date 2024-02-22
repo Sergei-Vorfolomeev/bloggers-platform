@@ -10,9 +10,9 @@ export class BcryptService {
         }
     }
 
-    static async comparePasswords(password: string, hashedPassword: string): Promise<boolean> {
+    static async comparePasswords(password: string, hashedPassword: string | null): Promise<boolean> {
         try {
-            return await bcrypt.compare(password, hashedPassword)
+            return await bcrypt.compare(password, hashedPassword as string)
         } catch (error) {
             console.error('Ошибка хеширования пароля:', error);
             return false

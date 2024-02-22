@@ -9,6 +9,7 @@ export const blogsCollection = dataBase.collection<BlogDBModel>('blogs')
 export const postsCollection = dataBase.collection<PostDBModel>('posts')
 export const usersCollection = dataBase.collection<UserDBModel>('users')
 export const commentsCollection = dataBase.collection<CommentDBModel>('comments')
+export const tokensBlackListCollection = dataBase.collection<string[]>('tokens-black-list')
 
 export const runDB = async () => {
     try {

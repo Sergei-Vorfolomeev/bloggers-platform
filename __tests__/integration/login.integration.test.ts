@@ -60,7 +60,7 @@ describe('LOGIN_INTEGRATION', () => {
     describe('update tokens', () => {
         const updateTokensUseCase = AuthService.updateTokens
 
-        it('update the access token with a refresh token', async () => {
+        it('update the access and refresh token', async () => {
             const {refreshToken} = await testSeeder.loginUser()
             const result = await updateTokensUseCase(refreshToken)
             expect(result).toEqual(new Result(StatusCode.SUCCESS, null, {

@@ -2,11 +2,7 @@ import {UserDBModel} from "../repositories/types";
 import {UsersRepository} from "../repositories/users-repository";
 import {UsersQueryRepository} from "../repositories/users-query-repository";
 import {BcryptService} from "./bcrypt-service";
-import {TokensPayload, UserViewModel} from "./types";
-import {JwtService} from "./jwt-service";
-import {WithId} from "mongodb";
-import {Result, StatusCode} from "../utils/result";
-import {ErrorsMessages, FieldError} from "../utils/errors-messages";
+import {UserViewModel} from "./types";
 
 export class UsersService {
     static async createUser(login: string, email: string, password: string): Promise<UserViewModel | null> {
