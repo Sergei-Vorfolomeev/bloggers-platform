@@ -15,9 +15,9 @@ describe('AUTH-e2e', () => {
     })
 
     afterAll(async () => {
-        await client.close()
         await usersCollection.deleteMany({})
         jest.restoreAllMocks()
+        await client.close()
     })
 
     nodemailerService.sendEmail = jest.fn().mockImplementation(() => true)

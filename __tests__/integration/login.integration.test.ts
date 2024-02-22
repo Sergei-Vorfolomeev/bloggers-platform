@@ -20,7 +20,6 @@ describe('LOGIN_INTEGRATION', () => {
 
     beforeEach(async () => {
         await usersCollection.deleteMany({})
-        jest.restoreAllMocks()
     })
 
     describe('login user', () => {
@@ -39,7 +38,7 @@ describe('LOGIN_INTEGRATION', () => {
             const response = await checkUserCredentialsUseCase('invalid@gmail.com', '12345')
             expect(response).toEqual(new Result(
                 StatusCode.UNAUTHORIZED,
-                new ErrorsMessages(new FieldError('login, email', 'Login or email is incorrect'))))
+                new ErrorsMessages(new FieldError('login, email, password', 'Login, email or password is incorrect'))))
         })
 
         it('login user with incorrect password', async () => {
@@ -47,11 +46,11 @@ describe('LOGIN_INTEGRATION', () => {
             const response = await checkUserCredentialsUseCase(user.email, 'invalid')
             expect(response).toEqual(new Result(
                 StatusCode.UNAUTHORIZED,
-                new ErrorsMessages(new FieldError('password', 'Password is incorrect'))))
+                new ErrorsMessages(new FieldError('login, email, password', 'Login, email or password is incorrect'))))
         })
 
-        it.skip('login user with error in creating tokens', async () => {
-            AuthService.generateTokens = jest.fn().mockImplementationOnce(() => false)
+        it('login user with error in creating tokens', async () => {
+            jest.spyOn(AuthService, 'generateTokens').mockReturnValueOnce(Promise.resolve(null));
             const user = await testSeeder.registerUser(testSeeder.createUserDto())
             const response = await checkUserCredentialsUseCase(user.email, user.password)
             expect(response).toEqual(new Result(StatusCode.SERVER_ERROR, 'Error with generating or saving tokens'))
@@ -89,7 +88,7 @@ describe('LOGIN_INTEGRATION', () => {
 
         it('update the access token with error in generating tokens ', async () => {
             const {refreshToken} = await testSeeder.loginUser()
-            AuthService.generateTokens = jest.fn().mockImplementationOnce(() => false)
+            jest.spyOn(AuthService, 'generateTokens').mockReturnValueOnce(Promise.resolve(null));
             const result = await new Promise((resolve) => {
                 setTimeout(async () => {
                     const res = await updateTokensUseCase(refreshToken)
