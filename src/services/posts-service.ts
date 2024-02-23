@@ -24,7 +24,7 @@ export class PostsService {
         if (!createdPostId) {
             return new Result(StatusCode.SERVER_ERROR)
         }
-        return new Result(StatusCode.NO_CONTENT, null, createdPostId)
+        return new Result(StatusCode.CREATED, null, createdPostId)
     }
 
     static async updatePost(id: string, inputData: PostInputModel): Promise<Result> {

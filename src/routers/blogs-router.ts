@@ -1,5 +1,4 @@
 import {Router} from "express";
-import {BlogsRepository} from "../repositories/blogs-repository";
 import {basicAuthGuard} from "../middlewares/basic-auth-guard";
 import {blogValidators} from "../validators/blog-validators";
 import {
@@ -22,6 +21,7 @@ import {BlogsService} from "../services/blogs-service";
 import {BlogViewModel, PostViewModel} from "../services/types";
 import {postValidatorsWithoutBlogIdValidation} from "../validators/post-validators";
 import {PostsQueryRepository} from "../repositories/posts-query-repository";
+import {StatusCode} from "../utils/result";
 
 export const blogsRouter = Router()
 
@@ -73,10 +73,19 @@ blogsRouter.get('/:id/posts', async (req: RequestWithParamsAndQuery<QueryParams>
 
 blogsRouter.post('/', basicAuthGuard, blogValidators(),
     async (req: RequestWithBody<BlogInputModel>, res: ResponseType) => {
-        const newBlog = await BlogsService.createBlog(req.body)
-        newBlog
-            ? res.status(201).send(newBlog)
-            : res.sendStatus(400)
+        const {statusCode, data: createdBlogId} = await BlogsService.createBlog(req.body)
+        switch (statusCode) {
+            case StatusCode.SERVER_ERROR: {
+                res.sendStatus(555);
+                return
+            }
+            case StatusCode.CREATED: {
+                const blog = await BlogsQueryRepository.getBlogById(createdBlogId!)
+                blog
+                    ? res.status(201).send(blog)
+                    : res.sendStatus(400)
+            }
+        }
     })
 
 blogsRouter.post('/:id/posts', basicAuthGuard, postValidatorsWithoutBlogIdValidation(),
@@ -86,25 +95,51 @@ blogsRouter.post('/:id/posts', basicAuthGuard, postValidatorsWithoutBlogIdValida
             res.sendStatus(404)
             return
         }
-        const newBlog = await BlogsService.createPostWithinBlog(id, req.body)
-        newBlog
-            ? res.status(201).send(newBlog)
-            : res.sendStatus(404)
+        const {statusCode, data: createdPostId} = await BlogsService.createPostWithinBlog(id, req.body)
+        switch (statusCode) {
+            case StatusCode.BAD_REQUEST: {
+                res.sendStatus(400);
+                return
+            }
+            case StatusCode.NOT_FOUND: {
+                res.sendStatus(404);
+                return
+            }
+            case StatusCode.SERVER_ERROR: {
+                res.sendStatus(555);
+                return
+            }
+            case StatusCode.CREATED: {
+                const post = await PostsQueryRepository.getPostById(createdPostId!)
+                post
+                    ? res.status(201).send(post)
+                    : res.sendStatus(400)
+            }
+        }
     })
 
 blogsRouter.put('/:id', basicAuthGuard, blogValidators(),
     async (req: RequestWithParamsAndBody<BlogInputModel>, res: ResponseType) => {
         const {id} = req.params
-        const {name, description, websiteUrl} = req.body
         if (!ObjectId.isValid(id)) {
             res.sendStatus(404)
             return
         }
-        const dataForUpdate = {name, description, websiteUrl}
-        const isUpdated = await BlogsRepository.updateBlog(id, dataForUpdate)
-        isUpdated
-            ? res.sendStatus(204)
-            : res.sendStatus(404)
+        const {statusCode} = await BlogsService.updateBlog(id, req.body)
+        switch (statusCode) {
+            case StatusCode.NOT_FOUND: {
+                res.sendStatus(404);
+                return
+            }
+            case StatusCode.SERVER_ERROR: {
+                res.sendStatus(555);
+                return
+            }
+            case StatusCode.NO_CONTENT: {
+                res.sendStatus(204)
+                return
+            }
+        }
     })
 
 blogsRouter.delete('/:id', basicAuthGuard,
@@ -114,8 +149,15 @@ blogsRouter.delete('/:id', basicAuthGuard,
             res.sendStatus(404)
             return
         }
-        const isDeleted = await BlogsService.deleteBlog(id)
-        isDeleted
-            ? res.sendStatus(204)
-            : res.sendStatus(404)
+        const {statusCode} = await BlogsService.deleteBlog(id)
+        switch (statusCode) {
+            case StatusCode.NOT_FOUND: {
+                res.sendStatus(404);
+                return
+            }
+            case StatusCode.NO_CONTENT: {
+                res.sendStatus(204)
+                return
+            }
+        }
     })

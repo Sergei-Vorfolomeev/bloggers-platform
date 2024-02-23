@@ -64,10 +64,10 @@ postsRouter.post('/', basicAuthGuard, postValidators(),
                 res.sendStatus(555);
                 return
             }
-            case StatusCode.NO_CONTENT: {
-                const newPost = await PostsQueryRepository.getPostById(createdPostId!)
-                newPost
-                    ? res.status(201).send(newPost)
+            case StatusCode.CREATED: {
+                const post = await PostsQueryRepository.getPostById(createdPostId!)
+                post
+                    ? res.status(201).send(post)
                     : res.sendStatus(400)
             }
         }

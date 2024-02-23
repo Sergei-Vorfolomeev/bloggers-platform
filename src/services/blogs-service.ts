@@ -1,13 +1,11 @@
 import {BlogsRepository} from "../repositories/blogs-repository";
-import {BlogsQueryRepository} from "../repositories/blogs-query-repository";
 import {BlogDBModel} from "../repositories/types";
 import {BlogInputModel, PostInputModel} from "../routers/types";
-import {BlogViewModel, PostViewModel} from "./types";
 import {PostsService} from "./posts-service";
-import {PostsRepository} from "../repositories/posts-repository";
+import {Result, StatusCode} from "../utils/result";
 
 export class BlogsService {
-    static async createBlog(inputData: BlogInputModel): Promise<BlogViewModel | null> {
+    static async createBlog(inputData: BlogInputModel): Promise<Result<string>> {
         const {name, description, websiteUrl} = inputData
         const newBlog: BlogDBModel = {
             name, description, websiteUrl,
@@ -16,39 +14,45 @@ export class BlogsService {
         }
         const createdBlogId = await BlogsRepository.createBlog(newBlog)
         if (!createdBlogId) {
-            return null
+            return new Result(StatusCode.SERVER_ERROR)
         }
-        const blog = await BlogsQueryRepository.getBlogById(createdBlogId)
-        if (!blog) {
-            return null
-        }
-        return blog
+        return new Result(StatusCode.CREATED, null, createdBlogId)
     }
 
-    static async updateBlog(id: string, inputData: BlogInputModel): Promise<boolean | null> {
-        const blog = await BlogsQueryRepository.getBlogById(id)
+    static async updateBlog(id: string, inputData: BlogInputModel): Promise<Result> {
+        const {name, description, websiteUrl} = inputData
+        const blog = await BlogsRepository.getBlogById(id)
         if (!blog) {
-            return null
+            return new Result(StatusCode.NOT_FOUND)
         }
         const updatedBlog = {
             ...blog,
-            ...inputData
+            name, description, websiteUrl
         }
-        return await BlogsRepository.updateBlog(id, updatedBlog)
+        const isUpdated = await BlogsRepository.updateBlog(id, updatedBlog)
+        if (!isUpdated) {
+            return new Result(StatusCode.SERVER_ERROR)
+        }
+        return new Result(StatusCode.NO_CONTENT)
     }
 
-    static async deleteBlog(id: string): Promise<boolean> {
-        return await BlogsRepository.deleteBlog(id)
+    static async deleteBlog(id: string): Promise<Result> {
+        const isDeleted = await BlogsRepository.deleteBlog(id)
+        if (!isDeleted) {
+            return new Result(StatusCode.NOT_FOUND)
+        }
+        return new Result(StatusCode.NO_CONTENT)
     }
 
-    static async createPostWithinBlog(id: string, inputData: Omit<PostInputModel, 'blogId'>): Promise<PostViewModel | null> {
-        const blog = await BlogsQueryRepository.getBlogById(id)
+    static async createPostWithinBlog(id: string, inputData: Omit<PostInputModel, 'blogId'>): Promise<Result<string>> {
+        const {title, shortDescription, content} = inputData
+        const blog = await BlogsRepository.getBlogById(id)
         if (!blog) {
-            return null
+            return new Result(StatusCode.NOT_FOUND)
         }
         const inputDataWithBlogId: PostInputModel = {
-            ...inputData,
-            blogId: blog.id
+            title, shortDescription, content,
+            blogId: blog._id.toString()
         }
         return await PostsService.createPost(inputDataWithBlogId)
     }

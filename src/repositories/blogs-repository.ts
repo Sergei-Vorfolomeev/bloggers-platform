@@ -4,6 +4,15 @@ import {BlogDBModel} from "./types";
 import {BlogInputModel} from "../routers/types";
 
 export class BlogsRepository {
+    static async getBlogById(blogId: string): Promise<WithId<BlogDBModel> | null> {
+        try {
+            return await blogsCollection.findOne({_id: new ObjectId(blogId)})
+        } catch (e) {
+            console.error(e)
+            return null
+        }
+    }
+
     static async createBlog(blog: BlogDBModel): Promise<string | null> {
         try {
             const res = await blogsCollection.insertOne(blog)
@@ -43,15 +52,6 @@ export class BlogsRepository {
             return false
         } finally {
             await session.endSession()
-        }
-    }
-
-    static async getBlogById(blogId: string): Promise<WithId<BlogDBModel> | null> {
-        try {
-            return await blogsCollection.findOne({_id: new ObjectId(blogId)})
-        } catch (e) {
-            console.error(e)
-            return null
         }
     }
 }
