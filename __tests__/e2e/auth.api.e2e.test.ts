@@ -105,7 +105,7 @@ describe('AUTH-e2e', () => {
         validRefreshToken = cookieHeader[0].split(';')[0].split('=')[1]
         expect(validRefreshToken).toEqual(expect.any(String))
         expect(validRefreshToken).toContain('.')
-       expect(validRefreshToken).not.toBe(inValidRefreshToken)
+        expect(validRefreshToken).not.toBe(inValidRefreshToken)
         expect(res.body.accessToken).toEqual(expect.any(String))
         expect(res.body.accessToken).toContain('.')
     })

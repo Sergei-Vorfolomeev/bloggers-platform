@@ -1,15 +1,20 @@
 import {PostInputModel} from "../routers/types";
-import {PostViewModel} from "./types";
 import {PostDBModel} from "../repositories/types";
-import {BlogsQueryRepository} from "../repositories/blogs-query-repository";
 import {PostsRepository} from "../repositories/posts-repository";
-import {PostsQueryRepository} from "../repositories/posts-query-repository";
+import {BlogsRepository} from "../repositories/blogs-repository";
+import {Result, StatusCode} from "../utils/result";
+import {ErrorsMessages, FieldError} from "../utils/errors-messages";
 
 export class PostsService {
-    static async createPost(inputData: PostInputModel): Promise<PostViewModel | null> {
+    static async createPost(inputData: PostInputModel): Promise<Result<string>> {
         const {title, shortDescription, content, blogId} = inputData
-        const blog = await BlogsQueryRepository.getBlogById(blogId)
-        if (!blog) return null
+        const blog = await BlogsRepository.getBlogById(blogId)
+        if (!blog) {
+            return new Result(
+                StatusCode.BAD_REQUEST,
+                new ErrorsMessages(new FieldError('blogId', 'This blog doesn\'t exist'))
+            )
+        }
         const newPost: PostDBModel = {
             title, shortDescription, content, blogId,
             blogName: blog.name,
@@ -17,27 +22,33 @@ export class PostsService {
         }
         const createdPostId = await PostsRepository.createPost(newPost)
         if (!createdPostId) {
-            return null
+            return new Result(StatusCode.SERVER_ERROR)
         }
-        const post = await PostsQueryRepository.getPostById(createdPostId)
-        if (!post) {
-            return null
-        }
-        return post
+        return new Result(StatusCode.NO_CONTENT, null, createdPostId)
     }
-    static async updatePost(id: string, inputData: PostInputModel): Promise<boolean | null> {
+
+    static async updatePost(id: string, inputData: PostInputModel): Promise<Result> {
         const {title, shortDescription, content, blogId} = inputData
-        const post = await PostsQueryRepository.getPostById(id)
+        const post = await PostsRepository.getPostById(id)
         if (!post) {
-            return null
+            return new Result(StatusCode.NOT_FOUND)
         }
         const newPost = {
             ...post,
             title, shortDescription, content, blogId
         }
-        return await PostsRepository.updatePost(id, newPost)
+        const isUpdated = await PostsRepository.updatePost(id, newPost)
+        if (!isUpdated) {
+            return new Result(StatusCode.SERVER_ERROR)
+        }
+        return new Result(StatusCode.NO_CONTENT)
     }
-    static async deletePost(id: string): Promise<boolean> {
-        return await PostsRepository.deletePost(id)
+
+    static async deletePost(id: string): Promise<Result> {
+        const isDeleted = await PostsRepository.deletePost(id)
+        if (!isDeleted) {
+            return new Result(StatusCode.NOT_FOUND)
+        }
+        return new Result(StatusCode.NO_CONTENT)
     }
 }

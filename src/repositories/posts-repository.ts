@@ -1,9 +1,18 @@
 import {client, commentsCollection, postsCollection} from "../db/db";
-import {ObjectId} from "mongodb";
+import {ObjectId, WithId} from "mongodb";
 import {PostDBModel} from "./types";
 import {PostInputModel} from "../routers/types";
 
 export class PostsRepository {
+    static async getPostById(postId: string): Promise<WithId<PostDBModel> | null> {
+        try {
+            return await postsCollection.findOne({_id: new ObjectId(postId)})
+        } catch (e) {
+            console.log(e)
+            return null
+        }
+    }
+
     static async createPost(post: PostDBModel): Promise<string | null> {
         try {
             const res = await postsCollection.insertOne(post)

@@ -1,5 +1,5 @@
 import {blogsCollection, client, commentsCollection, postsCollection} from "../db/db";
-import {ObjectId} from "mongodb";
+import {ObjectId, WithId} from "mongodb";
 import {BlogDBModel} from "./types";
 import {BlogInputModel} from "../routers/types";
 
@@ -43,6 +43,15 @@ export class BlogsRepository {
             return false
         } finally {
             await session.endSession()
+        }
+    }
+
+    static async getBlogById(blogId: string): Promise<WithId<BlogDBModel> | null> {
+        try {
+            return await blogsCollection.findOne({_id: new ObjectId(blogId)})
+        } catch (e) {
+            console.error(e)
+            return null
         }
     }
 }
