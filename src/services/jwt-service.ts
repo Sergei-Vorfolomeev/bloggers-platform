@@ -5,6 +5,7 @@ import {settings} from "../settings";
 import {UsersRepository} from "../repositories/users-repository";
 import {CryptoService} from "./crypto-service";
 import {DevicesRepository} from "../repositories/devices-repository";
+import {Result, StatusCode} from "../utils/result";
 
 export class JwtService {
     static createToken(user: WithId<UserDBModel>, deviceId: string, type: 'access' | 'refresh') {
@@ -40,6 +41,11 @@ export class JwtService {
         }
         const device = await DevicesRepository.findDeviceById(deviceId)
         if (!device) {
+            return null
+        }
+        const decryptedRefreshToken = CryptoService.decrypt(device.refreshToken)
+        const isMatched = refreshToken === decryptedRefreshToken
+        if (!isMatched) {
             return null
         }
         return {user, device}

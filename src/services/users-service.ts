@@ -2,6 +2,9 @@ import {UserDBModel} from "../repositories/types";
 import {UsersRepository} from "../repositories/users-repository";
 import {BcryptService} from "./bcrypt-service";
 import {Result, StatusCode} from "../utils/result";
+import {JwtService} from "./jwt-service";
+import {DevicesRepository} from "../repositories/devices-repository";
+import {DeviceViewModel} from "./types";
 
 export class UsersService {
     static async createUser(login: string, email: string, password: string): Promise<Result<string>> {
@@ -32,5 +35,23 @@ export class UsersService {
             return new Result(StatusCode.NotFound)
         }
         return new Result(StatusCode.NoContent)
+    }
+
+    static async getDevices(refreshToken: string): Promise<Result<DeviceViewModel[]>> {
+        const payload = await JwtService.verifyRefreshToken(refreshToken)
+        if (!payload) {
+            return new Result(StatusCode.Unauthorized)
+        }
+        const devices = await DevicesRepository.getAllDevicesByUserId(payload.user._id.toString())
+        if (!devices) {
+            return new Result(StatusCode.ServerError)
+        }
+        const devicesForClient: DeviceViewModel[] = devices.map(device => ({
+            deviceId: device._id.toString(),
+            title: device.title,
+            ip: device.ip,
+            lastActivateDate: device.lastActivateDate
+        }))
+        return new Result(StatusCode.Success, null, devicesForClient)
     }
 }

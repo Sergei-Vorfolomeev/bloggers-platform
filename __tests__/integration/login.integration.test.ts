@@ -23,11 +23,11 @@ describe('LOGIN_INTEGRATION', () => {
     })
 
     describe('login user', () => {
-        const checkUserCredentialsUseCase = AuthService.login
+        const loginUseCase = AuthService.login
 
         it('login user with correct data', async () => {
             const user = await testSeeder.registerUser(testSeeder.createUserDto())
-            const response = await checkUserCredentialsUseCase(user.email, user.password)
+            const response = await loginUseCase(user.email, user.password, 'Chrome', '1.1.1.1')
             expect(response).toEqual(new Result(StatusCode.Success, null, {
                 accessToken: expect.any(String),
                 refreshToken: expect.any(String),
@@ -35,7 +35,7 @@ describe('LOGIN_INTEGRATION', () => {
         })
 
         it('login user with incorrect email', async () => {
-            const response = await checkUserCredentialsUseCase('invalid@gmail.com', '12345')
+            const response = await loginUseCase('invalid@gmail.com', '12345', 'Chrome', '1.1.1.1')
             expect(response).toEqual(new Result(
                 StatusCode.Unauthorized,
                 new ErrorsMessages(new FieldError('login, email, password', 'Login, email or password is incorrect'))))
@@ -43,7 +43,7 @@ describe('LOGIN_INTEGRATION', () => {
 
         it('login user with incorrect password', async () => {
             const user = await testSeeder.registerUser(testSeeder.createUserDto())
-            const response = await checkUserCredentialsUseCase(user.email, 'invalid')
+            const response = await loginUseCase(user.email, 'invalid', 'Chrome', '1.1.1.1')
             expect(response).toEqual(new Result(
                 StatusCode.Unauthorized,
                 new ErrorsMessages(new FieldError('login, email, password', 'Login, email or password is incorrect'))))
@@ -52,7 +52,7 @@ describe('LOGIN_INTEGRATION', () => {
         it('login user with error in creating tokens', async () => {
             jest.spyOn(AuthService, 'generateTokens').mockReturnValueOnce(Promise.resolve(null));
             const user = await testSeeder.registerUser(testSeeder.createUserDto())
-            const response = await checkUserCredentialsUseCase(user.email, user.password)
+            const response = await loginUseCase(user.email, user.password, 'Chrome', '1.1.1.1')
             expect(response).toEqual(new Result(StatusCode.ServerError, 'Error with generating or saving tokens'))
         })
     })
@@ -71,7 +71,8 @@ describe('LOGIN_INTEGRATION', () => {
 
         it('update the access token with incorrect refresh token ', async () => {
             await testSeeder.loginUser()
-            const result = await updateTokensUseCase('invalid.token.provided')
+            const invalidToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NWRhMTNmOGMxMTgzZTQ5MGYxOGIwZDciLCJkZXZpY2VJZCI6IjY1ZGExNDIwYzExODNlNDkwZjE4YjBkOCIsImlhdCI6MTcwODc5MDgxNiwiZXhwIjoxNzA4NzkwODI2fQ.V6awo096BO88xopUcaXgZ3tU66soo7cCnQMvRczAm70'
+            const result = await updateTokensUseCase(invalidToken)
             expect(result).toEqual(new Result(StatusCode.Unauthorized))
         })
 

@@ -162,11 +162,6 @@ export class AuthService {
             return new Result(StatusCode.Unauthorized)
         }
         const {user, device} = payload
-        const decryptedRefreshToken = CryptoService.decrypt(device.refreshToken)
-        const isMatched = refreshToken === decryptedRefreshToken
-        if (!isMatched) {
-            return new Result(StatusCode.Unauthorized)
-        }
         const tokens = await AuthService.generateTokens(user, device._id.toString())
         if (!tokens) {
             return new Result(StatusCode.ServerError)

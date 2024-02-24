@@ -44,4 +44,13 @@ export class DevicesRepository {
             return false
         }
     }
+
+    static async getAllDevicesByUserId(userId: string): Promise<DeviceDBModel[] | null> {
+        try {
+           return await devicesCollection.find({userId}).toArray()
+        } catch (e) {
+            console.error(e)
+            return null
+        }
+    }
 }
