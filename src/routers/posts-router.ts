@@ -21,7 +21,7 @@ import {CommentsQueryRepository} from "../repositories/comments-query-repository
 import {commentValidator} from "../validators/comment-validator";
 import {CommentsService} from "../services/comments-service";
 import {accessTokenGuard} from "../middlewares/access-token-guard";
-import {Result, StatusCode} from "../utils/result";
+import {StatusCode} from "../utils/result";
 
 export const postsRouter = Router()
 
@@ -56,15 +56,15 @@ postsRouter.post('/', basicAuthGuard, postValidators(),
     async (req: RequestWithBody<PostInputModel>, res: ResponseWithBody<PostViewModel>) => {
         const {statusCode, data: createdPostId} = await PostsService.createPost(req.body)
         switch (statusCode) {
-            case StatusCode.BAD_REQUEST: {
+            case StatusCode.BadRequest: {
                 res.sendStatus(400);
                 return
             }
-            case StatusCode.SERVER_ERROR: {
+            case StatusCode.ServerError: {
                 res.sendStatus(555);
                 return
             }
-            case StatusCode.CREATED: {
+            case StatusCode.Created: {
                 const post = await PostsQueryRepository.getPostById(createdPostId!)
                 post
                     ? res.status(201).send(post)
@@ -82,15 +82,15 @@ postsRouter.put('/:id', basicAuthGuard, postValidators(),
         }
         const {statusCode} = await PostsService.updatePost(id, req.body)
         switch (statusCode) {
-            case StatusCode.NOT_FOUND: {
+            case StatusCode.NotFound: {
                 res.sendStatus(404);
                 return
             }
-            case StatusCode.SERVER_ERROR: {
+            case StatusCode.ServerError: {
                 res.sendStatus(555);
                 return
             }
-            case StatusCode.NO_CONTENT: {
+            case StatusCode.NoContent: {
                 res.sendStatus(204)
                 return
             }
@@ -106,11 +106,11 @@ postsRouter.delete('/:id', basicAuthGuard,
         }
         const {statusCode} = await PostsService.deletePost(id)
         switch (statusCode) {
-            case StatusCode.NOT_FOUND: {
+            case StatusCode.NotFound: {
                 res.sendStatus(404);
                 return
             }
-            case StatusCode.NO_CONTENT: {
+            case StatusCode.NoContent: {
                 res.sendStatus(204)
                 return
             }
@@ -148,15 +148,15 @@ postsRouter.post('/:id/comments', accessTokenGuard, commentValidator(),
         }
         const {statusCode, data: createdCommentId} = await CommentsService.createComment(postId, userId, content)
         switch (statusCode) {
-            case StatusCode.NOT_FOUND: {
+            case StatusCode.NotFound: {
                 res.sendStatus(404)
                 return
             }
-            case StatusCode.SERVER_ERROR: {
+            case StatusCode.ServerError: {
                 res.sendStatus(500)
                 return
             }
-            case StatusCode.SUCCESS: {
+            case StatusCode.Success: {
                 const createdComment = await CommentsQueryRepository.getCommentById(createdCommentId!)
                 createdComment
                     ? res.status(201).send(createdComment)

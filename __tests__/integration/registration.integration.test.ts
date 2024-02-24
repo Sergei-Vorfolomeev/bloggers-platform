@@ -33,7 +33,7 @@ describe('REGISTRATION_INTEGRATION', () => {
         it('register user with correct data', async () => {
             const {login, email, password} = testSeeder.createUserDto()
             const result = await registerUserUseCase(login, email, password)
-            expect(result).toEqual(new Result(StatusCode.NO_CONTENT))
+            expect(result).toEqual(new Result(StatusCode.NoContent))
             expect(nodemailerService.sendEmail).toBeCalledTimes(1)
         })
     })
@@ -44,7 +44,7 @@ describe('REGISTRATION_INTEGRATION', () => {
         it('confirm user email by valid code', async () => {
             const {emailConfirmation} = await testSeeder.registerUser(testSeeder.createUserDto())
             const result = await confirmEmailByCodeUseCase(emailConfirmation.confirmationCode)
-            expect(result).toEqual(new Result(StatusCode.NO_CONTENT))
+            expect(result).toEqual(new Result(StatusCode.NoContent))
         })
 
         it('failed confirmation because of the code is expired', async () => {
@@ -54,7 +54,7 @@ describe('REGISTRATION_INTEGRATION', () => {
             })
             const result = await confirmEmailByCodeUseCase(emailConfirmation.confirmationCode)
             expect(result).toEqual(new Result(
-                StatusCode.BAD_REQUEST,
+                StatusCode.BadRequest,
                 new ErrorsMessages(new FieldError('code', 'Confirmation code is expired'))
             ))
         })
@@ -66,7 +66,7 @@ describe('REGISTRATION_INTEGRATION', () => {
             })
             const result = await confirmEmailByCodeUseCase(emailConfirmation.confirmationCode)
             expect(result).toEqual(new Result(
-                StatusCode.BAD_REQUEST,
+                StatusCode.BadRequest,
                 new ErrorsMessages(new FieldError('code', 'Confirmation code is already been applied'))
             ))
         })
@@ -75,7 +75,7 @@ describe('REGISTRATION_INTEGRATION', () => {
             const code = randomUUID()
             const result = await confirmEmailByCodeUseCase(code)
             expect(result).toEqual(new Result(
-                StatusCode.BAD_REQUEST,
+                StatusCode.BadRequest,
                 new ErrorsMessages(new FieldError('code', 'Confirmation code is incorrect'))
             ))
         })
@@ -88,7 +88,7 @@ describe('REGISTRATION_INTEGRATION', () => {
         it('resend confirmation code to user with invalid email', async () => {
             const result = await resendConfirmationCodeUseCase('invalid@gmail.com')
             expect(result).toEqual(new Result(
-                StatusCode.BAD_REQUEST,
+                StatusCode.BadRequest,
                 new ErrorsMessages(new FieldError('email', 'Email is incorrect'))
             ))
             expect(nodemailerService.sendEmail).not.toBeCalled()
@@ -101,7 +101,7 @@ describe('REGISTRATION_INTEGRATION', () => {
             })
             const result = await resendConfirmationCodeUseCase(email)
             expect(result).toEqual(new Result(
-                StatusCode.BAD_REQUEST,
+                StatusCode.BadRequest,
                 new ErrorsMessages(new FieldError('email', 'Email is already confirmed'))
             ))
             expect(nodemailerService.sendEmail).not.toBeCalled()
@@ -110,7 +110,7 @@ describe('REGISTRATION_INTEGRATION', () => {
         it('resend confirmation code to user with valid email', async () => {
             const {email} = await testSeeder.registerUser(testSeeder.createUserDto())
             const result = await resendConfirmationCodeUseCase(email)
-            expect(result).toEqual(new Result(StatusCode.NO_CONTENT))
+            expect(result).toEqual(new Result(StatusCode.NoContent))
             expect(nodemailerService.sendEmail).toBeCalledTimes(1)
         })
     })

@@ -33,10 +33,10 @@ commentsRouter.delete('/:id', accessTokenGuard,
         }
         const result = await CommentsService.deleteComment(commentId, userId)
         switch(result.statusCode) {
-            case StatusCode.NOT_FOUND: res.sendStatus(404); break
-            case StatusCode.FORBIDDEN: res.sendStatus(403); break
-            case StatusCode.SERVER_ERROR: res.sendStatus(500); break
-            case StatusCode.SUCCESS: res.sendStatus(204); break
+            case StatusCode.NotFound: res.sendStatus(404); break
+            case StatusCode.Forbidden: res.sendStatus(403); break
+            case StatusCode.ServerError: res.sendStatus(500); break
+            case StatusCode.Success: res.sendStatus(204); break
         }
     })
 
@@ -51,9 +51,9 @@ commentsRouter.put('/:id', accessTokenGuard, commentValidator(),
         }
         const result = await CommentsService.updateComment(commentId, userId, content)
         switch (result.statusCode) {
-            case StatusCode.NOT_FOUND: res.sendStatus(404); break
-            case StatusCode.FORBIDDEN: res.sendStatus(403); break
-            case StatusCode.SERVER_ERROR: res.sendStatus(500); break
-            case StatusCode.SUCCESS: res.sendStatus(204); break
+            case StatusCode.NotFound: res.sendStatus(404); break
+            case StatusCode.Forbidden: res.sendStatus(403); break
+            case StatusCode.ServerError: res.sendStatus(500); break
+            case StatusCode.Success: res.sendStatus(204); break
         }
     })

@@ -14,16 +14,16 @@ export class BlogsService {
         }
         const createdBlogId = await BlogsRepository.createBlog(newBlog)
         if (!createdBlogId) {
-            return new Result(StatusCode.SERVER_ERROR)
+            return new Result(StatusCode.ServerError)
         }
-        return new Result(StatusCode.CREATED, null, createdBlogId)
+        return new Result(StatusCode.Created, null, createdBlogId)
     }
 
     static async updateBlog(id: string, inputData: BlogInputModel): Promise<Result> {
         const {name, description, websiteUrl} = inputData
         const blog = await BlogsRepository.getBlogById(id)
         if (!blog) {
-            return new Result(StatusCode.NOT_FOUND)
+            return new Result(StatusCode.NotFound)
         }
         const updatedBlog = {
             ...blog,
@@ -31,24 +31,24 @@ export class BlogsService {
         }
         const isUpdated = await BlogsRepository.updateBlog(id, updatedBlog)
         if (!isUpdated) {
-            return new Result(StatusCode.SERVER_ERROR)
+            return new Result(StatusCode.ServerError)
         }
-        return new Result(StatusCode.NO_CONTENT)
+        return new Result(StatusCode.NoContent)
     }
 
     static async deleteBlog(id: string): Promise<Result> {
         const isDeleted = await BlogsRepository.deleteBlog(id)
         if (!isDeleted) {
-            return new Result(StatusCode.NOT_FOUND)
+            return new Result(StatusCode.NotFound)
         }
-        return new Result(StatusCode.NO_CONTENT)
+        return new Result(StatusCode.NoContent)
     }
 
     static async createPostWithinBlog(id: string, inputData: Omit<PostInputModel, 'blogId'>): Promise<Result<string>> {
         const {title, shortDescription, content} = inputData
         const blog = await BlogsRepository.getBlogById(id)
         if (!blog) {
-            return new Result(StatusCode.NOT_FOUND)
+            return new Result(StatusCode.NotFound)
         }
         const inputDataWithBlogId: PostInputModel = {
             title, shortDescription, content,

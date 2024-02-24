@@ -7,7 +7,7 @@ export class UsersService {
     static async createUser(login: string, email: string, password: string): Promise<Result<string>> {
         const hashedPassword = await BcryptService.generateHash(password)
         if (!hashedPassword) {
-            return new Result(StatusCode.SERVER_ERROR)
+            return new Result(StatusCode.ServerError)
         }
         const newUser: UserDBModel = {
             login, email,
@@ -22,16 +22,16 @@ export class UsersService {
         }
         const createdUserId = await UsersRepository.createUser(newUser)
         if (!createdUserId) {
-            return new Result(StatusCode.SERVER_ERROR)
+            return new Result(StatusCode.ServerError)
         }
-        return new Result(StatusCode.CREATED, null, createdUserId)
+        return new Result(StatusCode.Created, null, createdUserId)
     }
 
     static async deleteUser(id: string): Promise<Result> {
         const isDeleted = await UsersRepository.deleteUser(id)
         if (!isDeleted) {
-            return new Result(StatusCode.NOT_FOUND)
+            return new Result(StatusCode.NotFound)
         }
-        return new Result(StatusCode.NO_CONTENT)
+        return new Result(StatusCode.NoContent)
     }
 }

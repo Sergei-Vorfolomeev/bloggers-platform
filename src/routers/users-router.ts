@@ -56,11 +56,11 @@ usersRouter.post('/',
         const {login, email, password} = req.body
         const {statusCode, data: createdUserId} = await UsersService.createUser(login, email, password)
         switch (statusCode) {
-            case StatusCode.SERVER_ERROR: {
+            case StatusCode.ServerError: {
                 res.sendStatus(555);
                 return
             }
-            case StatusCode.CREATED: {
+            case StatusCode.Created: {
                 const createdUser = await UsersQueryRepository.getUserById(createdUserId!)
                 createdUser
                     ? res.status(201).send(createdUser)
@@ -79,11 +79,11 @@ usersRouter.delete('/:id',
         }
         const {statusCode} = await UsersService.deleteUser(id)
         switch (statusCode) {
-            case StatusCode.NOT_FOUND: {
+            case StatusCode.NotFound: {
                 res.sendStatus(404);
                 return
             }
-            case StatusCode.NO_CONTENT: {
+            case StatusCode.NoContent: {
                 res.sendStatus(204)
                 return
             }

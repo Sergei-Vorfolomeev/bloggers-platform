@@ -25,13 +25,13 @@ describe('LOGOUT_INTEGRATION', () => {
     it('successful logout', async () => {
         const {refreshToken} = await testSeeder.loginUser()
         const result = await logoutUseCase(refreshToken)
-        expect(result).toEqual(new Result(StatusCode.NO_CONTENT))
+        expect(result).toEqual(new Result(StatusCode.NoContent))
     })
 
     it('logout with invalid refresh token', async () => {
         await testSeeder.loginUser()
         const result = await logoutUseCase('invalid.refresh.token')
-        expect(result).toEqual(new Result(StatusCode.UNAUTHORIZED))
+        expect(result).toEqual(new Result(StatusCode.Unauthorized))
     })
 
     it('logout with expired refresh token', async () => {
@@ -42,6 +42,6 @@ describe('LOGOUT_INTEGRATION', () => {
             }, 21000)
         })
         const result = await logoutUseCase(refreshToken)
-        expect(result).toEqual(new Result(StatusCode.UNAUTHORIZED))
+        expect(result).toEqual(new Result(StatusCode.Unauthorized))
     })
 })

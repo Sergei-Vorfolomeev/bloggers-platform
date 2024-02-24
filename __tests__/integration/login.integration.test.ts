@@ -28,7 +28,7 @@ describe('LOGIN_INTEGRATION', () => {
         it('login user with correct data', async () => {
             const user = await testSeeder.registerUser(testSeeder.createUserDto())
             const response = await checkUserCredentialsUseCase(user.email, user.password)
-            expect(response).toEqual(new Result(StatusCode.SUCCESS, null, {
+            expect(response).toEqual(new Result(StatusCode.Success, null, {
                 accessToken: expect.any(String),
                 refreshToken: expect.any(String),
             }))
@@ -37,7 +37,7 @@ describe('LOGIN_INTEGRATION', () => {
         it('login user with incorrect email', async () => {
             const response = await checkUserCredentialsUseCase('invalid@gmail.com', '12345')
             expect(response).toEqual(new Result(
-                StatusCode.UNAUTHORIZED,
+                StatusCode.Unauthorized,
                 new ErrorsMessages(new FieldError('login, email, password', 'Login, email or password is incorrect'))))
         })
 
@@ -45,7 +45,7 @@ describe('LOGIN_INTEGRATION', () => {
             const user = await testSeeder.registerUser(testSeeder.createUserDto())
             const response = await checkUserCredentialsUseCase(user.email, 'invalid')
             expect(response).toEqual(new Result(
-                StatusCode.UNAUTHORIZED,
+                StatusCode.Unauthorized,
                 new ErrorsMessages(new FieldError('login, email, password', 'Login, email or password is incorrect'))))
         })
 
@@ -53,7 +53,7 @@ describe('LOGIN_INTEGRATION', () => {
             jest.spyOn(AuthService, 'generateTokens').mockReturnValueOnce(Promise.resolve(null));
             const user = await testSeeder.registerUser(testSeeder.createUserDto())
             const response = await checkUserCredentialsUseCase(user.email, user.password)
-            expect(response).toEqual(new Result(StatusCode.SERVER_ERROR, 'Error with generating or saving tokens'))
+            expect(response).toEqual(new Result(StatusCode.ServerError, 'Error with generating or saving tokens'))
         })
     })
 
@@ -63,7 +63,7 @@ describe('LOGIN_INTEGRATION', () => {
         it('update the access and refresh token', async () => {
             const {refreshToken} = await testSeeder.loginUser()
             const result = await updateTokensUseCase(refreshToken)
-            expect(result).toEqual(new Result(StatusCode.SUCCESS, null, {
+            expect(result).toEqual(new Result(StatusCode.Success, null, {
                 accessToken: expect.any(String),
                 refreshToken: expect.any(String),
             }))
@@ -72,7 +72,7 @@ describe('LOGIN_INTEGRATION', () => {
         it('update the access token with incorrect refresh token ', async () => {
             await testSeeder.loginUser()
             const result = await updateTokensUseCase('invalid.token.provided')
-            expect(result).toEqual(new Result(StatusCode.UNAUTHORIZED))
+            expect(result).toEqual(new Result(StatusCode.Unauthorized))
         })
 
         it('update the access token with expired refresh token ', async () => {
@@ -83,7 +83,7 @@ describe('LOGIN_INTEGRATION', () => {
                     resolve(res)
                 }, 21000)
             })
-            expect(result).toEqual(new Result(StatusCode.UNAUTHORIZED))
+            expect(result).toEqual(new Result(StatusCode.Unauthorized))
         })
 
         it('update the access token with error in generating tokens ', async () => {
@@ -95,7 +95,7 @@ describe('LOGIN_INTEGRATION', () => {
                     resolve(res)
                 }, 2000)
             })
-            expect(result).toEqual(new Result(StatusCode.SERVER_ERROR, 'Error with generating or saving tokens'))
+            expect(result).toEqual(new Result(StatusCode.ServerError, 'Error with generating or saving tokens'))
         })
     })
 })

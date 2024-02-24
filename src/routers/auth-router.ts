@@ -29,13 +29,13 @@ authRouter.post(
         const {loginOrEmail, password} = req.body
         const {statusCode, data} = await AuthService.login(loginOrEmail, password)
         switch (statusCode) {
-            case StatusCode.UNAUTHORIZED:
+            case StatusCode.Unauthorized:
                 res.sendStatus(401)
                 break
-            case StatusCode.SERVER_ERROR:
+            case StatusCode.ServerError:
                 res.sendStatus(555)
                 break
-            case StatusCode.SUCCESS:
+            case StatusCode.Success:
                 res.cookie('refreshToken', data!.refreshToken, {httpOnly: true, secure: true})
                 res.status(200).send({accessToken: data!.accessToken})
                 break
@@ -62,10 +62,10 @@ authRouter.post('/registration', userValidator(),
         const {login, email, password} = req.body
         const {statusCode} = await AuthService.registerUser(login, email, password)
         switch (statusCode) {
-            case StatusCode.SERVER_ERROR:
+            case StatusCode.ServerError:
                 res.sendStatus(555);
                 break
-            case StatusCode.NO_CONTENT:
+            case StatusCode.NoContent:
                 res.sendStatus(204);
                 break
         }
@@ -76,13 +76,13 @@ authRouter.post('/registration-confirmation',
         const {code} = req.body
         const {statusCode, errorsMessages} = await AuthService.confirmEmailByCode(code)
         switch (statusCode) {
-            case StatusCode.BAD_REQUEST:
+            case StatusCode.BadRequest:
                 res.status(400).send(errorsMessages);
                 break
-            case StatusCode.SERVER_ERROR:
+            case StatusCode.ServerError:
                 res.status(555).send(errorsMessages);
                 break
-            case StatusCode.NO_CONTENT:
+            case StatusCode.NoContent:
                 res.sendStatus(204);
                 break
         }
@@ -93,13 +93,13 @@ authRouter.post('/registration-email-resending', emailValidator(),
         const {email} = req.body
         const {statusCode, errorsMessages} = await AuthService.resendConfirmationCode(email)
         switch (statusCode) {
-            case StatusCode.BAD_REQUEST:
+            case StatusCode.BadRequest:
                 res.status(400).send(errorsMessages);
                 break
-            case StatusCode.SERVER_ERROR:
+            case StatusCode.ServerError:
                 res.status(555).send(errorsMessages);
                 break
-            case StatusCode.NO_CONTENT:
+            case StatusCode.NoContent:
                 res.sendStatus(204);
                 break
         }
@@ -109,13 +109,13 @@ authRouter.post('/refresh-token', async (req: RequestType, res: ResponseWithBody
     const refreshToken = req.cookies.refreshToken
     const {statusCode, data} = await AuthService.updateTokens(refreshToken)
     switch (statusCode) {
-        case StatusCode.UNAUTHORIZED:
+        case StatusCode.Unauthorized:
             res.sendStatus(401)
             break
-        case StatusCode.SERVER_ERROR:
+        case StatusCode.ServerError:
             res.sendStatus(555)
             break
-        case StatusCode.SUCCESS:
+        case StatusCode.Success:
             res.cookie('refreshToken', data!.refreshToken, {httpOnly: true, secure: true})
             res.status(200).send({accessToken: data!.accessToken})
             break
@@ -126,13 +126,13 @@ authRouter.post('/logout', async (req: RequestType, res: ResponseType) => {
     const refreshToken = req.cookies.refreshToken
     const {statusCode} = await AuthService.logout(refreshToken)
     switch (statusCode) {
-        case StatusCode.UNAUTHORIZED:
+        case StatusCode.Unauthorized:
             res.sendStatus(401)
             break
-        case StatusCode.SERVER_ERROR:
+        case StatusCode.ServerError:
             res.sendStatus(555)
             break
-        case StatusCode.NO_CONTENT:
+        case StatusCode.NoContent:
             res.sendStatus(204)
             break
     }

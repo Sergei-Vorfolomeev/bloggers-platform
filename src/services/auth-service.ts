@@ -16,7 +16,7 @@ export class AuthService {
     static async registerUser(login: string, email: string, password: string): Promise<Result> {
         const hashedPassword = await BcryptService.generateHash(password)
         if (!hashedPassword) {
-            return new Result(StatusCode.SERVER_ERROR, 'Error with hashing password')
+            return new Result(StatusCode.ServerError, 'Error with hashing password')
         }
         const newUser: UserDBModel = {
             login,
@@ -35,56 +35,56 @@ export class AuthService {
         }
         const userId = await UsersRepository.createUser(newUser)
         if (!userId) {
-            return new Result(StatusCode.SERVER_ERROR, 'Error with creating user in db')
+            return new Result(StatusCode.ServerError, 'Error with creating user in db')
         }
         const info = await nodemailerService.sendEmail(email, 'Confirm your email', template(newUser.emailConfirmation.confirmationCode))
         if (!info) {
-            return new Result(StatusCode.SERVER_ERROR, 'Error with sending email')
+            return new Result(StatusCode.ServerError, 'Error with sending email')
         }
-        return new Result(StatusCode.NO_CONTENT)
+        return new Result(StatusCode.NoContent)
     }
 
     static async confirmEmailByCode(code: string): Promise<Result> {
         const user = await UsersRepository.findByConfirmationCode(code)
         if (!user) {
             return new Result(
-                StatusCode.BAD_REQUEST,
+                StatusCode.BadRequest,
                 new ErrorsMessages(new FieldError('code', 'Confirmation code is incorrect'))
             )
         }
         if (user.emailConfirmation.isConfirmed) {
             return new Result(
-                StatusCode.BAD_REQUEST,
+                StatusCode.BadRequest,
                 new ErrorsMessages(new FieldError('code', 'Confirmation code is already been applied'))
             )
         }
         if (new Date() > user.emailConfirmation.expirationDate) {
             return new Result(
-                StatusCode.BAD_REQUEST,
+                StatusCode.BadRequest,
                 new ErrorsMessages(new FieldError('code', 'Confirmation code is expired'))
             )
         }
         const isUpdated = await UsersRepository.confirmEmail(user._id)
         if (!isUpdated) {
             return new Result(
-                StatusCode.SERVER_ERROR,
+                StatusCode.ServerError,
                 new ErrorsMessages(new FieldError('code', 'Confirmation code wasn\'t updated'))
             )
         }
-        return new Result(StatusCode.NO_CONTENT)
+        return new Result(StatusCode.NoContent)
     }
 
     static async resendConfirmationCode(email: string) {
         const user = await UsersRepository.findUserByLoginOrEmail(email)
         if (!user) {
             return new Result(
-                StatusCode.BAD_REQUEST,
+                StatusCode.BadRequest,
                 new ErrorsMessages(new FieldError('email', 'Email is incorrect'))
             )
         }
         if (user.emailConfirmation.isConfirmed) {
             return new Result(
-                StatusCode.BAD_REQUEST,
+                StatusCode.BadRequest,
                 new ErrorsMessages(new FieldError('email', 'Email is already confirmed'))
             )
         }
@@ -92,25 +92,25 @@ export class AuthService {
         const info = await nodemailerService.sendEmail(email, 'Confirm your email', template(newCode))
         if (!info) {
             return new Result(
-                StatusCode.SERVER_ERROR,
+                StatusCode.ServerError,
                 new ErrorsMessages(new FieldError('email', 'Error with sending email'))
             )
         }
         const isUpdated = await UsersRepository.updateConfirmationCode(user._id, newCode)
         if (!isUpdated) {
             return new Result(
-                StatusCode.SERVER_ERROR,
+                StatusCode.ServerError,
                 new ErrorsMessages(new FieldError('code', 'Confirmation code wasn\'t updated'))
             )
         }
-        return new Result(StatusCode.NO_CONTENT)
+        return new Result(StatusCode.NoContent)
     }
 
     static async login(loginOrEmail: string, password: string): Promise<Result<TokensPayload>> {
         const user = await UsersRepository.findUserByLoginOrEmail(loginOrEmail)
         if (!user) {
             return new Result(
-                StatusCode.UNAUTHORIZED,
+                StatusCode.Unauthorized,
                 new ErrorsMessages(
                     new FieldError('login, email, password', 'Login, email or password is incorrect')
                 )
@@ -119,7 +119,7 @@ export class AuthService {
         const isMatched = await BcryptService.comparePasswords(password, user.password)
         if (!isMatched) {
             return new Result(
-                StatusCode.UNAUTHORIZED,
+                StatusCode.Unauthorized,
                 new ErrorsMessages(
                     new FieldError('login, email, password', 'Login, email or password is incorrect')
                 )
@@ -127,9 +127,9 @@ export class AuthService {
         }
         const tokens = await AuthService.generateTokens(user)
         if (!tokens) {
-            return new Result(StatusCode.SERVER_ERROR, 'Error with generating or saving tokens')
+            return new Result(StatusCode.ServerError, 'Error with generating or saving tokens')
         }
-        return new Result(StatusCode.SUCCESS, null, tokens)
+        return new Result(StatusCode.Success, null, tokens)
     }
 
     static async generateTokens(user: WithId<UserDBModel>): Promise<TokensPayload | null> {
@@ -146,13 +146,13 @@ export class AuthService {
     static async updateTokens(refreshToken: string): Promise<Result<TokensPayload>> {
         const user = await AuthService.findUserByRefreshToken(refreshToken)
         if (!user) {
-            return new Result(StatusCode.UNAUTHORIZED)
+            return new Result(StatusCode.Unauthorized)
         }
         const tokens = await AuthService.generateTokens(user)
         if (!tokens) {
-            return new Result(StatusCode.SERVER_ERROR, 'Error with generating or saving tokens')
+            return new Result(StatusCode.ServerError, 'Error with generating or saving tokens')
         }
-        return new Result(StatusCode.SUCCESS, null, tokens)
+        return new Result(StatusCode.Success, null, tokens)
     }
 
     static async findUserByRefreshToken(refreshToken: string): Promise<WithId<UserDBModel> | null> {
@@ -175,12 +175,12 @@ export class AuthService {
     static async logout(refreshToken: string): Promise<Result> {
         const user = await AuthService.findUserByRefreshToken(refreshToken)
         if (!user) {
-            return new Result(StatusCode.UNAUTHORIZED)
+            return new Result(StatusCode.Unauthorized)
         }
         const isSaved = await UsersRepository.saveRefreshToken(user._id, null)
         if (!isSaved) {
-            return new Result(StatusCode.SERVER_ERROR)
+            return new Result(StatusCode.ServerError)
         }
-        return new Result(StatusCode.NO_CONTENT)
+        return new Result(StatusCode.NoContent)
     }
 }

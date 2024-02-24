@@ -1,7 +1,6 @@
 import {CommentDBModel} from "./types";
 import {commentsCollection} from "../db/db";
 import {ObjectId, WithId} from "mongodb";
-import {CommentViewModel} from "../services/types";
 
 export class CommentsRepository {
 

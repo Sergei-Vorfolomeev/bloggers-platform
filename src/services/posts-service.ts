@@ -11,7 +11,7 @@ export class PostsService {
         const blog = await BlogsRepository.getBlogById(blogId)
         if (!blog) {
             return new Result(
-                StatusCode.BAD_REQUEST,
+                StatusCode.BadRequest,
                 new ErrorsMessages(new FieldError('blogId', 'This blog doesn\'t exist'))
             )
         }
@@ -22,16 +22,16 @@ export class PostsService {
         }
         const createdPostId = await PostsRepository.createPost(newPost)
         if (!createdPostId) {
-            return new Result(StatusCode.SERVER_ERROR)
+            return new Result(StatusCode.ServerError)
         }
-        return new Result(StatusCode.CREATED, null, createdPostId)
+        return new Result(StatusCode.Created, null, createdPostId)
     }
 
     static async updatePost(id: string, inputData: PostInputModel): Promise<Result> {
         const {title, shortDescription, content, blogId} = inputData
         const post = await PostsRepository.getPostById(id)
         if (!post) {
-            return new Result(StatusCode.NOT_FOUND)
+            return new Result(StatusCode.NotFound)
         }
         const newPost = {
             ...post,
@@ -39,16 +39,16 @@ export class PostsService {
         }
         const isUpdated = await PostsRepository.updatePost(id, newPost)
         if (!isUpdated) {
-            return new Result(StatusCode.SERVER_ERROR)
+            return new Result(StatusCode.ServerError)
         }
-        return new Result(StatusCode.NO_CONTENT)
+        return new Result(StatusCode.NoContent)
     }
 
     static async deletePost(id: string): Promise<Result> {
         const isDeleted = await PostsRepository.deletePost(id)
         if (!isDeleted) {
-            return new Result(StatusCode.NOT_FOUND)
+            return new Result(StatusCode.NotFound)
         }
-        return new Result(StatusCode.NO_CONTENT)
+        return new Result(StatusCode.NoContent)
     }
 }
