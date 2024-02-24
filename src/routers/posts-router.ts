@@ -21,7 +21,7 @@ import {CommentsQueryRepository} from "../repositories/comments-query-repository
 import {commentValidator} from "../validators/comment-validator";
 import {CommentsService} from "../services/comments-service";
 import {accessTokenGuard} from "../middlewares/access-token-guard";
-import {StatusCode} from "../utils/result";
+import {Result, StatusCode} from "../utils/result";
 
 export const postsRouter = Router()
 
@@ -146,7 +146,7 @@ postsRouter.post('/:id/comments', accessTokenGuard, commentValidator(),
             res.sendStatus(404)
             return
         }
-        const {statusCode, data} = await CommentsService.createComment(postId, userId, content)
+        const {statusCode, data: createdCommentId} = await CommentsService.createComment(postId, userId, content)
         switch (statusCode) {
             case StatusCode.NOT_FOUND: {
                 res.sendStatus(404)
@@ -157,8 +157,10 @@ postsRouter.post('/:id/comments', accessTokenGuard, commentValidator(),
                 return
             }
             case StatusCode.SUCCESS: {
-                res.status(201).send(data)
-                return
+                const createdComment = await CommentsQueryRepository.getCommentById(createdCommentId!)
+                createdComment
+                    ? res.status(201).send(createdComment)
+                    : res.sendStatus(404)
             }
         }
     })

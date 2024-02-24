@@ -1,6 +1,6 @@
 import {CommentDBModel} from "./types";
 import {commentsCollection} from "../db/db";
-import {ObjectId} from "mongodb";
+import {ObjectId, WithId} from "mongodb";
 import {CommentViewModel} from "../services/types";
 
 export class CommentsRepository {
@@ -25,17 +25,7 @@ export class CommentsRepository {
         }
     }
 
-    static async deleteCommentsByPostId(postId: string): Promise<boolean> {
-        try {
-            const res = await commentsCollection.deleteMany({postId: postId})
-            return res.acknowledged
-        } catch (error) {
-            console.error(error)
-            return false
-        }
-    }
-
-    static async updateComment(id: string, updatedComment: CommentViewModel): Promise<boolean> {
+    static async updateComment(id: string, updatedComment: CommentDBModel): Promise<boolean> {
         try {
             const res = await commentsCollection.updateOne(
                 {_id: new ObjectId(id)},
@@ -45,6 +35,15 @@ export class CommentsRepository {
         } catch (error) {
             console.error(error)
             return false
+        }
+    }
+
+    static async getCommentById(commentId: string): Promise<WithId<CommentDBModel> | null> {
+        try {
+            return await commentsCollection.findOne({_id: new ObjectId(commentId)})
+        } catch (error) {
+            console.error(error)
+            return null
         }
     }
 }

@@ -71,4 +71,13 @@ export class UsersRepository {
     static async findUserByUserId(userId: string): Promise<WithId<UserDBModel> | null> {
         return await usersCollection.findOne({_id: new ObjectId(userId)})
     }
+
+    static async getUserById(userId: string): Promise<WithId<UserDBModel> | null> {
+        try {
+            return await usersCollection.findOne({_id: new ObjectId(userId)})
+        } catch (e) {
+            console.error(e)
+            return null
+        }
+    }
 }
