@@ -22,19 +22,25 @@ describe('devices', () => {
 
     jest.spyOn(nodemailerService, 'sendEmail').mockReturnValueOnce(Promise.resolve(true as SentMessageInfo))
 
+    let tokens1: any = null
+    let tokens2: any = null
+    let tokens3: any = null
+    let tokens4: any = null
+    let devices: any = null
     it('get all user devices', async () => {
         const user = await userSeeder.registerUser(app)
-        const tokens1 = await userSeeder.loginUserWithUserAgent(app, user.email, user.password, 'Chrome')
-        const tokens2 = await userSeeder.loginUserWithUserAgent(app, user.email, user.password, 'Safari')
-        const tokens3 = await userSeeder.loginUserWithUserAgent(app, user.email, user.password, 'IPhone')
-        const tokens4 = await userSeeder.loginUserWithUserAgent(app, user.email, user.password, 'Android1')
+        tokens1 = await userSeeder.loginUserWithUserAgent(app, user.email, user.password, 'Chrome')
+        tokens2 = await userSeeder.loginUserWithUserAgent(app, user.email, user.password, 'Safari')
+        tokens3 = await userSeeder.loginUserWithUserAgent(app, user.email, user.password, 'IPhone')
+        tokens4 = await userSeeder.loginUserWithUserAgent(app, user.email, user.password, 'Android1')
 
         const res = await request(app)
             .get(PATHS.devices)
             .set('Cookie', `refreshToken=${tokens4.refreshToken}`)
             .expect(200)
 
-        expect(res.body).toEqual([
+        devices = res.body
+        expect(devices).toEqual([
             {
                 deviceId: expect.any(String),
                 title: expect.any(String),
@@ -60,5 +66,83 @@ describe('devices', () => {
                 lastActivateDate: expect.any(String),
             },
         ])
+        await new Promise(resolve => {
+            setTimeout(() => {
+                resolve(1)
+            }, 500)
+        })
+    })
+
+    it('update refresh token of the first device', async () => {
+        const res = await request(app)
+            .post(`${PATHS.auth}/refresh-token`)
+            .set('Cookie', `refreshToken=${tokens1.refreshToken}`)
+            .expect(200)
+
+        const refreshToken = res.headers['set-cookie'][0].split(';')[0].split('=')[1]
+        expect(refreshToken).not.toBe(tokens1.refreshToken)
+        expect(res.body.accessToken).not.toBe(tokens1.accessToken)
+        expect(res.body).toEqual({
+            accessToken: expect.any(String),
+        })
+        tokens1 = {
+            accessToken: res.body.accessToken,
+            refreshToken
+        }
+    })
+
+    it('get all devices with updated token', async () => {
+        const res = await request(app)
+            .get(PATHS.devices)
+            .set('Cookie', `refreshToken=${tokens1.refreshToken}`)
+            .expect(200)
+
+        expect(res.body[0].lastActivateDate).not.toBe(devices[0].lastActivateDate)
+        expect(res.body[1]).toEqual(devices[1])
+        expect(res.body[2]).toEqual(devices[2])
+        expect(res.body[3]).toEqual(devices[3])
+        expect(res.body.length).toBe(4)
+
+        devices = res.body
+    })
+
+    it('delete the second device', async () => {
+        const secondDeviceId = devices[1].deviceId
+
+        await request(app)
+            .delete(`${PATHS.devices}/${secondDeviceId}`)
+            .set('Cookie', `refreshToken=${tokens1.refreshToken}`)
+            .expect(204)
+    })
+
+    it('get all devices without deleted device', async () => {
+        const res = await request(app)
+            .get(PATHS.devices)
+            .set('Cookie', `refreshToken=${tokens1.refreshToken}`)
+            .expect(200)
+
+        expect(res.body.length).toBe(3)
+        expect(res.body).toEqual([devices[0], devices[2], devices[3]])
+
+        devices = res.body
+    })
+
+    it('logout by the third device', async () => {
+        await request(app)
+            .post(`${PATHS.auth}/logout`)
+            .set('Cookie', `refreshToken=${tokens3.refreshToken}`)
+            .expect(204)
+    })
+
+    it('get all devices without logged out device', async () => {
+        const res = await request(app)
+            .get(PATHS.devices)
+            .set('Cookie', `refreshToken=${tokens1.refreshToken}`)
+            .expect(200)
+
+        expect(res.body.length).toBe(2)
+        expect(res.body).toEqual([ devices[0], devices[2] ])
+
+        devices = res.body
     })
 })

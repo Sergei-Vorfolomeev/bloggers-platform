@@ -47,10 +47,20 @@ export class DevicesRepository {
 
     static async getAllDevicesByUserId(userId: string): Promise<DeviceDBModel[] | null> {
         try {
-           return await devicesCollection.find({userId}).toArray()
+            return await devicesCollection.find({userId}).toArray()
         } catch (e) {
             console.error(e)
             return null
+        }
+    }
+
+    static async deleteDeviceById(deviceId: string): Promise<boolean> {
+        try {
+            const res = await devicesCollection.deleteOne({_id: new ObjectId(deviceId)})
+            return res.deletedCount === 1
+        } catch (e) {
+            console.error(e)
+            return false
         }
     }
 }

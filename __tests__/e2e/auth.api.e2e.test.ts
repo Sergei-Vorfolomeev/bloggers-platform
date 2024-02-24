@@ -90,7 +90,7 @@ describe('AUTH-e2e', () => {
         await new Promise(resolve => {
             setTimeout(() => {
                 resolve(1)
-            }, 1000)
+            }, 500)
         })
     })
 

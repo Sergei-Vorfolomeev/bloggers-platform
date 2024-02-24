@@ -54,4 +54,24 @@ export class UsersService {
         }))
         return new Result(StatusCode.Success, null, devicesForClient)
     }
+
+    static async deleteDeviceById(refreshToken: string, deviceId: string) {
+        const payload = await JwtService.verifyRefreshToken(refreshToken)
+        if (!payload) {
+            return new Result(StatusCode.Unauthorized)
+        }
+        const {user, device} = payload
+        const userDevices = await DevicesRepository.getAllDevicesByUserId(user._id.toString())
+        if (!userDevices) {
+            return new Result(StatusCode.ServerError)
+        }
+        if (!userDevices.find(device => device._id.toString() === deviceId)) {
+            return new Result(StatusCode.Forbidden)
+        }
+        const isDeleted = await DevicesRepository.deleteDeviceById(deviceId)
+        if (!isDeleted) {
+            return new Result(StatusCode.NotFound)
+        }
+        return new Result(StatusCode.NoContent)
+    }
 }
