@@ -1,14 +1,13 @@
 import {UserDBModel} from "../repositories/types";
 import {UsersRepository} from "../repositories/users-repository";
-import {UsersQueryRepository} from "../repositories/users-query-repository";
 import {BcryptService} from "./bcrypt-service";
-import {UserViewModel} from "./types";
+import {Result, StatusCode} from "../utils/result";
 
 export class UsersService {
-    static async createUser(login: string, email: string, password: string): Promise<UserViewModel | null> {
+    static async createUser(login: string, email: string, password: string): Promise<Result<string>> {
         const hashedPassword = await BcryptService.generateHash(password)
         if (!hashedPassword) {
-            return null
+            return new Result(StatusCode.SERVER_ERROR)
         }
         const newUser: UserDBModel = {
             login, email,
@@ -23,16 +22,16 @@ export class UsersService {
         }
         const createdUserId = await UsersRepository.createUser(newUser)
         if (!createdUserId) {
-            return null
+            return new Result(StatusCode.SERVER_ERROR)
         }
-        const createdUser = await UsersQueryRepository.getUserById(createdUserId)
-        if (!createdUser) {
-            return null
-        }
-        return createdUser
+        return new Result(StatusCode.CREATED, null, createdUserId)
     }
 
-    static async deleteUser(id: string): Promise<boolean> {
-        return await UsersRepository.deleteUser(id)
+    static async deleteUser(id: string): Promise<Result> {
+        const isDeleted = await UsersRepository.deleteUser(id)
+        if (!isDeleted) {
+            return new Result(StatusCode.NOT_FOUND)
+        }
+        return new Result(StatusCode.NO_CONTENT)
     }
 }

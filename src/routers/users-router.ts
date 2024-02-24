@@ -1,8 +1,10 @@
 import {Router} from "express";
 import {
     Paginator,
-    RequestWithBody, RequestWithParams,
-    RequestWithQuery, ResponseType,
+    RequestWithBody,
+    RequestWithParams,
+    RequestWithQuery,
+    ResponseType,
     ResponseWithBody,
     UserInputModel,
     UsersQueryParams
@@ -13,6 +15,7 @@ import {basicAuthGuard} from "../middlewares/basic-auth-guard";
 import {UsersService} from "../services/users-service";
 import {UsersQueryRepository} from "../repositories/users-query-repository";
 import {ObjectId} from "mongodb";
+import {StatusCode} from "../utils/result";
 
 export const usersRouter = Router()
 
@@ -51,10 +54,19 @@ usersRouter.post('/',
     userValidator(),
     async (req: RequestWithBody<UserInputModel>, res: ResponseWithBody<UserViewModel>) => {
         const {login, email, password} = req.body
-        const user = await UsersService.createUser(login, email, password)
-        user
-            ? res.status(201).send(user)
-            : res.sendStatus(400)
+        const {statusCode, data: createdUserId} = await UsersService.createUser(login, email, password)
+        switch (statusCode) {
+            case StatusCode.SERVER_ERROR: {
+                res.sendStatus(555);
+                return
+            }
+            case StatusCode.CREATED: {
+                const createdUser = await UsersQueryRepository.getUserById(createdUserId!)
+                createdUser
+                    ? res.status(201).send(createdUser)
+                    : res.sendStatus(400)
+            }
+        }
     })
 
 usersRouter.delete('/:id',
@@ -65,8 +77,15 @@ usersRouter.delete('/:id',
             res.sendStatus(404)
             return
         }
-        const isDeleted = await UsersService.deleteUser(id)
-        isDeleted
-            ? res.sendStatus(204)
-            : res.sendStatus(404)
+        const {statusCode} = await UsersService.deleteUser(id)
+        switch (statusCode) {
+            case StatusCode.NOT_FOUND: {
+                res.sendStatus(404);
+                return
+            }
+            case StatusCode.NO_CONTENT: {
+                res.sendStatus(204)
+                return
+            }
+        }
     })
