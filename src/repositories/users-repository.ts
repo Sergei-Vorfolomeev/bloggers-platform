@@ -68,7 +68,7 @@ export class UsersRepository {
         return res.matchedCount === 1
     }
 
-    static async findUserByUserId(userId: string): Promise<WithId<UserDBModel> | null> {
+    static async findUserById(userId: string): Promise<WithId<UserDBModel> | null> {
         return await usersCollection.findOne({_id: new ObjectId(userId)})
     }
 

@@ -1,5 +1,5 @@
 import {MongoClient} from "mongodb";
-import {BlogDBModel, CommentDBModel, PostDBModel, UserDBModel} from "../repositories/types";
+import {BlogDBModel, CommentDBModel, DeviceDBModel, PostDBModel, UserDBModel} from "../repositories/types";
 import {settings} from "../settings";
 
 export const client = new MongoClient(settings.MONGO_URI)
@@ -9,7 +9,7 @@ export const blogsCollection = dataBase.collection<BlogDBModel>('blogs')
 export const postsCollection = dataBase.collection<PostDBModel>('posts')
 export const usersCollection = dataBase.collection<UserDBModel>('users')
 export const commentsCollection = dataBase.collection<CommentDBModel>('comments')
-export const tokensBlackListCollection = dataBase.collection<string[]>('tokens-black-list')
+export const devicesCollection = dataBase.collection<DeviceDBModel>('devices')
 
 export const runDB = async () => {
     try {

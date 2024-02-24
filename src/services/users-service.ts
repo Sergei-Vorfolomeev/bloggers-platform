@@ -18,7 +18,6 @@ export class UsersService {
                 expirationDate: new Date(),
                 isConfirmed: true
             },
-            refreshToken: null
         }
         const createdUserId = await UsersRepository.createUser(newUser)
         if (!createdUserId) {

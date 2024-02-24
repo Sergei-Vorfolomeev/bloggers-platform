@@ -27,7 +27,9 @@ authRouter.post(
     validateLoginOrEmail(),
     async (req: RequestWithBody<LoginInputModel>, res: ResponseWithBody<LoginSuccessViewModel>) => {
         const {loginOrEmail, password} = req.body
-        const {statusCode, data} = await AuthService.login(loginOrEmail, password)
+        const deviceName = req.headers.userAgent || 'unknown'
+        const clientIp = req.ip || 'unknown'
+        const {statusCode, data} = await AuthService.login(loginOrEmail, password, deviceName.toString(), clientIp)
         switch (statusCode) {
             case StatusCode.Unauthorized:
                 res.sendStatus(401)
@@ -109,6 +111,9 @@ authRouter.post('/refresh-token', async (req: RequestType, res: ResponseWithBody
     const refreshToken = req.cookies.refreshToken
     const {statusCode, data} = await AuthService.updateTokens(refreshToken)
     switch (statusCode) {
+        case StatusCode.NotFound:
+            res.sendStatus(404)
+            break
         case StatusCode.Unauthorized:
             res.sendStatus(401)
             break

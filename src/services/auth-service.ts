@@ -1,5 +1,5 @@
 import {BcryptService} from "./bcrypt-service";
-import {UserDBModel} from "../repositories/types";
+import {DeviceDBModel, UserDBModel} from "../repositories/types";
 import {randomUUID} from "crypto";
 import {add} from "date-fns/add";
 import {UsersRepository} from "../repositories/users-repository";
@@ -9,8 +9,9 @@ import {template} from "../utils/template";
 import {ErrorsMessages, FieldError} from "../utils/errors-messages";
 import {TokensPayload} from "./types";
 import {JwtService} from "./jwt-service";
-import {WithId} from "mongodb";
+import {ObjectId, WithId} from "mongodb";
 import {CryptoService} from "./crypto-service";
+import {DevicesRepository} from "../repositories/devices-repository";
 
 export class AuthService {
     static async registerUser(login: string, email: string, password: string): Promise<Result> {
@@ -31,7 +32,6 @@ export class AuthService {
                 }),
                 isConfirmed: false
             },
-            refreshToken: null
         }
         const userId = await UsersRepository.createUser(newUser)
         if (!userId) {
@@ -106,7 +106,7 @@ export class AuthService {
         return new Result(StatusCode.NoContent)
     }
 
-    static async login(loginOrEmail: string, password: string): Promise<Result<TokensPayload>> {
+    static async login(loginOrEmail: string, password: string, deviceName: string, clientIp: string): Promise<Result<TokensPayload>> {
         const user = await UsersRepository.findUserByLoginOrEmail(loginOrEmail)
         if (!user) {
             return new Result(
@@ -125,60 +125,74 @@ export class AuthService {
                 )
             )
         }
-        const tokens = await AuthService.generateTokens(user)
+        const deviceId = new ObjectId()
+        const tokens = await AuthService.generateTokens(user, deviceId.toString())
         if (!tokens) {
             return new Result(StatusCode.ServerError, 'Error with generating or saving tokens')
         }
+        const newDevice: DeviceDBModel = {
+            _id: deviceId,
+            userId: user._id.toString(),
+            ip: clientIp,
+            title: deviceName,
+            creationDate: new Date().toISOString(),
+            refreshToken: tokens.encryptedRefreshToken,
+            lastActivateDate: new Date().toISOString(),
+            expirationDate: add(new Date(), {
+                seconds: 20
+            }).toISOString(),
+        }
+        await DevicesRepository.addNewDevice(newDevice)
         return new Result(StatusCode.Success, null, tokens)
     }
 
-    static async generateTokens(user: WithId<UserDBModel>): Promise<TokensPayload | null> {
-        const accessToken = JwtService.createToken(user, 'access')
-        const refreshToken = JwtService.createToken(user, 'refresh')
-        const encryptedToken = CryptoService.encrypt(refreshToken)
-        const isSaved = await UsersRepository.saveRefreshToken(user._id, encryptedToken)
-        if (!isSaved) {
-            return null
-        }
-        return {accessToken, refreshToken}
+    static async generateTokens(
+        user: WithId<UserDBModel>,
+        deviceId: string
+    ): Promise<TokensPayload & { encryptedRefreshToken: string } | null> {
+        const accessToken = JwtService.createToken(user, deviceId, 'access')
+        const refreshToken = JwtService.createToken(user, deviceId, 'refresh')
+        const encryptedRefreshToken = CryptoService.encrypt(refreshToken)
+        return {accessToken, refreshToken, encryptedRefreshToken}
     }
 
     static async updateTokens(refreshToken: string): Promise<Result<TokensPayload>> {
-        const user = await AuthService.findUserByRefreshToken(refreshToken)
-        if (!user) {
+        const payload = await JwtService.verifyRefreshToken(refreshToken)
+        if (!payload) {
             return new Result(StatusCode.Unauthorized)
         }
-        const tokens = await AuthService.generateTokens(user)
+        const {user, device} = payload
+        const decryptedRefreshToken = CryptoService.decrypt(device.refreshToken)
+        const isMatched = refreshToken === decryptedRefreshToken
+        if (!isMatched) {
+            return new Result(StatusCode.Unauthorized)
+        }
+        const tokens = await AuthService.generateTokens(user, device._id.toString())
         if (!tokens) {
-            return new Result(StatusCode.ServerError, 'Error with generating or saving tokens')
+            return new Result(StatusCode.ServerError)
+        }
+        const deviceWithNewRefreshToken: DeviceDBModel = {
+            ...device,
+            refreshToken: tokens.encryptedRefreshToken,
+            lastActivateDate: new Date().toISOString(),
+            expirationDate: add(new Date(), {
+                seconds: 20
+            }).toISOString(),
+        }
+        const isUpdated = await DevicesRepository.updateRefreshToken(deviceWithNewRefreshToken)
+        if (!isUpdated) {
+            new Result(StatusCode.ServerError)
         }
         return new Result(StatusCode.Success, null, tokens)
     }
 
-    static async findUserByRefreshToken(refreshToken: string): Promise<WithId<UserDBModel> | null> {
-        const payload = await JwtService.verifyToken(refreshToken, 'refresh')
-        if (!payload) {
-            return null
-        }
-        const user = await UsersRepository.findUserByUserId(payload.userId)
-        if (!user || !user.refreshToken) {
-            return null
-        }
-        const decryptedRefreshToken = CryptoService.decrypt(user.refreshToken)
-        const isMatched = refreshToken === decryptedRefreshToken
-        if (!isMatched) {
-            return null
-        }
-        return user
-    }
-
     static async logout(refreshToken: string): Promise<Result> {
-        const user = await AuthService.findUserByRefreshToken(refreshToken)
-        if (!user) {
+        const payload = await JwtService.verifyRefreshToken(refreshToken)
+        if (!payload) {
             return new Result(StatusCode.Unauthorized)
         }
-        const isSaved = await UsersRepository.saveRefreshToken(user._id, null)
-        if (!isSaved) {
+        const isDeleted = await DevicesRepository.deleteDevice(payload.device._id.toString())
+        if (!isDeleted) {
             return new Result(StatusCode.ServerError)
         }
         return new Result(StatusCode.NoContent)

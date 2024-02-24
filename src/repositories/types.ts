@@ -1,4 +1,4 @@
-import {SortDirection} from "mongodb";
+import {ObjectId, SortDirection} from "mongodb";
 import {CommentatorInfo} from "../services/types";
 
 export type PostDBModel = {
@@ -24,7 +24,6 @@ export type UserDBModel = {
     password: string
     createdAt: string
     emailConfirmation: EmailConfirmationType
-    refreshToken: string | null
 }
 
 type EmailConfirmationType = {
@@ -38,6 +37,17 @@ export type CommentDBModel = {
     commentatorInfo: CommentatorInfo
     postId: string
     createdAt: string
+}
+
+export type DeviceDBModel = {
+    _id: ObjectId
+    userId: string
+    ip: string
+    title: string
+    creationDate: string
+    refreshToken: string
+    lastActivateDate: string
+    expirationDate: string
 }
 
 export type UsersSortParams = {

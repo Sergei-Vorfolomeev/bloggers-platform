@@ -36,7 +36,15 @@ export type CommentatorInfo = {
     userLogin: string
 }
 
+export type DeviceViewModel = {
+    deviceId: string
+    ip: string
+    title: string
+    lastActivateDate: string
+}
+
 export type TokensPayload = {
     accessToken: string
     refreshToken: string
 }
+
