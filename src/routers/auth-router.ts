@@ -27,7 +27,7 @@ authRouter.post(
     validateLoginOrEmail(),
     async (req: RequestWithBody<LoginInputModel>, res: ResponseWithBody<LoginSuccessViewModel>) => {
         const {loginOrEmail, password} = req.body
-        const deviceName = req.headers.userAgent || 'unknown'
+        const deviceName = req.headers['user-agent'] || 'unknown'
         const clientIp = req.ip || 'unknown'
         const {statusCode, data} = await AuthService.login(loginOrEmail, password, deviceName.toString(), clientIp)
         switch (statusCode) {

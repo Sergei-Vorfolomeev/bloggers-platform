@@ -1,6 +1,6 @@
 import {app, PATHS} from "../../src/app";
 import {createPost} from "../utils/create-posts";
-import {createUser, createUsers, meRequest} from "../utils/create-users";
+import {userSeeder} from "../utils/user-seeder";
 
 const request = require('supertest')
 
@@ -14,7 +14,7 @@ describe(PATHS.comments, () => {
     let users: any = null
     let token: any = null
     it('try to login user 1', async () => {
-        users = await createUsers(app, 2)
+        users = await userSeeder.createUsers(app, 2)
         const res = await request(app)
             .post(`${PATHS.auth}/login`)
             .send({
@@ -54,7 +54,7 @@ describe(PATHS.comments, () => {
     let post: any = null
     let comment: any = null
     it('create valid comment', async () => {
-        const userInfo = await meRequest(app, token)
+        const userInfo = await userSeeder.meRequest(app, token)
         post = await createPost(app)
         const res = await request(app)
             .post(`${PATHS.posts}/${post.id}/comments`)
@@ -105,7 +105,7 @@ describe(PATHS.comments, () => {
 
     let token2: any = null
     it('try to login user 2', async () => {
-        users[1] = await createUser(app)
+        users[1] = await userSeeder.createUser(app)
         const res = await request(app)
             .post(`${PATHS.auth}/login`)
             .send({

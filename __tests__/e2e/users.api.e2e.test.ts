@@ -1,6 +1,6 @@
 import {app, PATHS} from "../../src/app";
 import {ADMIN_LOGIN, ADMIN_PASSWORD} from "../../src/middlewares/basic-auth-guard";
-import {createUsers} from "../utils/create-users";
+import {userSeeder} from "../utils/user-seeder";
 
 const request = require('supertest')
 
@@ -88,7 +88,7 @@ describe(PATHS.users, () => {
     })
     let users: any[] = []
     it('create many users', async () => {
-        users = await createUsers(app, 15)
+        users = await userSeeder.createUsers(app, 15)
     })
 
     it('get all users', async () => {

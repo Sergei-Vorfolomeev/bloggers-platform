@@ -1,7 +1,7 @@
 import {MongoMemoryServer} from "mongodb-memory-server";
 import {settings} from "../../src/settings";
 import {client, usersCollection} from "../../src/db/db";
-import {testSeeder} from "../utils/testSeeder";
+import {testSeeder} from "../utils/test-seeder";
 import {Result, StatusCode} from "../../src/utils/result";
 import {ErrorsMessages, FieldError} from "../../src/utils/errors-messages";
 import {AuthService} from "../../src/services/auth-service";
