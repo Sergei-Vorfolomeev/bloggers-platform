@@ -50,7 +50,7 @@ export class UsersService {
             deviceId: device._id.toString(),
             title: device.title,
             ip: device.ip,
-            lastActivateDate: device.lastActivateDate
+            lastActiveDate: device.lastActiveDate
         }))
         return new Result(StatusCode.Success, null, devicesForClient)
     }
@@ -61,6 +61,10 @@ export class UsersService {
             return new Result(StatusCode.Unauthorized)
         }
         const {user} = payload
+        const device = await DevicesRepository.findDeviceById(deviceId)
+        if (!device) {
+            return new Result(StatusCode.NotFound)
+        }
         const userDevices = await DevicesRepository.getAllDevicesByUserId(user._id.toString())
         if (!userDevices) {
             return new Result(StatusCode.ServerError)
@@ -70,7 +74,7 @@ export class UsersService {
         }
         const isDeleted = await DevicesRepository.deleteDeviceById(deviceId)
         if (!isDeleted) {
-            return new Result(StatusCode.NotFound)
+            return new Result(StatusCode.ServerError)
         }
         return new Result(StatusCode.NoContent)
     }

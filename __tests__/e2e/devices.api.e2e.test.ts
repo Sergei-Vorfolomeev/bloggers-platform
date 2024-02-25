@@ -46,7 +46,7 @@ describe('devices', () => {
                 deviceId: expect.any(String),
                 title: expect.any(String),
                 ip: expect.any(String),
-                lastActivateDate: expect.any(String),
+                lastActiveDate: expect.stringMatching(/\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z)/) // Строка в формате даты и времени
             })
         ]));
 
@@ -81,7 +81,7 @@ describe('devices', () => {
             .set('Cookie', `refreshToken=${tokens1.refreshToken}`)
             .expect(200)
 
-        expect(res.body[0].lastActivateDate).not.toBe(devices[0].lastActivateDate)
+        expect(res.body[0].lastActiveDate).not.toBe(devices[0].lastActiveDate)
         expect(res.body[1]).toEqual(devices[1])
         expect(res.body[2]).toEqual(devices[2])
         expect(res.body[3]).toEqual(devices[3])

@@ -40,7 +40,7 @@ export type DeviceViewModel = {
     deviceId: string
     ip: string
     title: string
-    lastActivateDate: string
+    lastActiveDate: string
 }
 
 export type TokensPayload = {

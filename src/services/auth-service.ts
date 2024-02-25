@@ -137,7 +137,7 @@ export class AuthService {
             title: deviceName,
             creationDate: new Date().toISOString(),
             refreshToken: tokens.encryptedRefreshToken,
-            lastActivateDate: new Date().toISOString(),
+            lastActiveDate: new Date().toISOString(),
             expirationDate: add(new Date(), {
                 seconds: 20
             }).toISOString(),
@@ -169,7 +169,7 @@ export class AuthService {
         const deviceWithNewRefreshToken: DeviceDBModel = {
             ...device,
             refreshToken: tokens.encryptedRefreshToken,
-            lastActivateDate: new Date().toISOString(),
+            lastActiveDate: new Date().toISOString(),
             expirationDate: add(new Date(), {
                 seconds: 20
             }).toISOString(),

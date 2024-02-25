@@ -46,7 +46,7 @@ export type DeviceDBModel = {
     title: string
     creationDate: string
     refreshToken: string
-    lastActivateDate: string
+    lastActiveDate: string
     expirationDate: string
 }
 
