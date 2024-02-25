@@ -50,6 +50,12 @@ export type DeviceDBModel = {
     expirationDate: string
 }
 
+export type ConnectionDBModel = {
+    ip: string
+    routePath: string
+    createdAt: Date
+}
+
 export type UsersSortParams = {
     searchLoginTerm: string | null
     searchEmailTerm: string | null

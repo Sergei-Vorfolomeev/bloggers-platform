@@ -4,6 +4,7 @@ import {MongoMemoryServer} from "mongodb-memory-server";
 import {settings} from "../../src/settings";
 import {client, usersCollection} from "../../src/db/db";
 import {SentMessageInfo} from "nodemailer";
+import {userSeeder} from "../utils/user-seeder";
 
 const request = require('supertest')
 
@@ -41,11 +42,11 @@ describe('AUTH-e2e', () => {
             .expect(200)
         user = res.body.items[0]
         expect(user).toEqual({
-                id: expect.any(String),
-                login: 'test-login',
-                email: 'email@gmail.com',
-                createdAt: expect.any(String),
-            })
+            id: expect.any(String),
+            login: 'test-login',
+            email: 'email@gmail.com',
+            createdAt: expect.any(String),
+        })
     })
 
     it('shouldn\'t create user twice', async () => {
@@ -129,6 +130,50 @@ describe('AUTH-e2e', () => {
         await request(app)
             .post(`${PATHS.auth}/refresh-token`)
             .set('Cookie', `refreshToken=${validRefreshToken}`)
+            .expect(401)
+    })
+})
+
+
+describe('test rate limit', () => {
+
+    let user: any = null
+    it('try to login many times', async () => {
+        user = await userSeeder.registerUser(app)
+        for (let i = 0; i < 5; i++) {
+            await request(app)
+                .post(`${PATHS.auth}/login`)
+                .send({
+                    loginOrEmail: user.email,
+                    password: `pass${i}`
+                })
+                .expect(401)
+        }
+    })
+
+    it('get 429 status - too many requests', async () => {
+        await request(app)
+            .post(`${PATHS.auth}/login`)
+            .send({
+                loginOrEmail: user.email,
+                password: `pass$`
+            })
+            .expect(429)
+
+        await new Promise(resolve => {
+            setTimeout(() => {
+                resolve(1)
+            }, 10000)
+        })
+    })
+
+    it('401 after 10 sec', async () => {
+        await request(app)
+            .post(`${PATHS.auth}/login`)
+            .send({
+                loginOrEmail: user.email,
+                password: `pass$`
+            })
             .expect(401)
     })
 })

@@ -19,11 +19,12 @@ import {userValidator} from "../validators/user-validator";
 import {AuthService} from "../services/auth-service";
 import {StatusCode} from "../utils/result";
 import {emailValidator} from "../validators/email-validator";
+import {rateLimiter} from "../middlewares/rate-limiter-middleware";
 
 export const authRouter = Router()
 
 authRouter.post(
-    '/login',
+    '/login', rateLimiter,
     validateLoginOrEmail(),
     async (req: RequestWithBody<LoginInputModel>, res: ResponseWithBody<LoginSuccessViewModel>) => {
         const {loginOrEmail, password} = req.body
@@ -59,7 +60,7 @@ authRouter.get('/me', accessTokenGuard,
         })
     })
 
-authRouter.post('/registration', userValidator(),
+authRouter.post('/registration', rateLimiter, userValidator(),
     async (req: RequestWithBody<UserInputModel>, res: ResponseType) => {
         const {login, email, password} = req.body
         const {statusCode} = await AuthService.registerUser(login, email, password)
@@ -73,7 +74,7 @@ authRouter.post('/registration', userValidator(),
         }
     })
 
-authRouter.post('/registration-confirmation',
+authRouter.post('/registration-confirmation', rateLimiter,
     async (req: RequestWithBody<RegistrationConfirmationCodeModel>, res: ResponseWithBody<APIErrorResult | string | null>) => {
         const {code} = req.body
         const {statusCode, errorsMessages} = await AuthService.confirmEmailByCode(code)
@@ -90,7 +91,7 @@ authRouter.post('/registration-confirmation',
         }
     })
 
-authRouter.post('/registration-email-resending', emailValidator(),
+authRouter.post('/registration-email-resending', rateLimiter, emailValidator(),
     async (req: RequestWithBody<RegistrationEmailResendingModel>, res: ResponseWithBody<APIErrorResult | string | null>) => {
         const {email} = req.body
         const {statusCode, errorsMessages} = await AuthService.resendConfirmationCode(email)

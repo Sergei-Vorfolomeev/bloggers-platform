@@ -1,5 +1,12 @@
 import {MongoClient} from "mongodb";
-import {BlogDBModel, CommentDBModel, DeviceDBModel, PostDBModel, UserDBModel} from "../repositories/types";
+import {
+    BlogDBModel,
+    CommentDBModel,
+    ConnectionDBModel,
+    DeviceDBModel,
+    PostDBModel,
+    UserDBModel
+} from "../repositories/types";
 import {settings} from "../settings";
 
 export const client = new MongoClient(settings.MONGO_URI)
@@ -10,6 +17,9 @@ export const postsCollection = dataBase.collection<PostDBModel>('posts')
 export const usersCollection = dataBase.collection<UserDBModel>('users')
 export const commentsCollection = dataBase.collection<CommentDBModel>('comments')
 export const devicesCollection = dataBase.collection<DeviceDBModel>('devices')
+export const connectionsCollection = dataBase.collection<ConnectionDBModel>('connections')
+
+
 
 export const runDB = async () => {
     try {
