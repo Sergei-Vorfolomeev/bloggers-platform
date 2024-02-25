@@ -7,6 +7,7 @@ import {usersRouter} from "./routers/users-router";
 import {commentsRouter} from "./routers/comments-router";
 import cookieParser from "cookie-parser";
 import {devicesRouter} from "./routers/devices-router";
+import {limiter} from "./middlewares/limit-middleware";
 
 export const PATHS = {
     __test__: '/testing/all-data',
@@ -32,6 +33,7 @@ export const app = express()
 app.set('trust proxy', true)
 app.use(cookieParser())
 app.use(express.json())
+//app.use(limiter)
 app.use(PATHS.auth, authRouter)
 app.use(PATHS.blogs, blogsRouter)
 app.use(PATHS.posts, postsRouter)

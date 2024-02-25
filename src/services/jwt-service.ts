@@ -6,6 +6,7 @@ import {UsersRepository} from "../repositories/users-repository";
 import {CryptoService} from "./crypto-service";
 import {DevicesRepository} from "../repositories/devices-repository";
 import {Result, StatusCode} from "../utils/result";
+import {log} from "util";
 
 export class JwtService {
     static createToken(user: WithId<UserDBModel>, deviceId: string, type: 'access' | 'refresh') {

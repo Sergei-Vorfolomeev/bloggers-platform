@@ -57,3 +57,22 @@ devicesRouter.delete('/:id', async (req: RequestWithParams, res: ResponseType) =
         }
     }
 })
+
+devicesRouter.delete('/', async (req: RequestType, res: ResponseType) => {
+    const refreshToken = req.cookies.refreshToken
+    const {statusCode} = await UsersService.deleteOtherDevices(refreshToken)
+    switch (statusCode) {
+        case StatusCode.Unauthorized: {
+            res.sendStatus(401)
+            return
+        }
+        case StatusCode.ServerError: {
+            res.sendStatus(555)
+            return
+        }
+        case StatusCode.NoContent: {
+            res.sendStatus(204)
+            return
+        }
+    }
+})

@@ -60,7 +60,7 @@ export class UsersService {
         if (!payload) {
             return new Result(StatusCode.Unauthorized)
         }
-        const {user, device} = payload
+        const {user} = payload
         const userDevices = await DevicesRepository.getAllDevicesByUserId(user._id.toString())
         if (!userDevices) {
             return new Result(StatusCode.ServerError)
@@ -72,6 +72,24 @@ export class UsersService {
         if (!isDeleted) {
             return new Result(StatusCode.NotFound)
         }
+        return new Result(StatusCode.NoContent)
+    }
+
+    static async deleteOtherDevices(refreshToken: string) {
+        const payload = await JwtService.verifyRefreshToken(refreshToken)
+        if (!payload) {
+            return new Result(StatusCode.Unauthorized)
+        }
+        const {user, device} = payload
+        const userDevices = await DevicesRepository.getAllDevicesByUserId(user._id.toString())
+        if (!userDevices) {
+            return new Result(StatusCode.ServerError)
+        }
+        userDevices.map(async (el) => {
+            if (el._id.toString() !== device._id.toString()) {
+                await DevicesRepository.deleteDeviceById(el._id.toString())
+            }
+        })
         return new Result(StatusCode.NoContent)
     }
 }

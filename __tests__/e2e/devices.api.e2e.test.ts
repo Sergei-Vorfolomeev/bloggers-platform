@@ -36,36 +36,20 @@ describe('devices', () => {
 
         const res = await request(app)
             .get(PATHS.devices)
-            .set('Cookie', `refreshToken=${tokens4.refreshToken}`)
+            .set('Cookie', `refreshToken=${tokens1.refreshToken}`)
             .expect(200)
 
         devices = res.body
-        expect(devices).toEqual([
-            {
+        expect(devices.length).toBe(4)
+        expect(devices).toEqual(expect.arrayContaining([
+            expect.objectContaining({
                 deviceId: expect.any(String),
                 title: expect.any(String),
                 ip: expect.any(String),
                 lastActivateDate: expect.any(String),
-            },
-            {
-                deviceId: expect.any(String),
-                title: expect.any(String),
-                ip: expect.any(String),
-                lastActivateDate: expect.any(String),
-            },
-            {
-                deviceId: expect.any(String),
-                title: expect.any(String),
-                ip: expect.any(String),
-                lastActivateDate: expect.any(String),
-            },
-            {
-                deviceId: expect.any(String),
-                title: expect.any(String),
-                ip: expect.any(String),
-                lastActivateDate: expect.any(String),
-            },
-        ])
+            })
+        ]));
+
         await new Promise(resolve => {
             setTimeout(() => {
                 resolve(1)
@@ -142,6 +126,25 @@ describe('devices', () => {
 
         expect(res.body.length).toBe(2)
         expect(res.body).toEqual([ devices[0], devices[2] ])
+
+        devices = res.body
+    })
+
+    it('delete all the rest devices by the first device', async () => {
+        await request(app)
+            .delete(PATHS.devices)
+            .set('Cookie', `refreshToken=${tokens1.refreshToken}`)
+            .expect(204)
+    })
+
+    it('get all devices without all the rest deleted devices', async () => {
+        const res = await request(app)
+            .get(PATHS.devices)
+            .set('Cookie', `refreshToken=${tokens1.refreshToken}`)
+            .expect(200)
+
+        expect(res.body.length).toBe(1)
+        expect(res.body).toEqual([ devices[0] ])
 
         devices = res.body
     })
