@@ -16,13 +16,12 @@ export const rateLimiter = async (req: Request, res: Response, next: NextFunctio
 
     await connectionsCollection.insertOne(newConnection)
     const lastConnections = await connectionsCollection
-        .find({
+        .countDocuments({
             ip: ip,
             routePath: originalUrl,
             createdAt: {$gte: limit}
         })
-        .toArray()
-    if (lastConnections.length > 5) {
+    if (lastConnections > 5) {
         res.sendStatus(429)
         return
     }
