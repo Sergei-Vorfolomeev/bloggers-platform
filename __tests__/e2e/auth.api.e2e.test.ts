@@ -4,6 +4,7 @@ import {MongoMemoryServer} from "mongodb-memory-server";
 import {SentMessageInfo} from "nodemailer";
 import {userSeeder} from "../utils/user-seeder";
 import mongoose from "mongoose";
+import {UserModel} from "../../src/repositories/models/user.model";
 
 const request = require('supertest')
 
@@ -132,6 +133,55 @@ describe('AUTH-e2e', () => {
             .post(`${PATHS.auth}/refresh-token`)
             .set('Cookie', `refreshToken=${validRefreshToken}`)
             .expect(401)
+    })
+
+    describe('recover password', () => {
+
+        let user: any = null
+        let recoveryCode: any = null
+        it('successful request to change password', async () => {
+
+            const {email} = await userSeeder.registerUser(app)
+            await request(app)
+                .post(`${PATHS.auth}/password-recovery`)
+                .send({
+                    email
+                })
+                .expect(204)
+
+            user = await UserModel.findOne().where('email').equals(email)
+            recoveryCode = user.passwordRecovery.recoveryCode
+        })
+
+        it('successful update password', async () => {
+            await request(app)
+                .post(`${PATHS.auth}/new-password`)
+                .send({
+                    recoveryCode,
+                    newPassword: 'newPassword'
+                })
+                .expect(204)
+        })
+
+        it('login using new password', async () => {
+            await request(app)
+                .post(`${PATHS.auth}/login`)
+                .send({
+                    loginOrEmail: user.email,
+                    password: 'newPassword'
+                })
+                .expect(200)
+        })
+
+        it('login using old password', async () => {
+            await request(app)
+                .post(`${PATHS.auth}/login`)
+                .send({
+                    loginOrEmail: user.email,
+                    password: 'test-pass'
+                })
+                .expect(401)
+        })
     })
 
     describe('test rate limit', () => {

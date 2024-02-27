@@ -160,11 +160,14 @@ authRouter.post('/password-recovery', rateLimiter, emailValidator(),
         }
     })
 
-authRouter.post('new-password', rateLimiter, newPasswordValidators(),
+authRouter.post('/new-password', rateLimiter, newPasswordValidators(),
     async (req: RequestWithBody<NewPasswordRecoveryInputModel>, res: ResponseType) => {
         const {recoveryCode, newPassword} = req.body
         const {statusCode} = await AuthService.updatePassword(recoveryCode, newPassword)
         switch (statusCode) {
+            case StatusCode.BadRequest:
+                res.sendStatus(400)
+                break
             case StatusCode.ServerError:
                 res.sendStatus(555)
                 break
