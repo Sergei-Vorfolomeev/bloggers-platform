@@ -1,12 +1,15 @@
-import {blogsCollection, client, commentsCollection, postsCollection} from "../db/db";
 import {ObjectId, WithId} from "mongodb";
 import {BlogDBModel} from "./types";
 import {BlogInputModel} from "../routers/types";
+import {BlogModel} from "./models/blog.model";
+import mongoose from "mongoose";
+import {PostModel} from "./models/post.model";
+import {CommentModel} from "./models/comment.model";
 
 export class BlogsRepository {
     static async getBlogById(blogId: string): Promise<WithId<BlogDBModel> | null> {
         try {
-            return await blogsCollection.findOne({_id: new ObjectId(blogId)})
+            return BlogModel.findById(new ObjectId(blogId)).lean().exec()
         } catch (e) {
             console.error(e)
             return null
@@ -15,8 +18,9 @@ export class BlogsRepository {
 
     static async createBlog(blog: BlogDBModel): Promise<string | null> {
         try {
-            const res = await blogsCollection.insertOne(blog)
-            return res.insertedId.toString()
+            const newBlog = new BlogModel(blog)
+            await newBlog.save()
+            return newBlog._id.toString()
         } catch (e) {
             console.error(e)
             return null
@@ -25,10 +29,8 @@ export class BlogsRepository {
 
     static async updateBlog(id: string, blog: BlogInputModel): Promise<boolean> {
         try {
-            const res = await blogsCollection.updateOne({_id: new ObjectId(id)}, {
-                $set: blog
-            })
-            return !!res.matchedCount
+            const res = await BlogModel.updateOne({_id: new ObjectId(id)}, blog)
+            return res.matchedCount === 1
         } catch (e) {
             console.error(e)
             return false
@@ -36,19 +38,20 @@ export class BlogsRepository {
     }
 
     static async deleteBlog(id: string): Promise<boolean> {
-        const session = await client.startSession();
+        const session = await mongoose.startSession();
         await session.startTransaction();
         try {
-            const res = await blogsCollection.deleteOne({_id: new ObjectId(id)})
-            const posts = await postsCollection.find({ blogId: id }).toArray();
+            const res = await BlogModel.deleteOne({_id: new ObjectId(id)})
+            const posts = await PostModel.find().where('blogId').equals(id).exec();
             for (const post of posts) {
-                await commentsCollection.deleteMany({postId: post._id.toString()})
-                await postsCollection.deleteOne({_id: post._id})
+                await CommentModel.deleteMany({postId: post._id.toString()})
+                await PostModel.deleteOne({_id: post._id})
             }
             await session.commitTransaction();
             return res.deletedCount === 1
         } catch (e) {
             console.error(e)
+            await session.abortTransaction()
             return false
         } finally {
             await session.endSession()

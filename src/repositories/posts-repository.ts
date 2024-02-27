@@ -1,12 +1,14 @@
-import {client, commentsCollection, postsCollection} from "../db/db";
 import {ObjectId, WithId} from "mongodb";
 import {PostDBModel} from "./types";
 import {PostInputModel} from "../routers/types";
+import {PostModel} from "./models/post.model";
+import mongoose from "mongoose";
+import {CommentModel} from "./models/comment.model";
 
 export class PostsRepository {
     static async getPostById(postId: string): Promise<WithId<PostDBModel> | null> {
         try {
-            return await postsCollection.findOne({_id: new ObjectId(postId)})
+            return PostModel.findById(new ObjectId(postId)).lean().exec()
         } catch (e) {
             console.log(e)
             return null
@@ -15,8 +17,9 @@ export class PostsRepository {
 
     static async createPost(post: PostDBModel): Promise<string | null> {
         try {
-            const res = await postsCollection.insertOne(post)
-            return res.insertedId.toString()
+            const newPost = new PostModel(post)
+            await newPost.save()
+            return newPost._id.toString()
         } catch (e) {
             console.log(e)
             return null
@@ -25,10 +28,8 @@ export class PostsRepository {
 
     static async updatePost(id: string, post: PostInputModel): Promise<boolean> {
         try {
-            const res = await postsCollection.updateOne({_id: new ObjectId(id)}, {
-                $set: post
-            })
-            return !!res.matchedCount
+            const res = await PostModel.updateOne({_id: new ObjectId(id)}, post)
+            return res.matchedCount === 1
         } catch (e) {
             console.log(e)
             return false
@@ -36,15 +37,16 @@ export class PostsRepository {
     }
 
     static async deletePost(id: string): Promise<boolean> {
-        const session = await client.startSession()
+        const session = await mongoose.startSession()
         await session.startTransaction()
         try {
-           const res =  await postsCollection.deleteOne({_id: new ObjectId(id)})
-            await commentsCollection.deleteMany({postId: id})
+            const res = await PostModel.deleteOne({_id: new ObjectId(id)})
+            await CommentModel.deleteMany({postId: id})
             await session.commitTransaction()
             return res.deletedCount === 1
         } catch (e) {
             console.log(e)
+            await session.abortTransaction()
             return false
         } finally {
             await session.endSession()

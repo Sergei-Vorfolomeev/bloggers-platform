@@ -2,18 +2,18 @@ import {ObjectId, SortDirection} from "mongodb";
 import {CommentatorInfo} from "../services/types";
 
 export type PostDBModel = {
-    title: string;
-    shortDescription: string;
-    content: string;
-    blogId: string;
-    blogName: string;
+    title: string
+    shortDescription: string
+    content: string
+    blogId: string
+    blogName: string
     createdAt: string
 }
 
 export type BlogDBModel = {
-    name: string;
-    description: string;
-    websiteUrl: string;
+    name: string
+    description: string
+    websiteUrl: string
     createdAt: string
     isMembership: boolean
 }

@@ -1,14 +1,26 @@
 import {app, PATHS} from "../../src/app";
 import {createPost} from "../utils/create-posts";
 import {userSeeder} from "../utils/user-seeder";
+import mongoose from "mongoose";
+import {MongoMemoryServer} from "mongodb-memory-server";
 
 const request = require('supertest')
 
 describe(PATHS.comments, () => {
+
     beforeAll(async () => {
+        const mongoServer = await MongoMemoryServer.create()
+        await mongoose.connect(mongoServer.getUri())
         await request(app)
             .delete(PATHS.__test__)
             .expect(204)
+    })
+
+    afterAll(async () => {
+        await request(app)
+            .delete(PATHS.__test__)
+            .expect(204)
+        await mongoose.disconnect()
     })
 
     let users: any = null

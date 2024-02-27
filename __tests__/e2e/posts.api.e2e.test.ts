@@ -1,5 +1,7 @@
 import {app, HTTP_STATUS, PATHS} from "../../src/app";
 import {ObjectId} from "mongodb";
+import mongoose from "mongoose";
+import {MongoMemoryServer} from "mongodb-memory-server";
 
 const request = require('supertest')
 
@@ -7,9 +9,18 @@ describe(PATHS.posts, () => {
     const credentials = Buffer.from('admin:qwerty').toString('base64')
 
     beforeAll(async () => {
+        const mongoServer = await MongoMemoryServer.create()
+        await mongoose.connect(mongoServer.getUri())
         await request(app)
             .delete(PATHS.__test__)
             .expect(HTTP_STATUS.NO_CONTENT_204)
+    })
+
+    afterAll(async () => {
+        await request(app)
+            .delete(PATHS.__test__)
+            .expect(204)
+        await mongoose.disconnect()
     })
 
     it('get empty posts', async () => {

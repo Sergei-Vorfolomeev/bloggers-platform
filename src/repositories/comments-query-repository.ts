@@ -1,15 +1,15 @@
 import {CommentViewModel} from "../services/types";
-import {commentsCollection} from "../db/db";
 import {ObjectId} from "mongodb";
 import {commentMapper} from "../utils/comment-mapper";
 import {PostsQueryRepository} from "./posts-query-repository";
 import {Paginator} from "../routers/types";
 import {SortParams} from "./types";
+import {CommentModel} from "./models/comment.model";
 
 export class CommentsQueryRepository {
     static async getCommentById(id: string): Promise<CommentViewModel | null> {
         try {
-            const comment = await commentsCollection.findOne({_id: new ObjectId(id)})
+            const comment = await CommentModel.findById(new ObjectId(id)).lean().exec()
             if (!comment) {
                 return null
             }
@@ -20,20 +20,21 @@ export class CommentsQueryRepository {
         }
     }
 
-    static async getCommentsByPostId(id: string, sortParams: SortParams): Promise<Paginator<CommentViewModel[]> | null> {
+    static async getCommentsByPostId(postId: string, sortParams: SortParams): Promise<Paginator<CommentViewModel[]> | null> {
         try {
             const {sortBy, sortDirection, pageNumber, pageSize} = sortParams
-            const post = await PostsQueryRepository.getPostById(id)
+            const post = await PostsQueryRepository.getPostById(postId)
             if (!post) {
                 return null
             }
-            const comments = await commentsCollection
-                .find({postId: {$eq: id}})
+            const comments = await CommentModel
+                .where('postId').equals(postId)
                 .skip((pageNumber - 1) * pageSize)
                 .limit(pageSize)
-                .sort(sortBy, sortDirection)
-                .toArray()
-            const totalCount = await commentsCollection.countDocuments({postId: {$eq: id}})
+                .sort({[sortBy]: sortDirection})
+                .lean()
+                .exec()
+            const totalCount = await CommentModel.countDocuments().where('postId').equals(postId)
             const pagesCount = totalCount === 0 ? 1 : Math.ceil(totalCount / pageSize)
             return {
                 items: comments.map(commentMapper),

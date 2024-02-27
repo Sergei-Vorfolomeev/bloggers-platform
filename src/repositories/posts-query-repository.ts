@@ -1,22 +1,23 @@
-import {postsCollection} from "../db/db";
 import {postMapper} from "../utils/post-mapper";
 import {ObjectId} from "mongodb";
 import {SortParams} from "./types";
 import {Paginator} from "../routers/types";
 import {PostViewModel} from "../services/types";
 import {BlogsQueryRepository} from "./blogs-query-repository";
+import {PostModel} from "./models/post.model";
 
 export class PostsQueryRepository {
     static async getPostsWithFilter(filter: {}, sortParams: SortParams): Promise<Paginator<PostViewModel[]> | null> {
         try {
             const {sortBy, sortDirection, pageSize, pageNumber} = sortParams
-            const posts = await postsCollection
+            const posts = await PostModel
                 .find(filter)
                 .skip((pageNumber - 1) * pageSize)
                 .limit(pageSize)
-                .sort(sortBy, sortDirection)
-                .toArray()
-            const totalCount = await postsCollection.countDocuments(filter)
+                .sort({[sortBy]: sortDirection})
+                .lean()
+                .exec()
+            const totalCount = await PostModel.countDocuments(filter)
             const pagesCount = totalCount === 0 ? 1 : Math.ceil(totalCount / pageSize)
             return {
                 items: posts.map(postMapper),
@@ -43,8 +44,10 @@ export class PostsQueryRepository {
 
     static async getPostById(id: string): Promise<PostViewModel | null> {
         try {
-            const post = await postsCollection.findOne({_id: new ObjectId(id)})
-            if (!post) return null
+            const post = await PostModel.findById(new ObjectId(id))
+            if (!post) {
+                return null
+            }
             return postMapper(post)
         } catch (e) {
             console.log(e)

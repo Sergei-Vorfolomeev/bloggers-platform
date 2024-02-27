@@ -1,34 +1,34 @@
 import {CommentDBModel} from "./types";
-import {commentsCollection} from "../db/db";
 import {ObjectId, WithId} from "mongodb";
+import {CommentModel} from "./models/comment.model";
 
 export class CommentsRepository {
 
-    static async createComment(newComment: CommentDBModel): Promise<string | null> {
+    static async getCommentById(commentId: string): Promise<WithId<CommentDBModel> | null> {
         try {
-            const res = await commentsCollection.insertOne(newComment)
-            return res.insertedId.toString()
+            return CommentModel.findById(new ObjectId(commentId)).lean().exec()
         } catch (error) {
             console.error(error)
             return null
         }
     }
 
-    static async deleteCommentById(id: string): Promise<boolean> {
+    static async createComment(comment: CommentDBModel): Promise<string | null> {
         try {
-            const res = await commentsCollection.deleteOne({_id: new ObjectId(id)})
-            return res.deletedCount === 1
+            const newComment = new CommentModel(comment)
+            await newComment.save()
+            return newComment._id.toString()
         } catch (error) {
             console.error(error)
-            return false
+            return null
         }
     }
 
     static async updateComment(id: string, updatedComment: CommentDBModel): Promise<boolean> {
         try {
-            const res = await commentsCollection.updateOne(
+            const res = await CommentModel.updateOne(
                 {_id: new ObjectId(id)},
-                {$set: updatedComment}
+                updatedComment
             )
             return res.matchedCount === 1
         } catch (error) {
@@ -37,12 +37,13 @@ export class CommentsRepository {
         }
     }
 
-    static async getCommentById(commentId: string): Promise<WithId<CommentDBModel> | null> {
+    static async deleteCommentById(id: string): Promise<boolean> {
         try {
-            return await commentsCollection.findOne({_id: new ObjectId(commentId)})
+            const res = await CommentModel.deleteOne({_id: new ObjectId(id)})
+            return res.deletedCount === 1
         } catch (error) {
             console.error(error)
-            return null
+            return false
         }
     }
 }
