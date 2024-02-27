@@ -93,3 +93,12 @@ export type LoginSuccessViewModel = {
     accessToken: string
 }
 
+export type NewPasswordRecoveryInputModel = {
+    newPassword: string
+    recoveryCode: string
+}
+
+export type PasswordRecoveryInputModel = {
+    email: string
+}
+

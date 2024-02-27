@@ -4,14 +4,15 @@ import {randomUUID} from "crypto";
 import {add} from "date-fns/add";
 import {UsersRepository} from "../repositories/users-repository";
 import {Result, StatusCode} from "../utils/result";
-import {nodemailerService} from "./nodemailer-service";
-import {template} from "../utils/template";
+import {NodemailerService} from "./nodemailer-service";
+import {templateForRegistration} from "../templates/template-for-registration";
 import {ErrorsMessages, FieldError} from "../utils/errors-messages";
 import {TokensPayload} from "./types";
 import {JwtService} from "./jwt-service";
 import {ObjectId, WithId} from "mongodb";
 import {CryptoService} from "./crypto-service";
 import {DevicesRepository} from "../repositories/devices-repository";
+import {templateForPasswordRecovery} from "../templates/template-for-password-recovery";
 
 export class AuthService {
     static async registerUser(login: string, email: string, password: string): Promise<Result> {
@@ -37,7 +38,7 @@ export class AuthService {
         if (!userId) {
             return new Result(StatusCode.ServerError, 'Error with creating user in db')
         }
-        const info = await nodemailerService.sendEmail(email, 'Confirm your email', template(newUser.emailConfirmation.confirmationCode))
+        const info = await NodemailerService.sendEmail(email, 'Confirm your email', templateForRegistration(newUser.emailConfirmation.confirmationCode))
         if (!info) {
             return new Result(StatusCode.ServerError, 'Error with sending email')
         }
@@ -89,7 +90,7 @@ export class AuthService {
             )
         }
         const newCode = randomUUID()
-        const info = await nodemailerService.sendEmail(email, 'Confirm your email', template(newCode))
+        const info = await NodemailerService.sendEmail(email, 'Confirm your email', templateForRegistration(newCode))
         if (!info) {
             return new Result(
                 StatusCode.ServerError,
@@ -195,6 +196,39 @@ export class AuthService {
         }
         const isDeleted = await DevicesRepository.deleteDevice(payload.device._id.toString())
         if (!isDeleted) {
+            return new Result(StatusCode.ServerError)
+        }
+        return new Result(StatusCode.NoContent)
+    }
+
+    static async recoverPassword(email: string): Promise<Result> {
+        const user =  await UsersRepository.findUserByLoginOrEmail(email)
+        if (!user) {
+            return new Result(StatusCode.NoContent)
+        }
+        const recoveryCode = randomUUID()
+        const isAdded = await UsersRepository.addRecoveryCode(user._id, recoveryCode)
+        if (!isAdded) {
+            return new Result(StatusCode.ServerError)
+        }
+        const isSent = await NodemailerService.sendEmail(email, 'Password recovery', templateForPasswordRecovery(recoveryCode))
+        if (!isSent) {
+            return new Result(StatusCode.ServerError)
+        }
+        return new Result(StatusCode.NoContent)
+    }
+
+    static async updatePassword(recoveryCode: string, newPassword: string): Promise<Result> {
+        const user = await UsersRepository.findUserByRecoveryCode(recoveryCode)
+        if (!user) {
+            return new Result(StatusCode.BadRequest)
+        }
+        const hashedPassword = await BcryptService.generateHash(newPassword)
+        if (!hashedPassword) {
+            return new Result(StatusCode.ServerError)
+        }
+        const isUpdated = await UsersRepository.updatePassword(user._id, hashedPassword)
+        if (!isUpdated) {
             return new Result(StatusCode.ServerError)
         }
         return new Result(StatusCode.NoContent)

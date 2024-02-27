@@ -11,6 +11,9 @@ export const UserSchema = new mongoose.Schema<UserDBModel>({
         expirationDate: {type: Date, required: true},
         isConfirmed: {type: Boolean, required: true},
     },
+    passwordRecovery: {
+        recoveryCode: String
+    }
 })
 
 export const UserModel = mongoose.model<UserDBModel>('user', UserSchema)

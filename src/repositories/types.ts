@@ -24,6 +24,9 @@ export type UserDBModel = {
     password: string
     createdAt: string
     emailConfirmation: EmailConfirmationType
+    passwordRecovery?: {
+        recoveryCode: string
+    }
 }
 
 type EmailConfirmationType = {

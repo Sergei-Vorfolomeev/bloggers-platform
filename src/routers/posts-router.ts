@@ -18,7 +18,7 @@ import {PostsQueryRepository} from "../repositories/posts-query-repository";
 import {CommentViewModel, PostViewModel} from "../services/types";
 import {PostsService} from "../services/posts-service";
 import {CommentsQueryRepository} from "../repositories/comments-query-repository";
-import {commentValidator} from "../validators/comment-validator";
+import {commentValidators} from "../validators/comment-validators";
 import {CommentsService} from "../services/comments-service";
 import {accessTokenGuard} from "../middlewares/access-token-guard";
 import {StatusCode} from "../utils/result";
@@ -137,7 +137,7 @@ postsRouter.get('/:id/comments',
             : res.sendStatus(404)
     })
 
-postsRouter.post('/:id/comments', accessTokenGuard, commentValidator(),
+postsRouter.post('/:id/comments', accessTokenGuard, commentValidators(),
     async (req: RequestWithParamsAndBody<CommentInputModel>, res: ResponseWithBody<CommentViewModel>) => {
         const {id: postId} = req.params
         const {content} = req.body

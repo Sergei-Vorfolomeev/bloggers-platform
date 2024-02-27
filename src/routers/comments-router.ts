@@ -6,7 +6,7 @@ import {CommentsQueryRepository} from "../repositories/comments-query-repository
 import {CommentsService} from "../services/comments-service";
 import {accessTokenGuard} from "../middlewares/access-token-guard";
 import {StatusCode} from "../utils/result";
-import {commentValidator} from "../validators/comment-validator";
+import {commentValidators} from "../validators/comment-validators";
 
 export const commentsRouter = Router()
 
@@ -40,7 +40,7 @@ commentsRouter.delete('/:id', accessTokenGuard,
         }
     })
 
-commentsRouter.put('/:id', accessTokenGuard, commentValidator(),
+commentsRouter.put('/:id', accessTokenGuard, commentValidators(),
     async (req: RequestWithParamsAndBody<CommentInputModel>, res: ResponseType) => {
         const {id: commentId} = req.params
         const {content} = req.body

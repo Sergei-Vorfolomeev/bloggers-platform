@@ -10,7 +10,7 @@ import {
     UsersQueryParams
 } from "./types";
 import {UserViewModel} from "../services/types";
-import {userValidator} from "../validators/user-validator";
+import {userValidators} from "../validators/user-validators";
 import {basicAuthGuard} from "../middlewares/basic-auth-guard";
 import {UsersService} from "../services/users-service";
 import {UsersQueryRepository} from "../repositories/users-query-repository";
@@ -51,7 +51,7 @@ usersRouter.get('/:id',
 
 usersRouter.post('/',
     basicAuthGuard,
-    userValidator(),
+    userValidators(),
     async (req: RequestWithBody<UserInputModel>, res: ResponseWithBody<UserViewModel>) => {
         const {login, email, password} = req.body
         const {statusCode, data: createdUserId} = await UsersService.createUser(login, email, password)

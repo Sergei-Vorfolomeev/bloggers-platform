@@ -2,7 +2,7 @@ import {MongoMemoryServer} from "mongodb-memory-server";
 import {AuthService} from "../../src/services/auth-service";
 import {testSeeder} from "../utils/test-seeder";
 import {Result, StatusCode} from "../../src/utils/result";
-import {nodemailerService} from "../../src/services/nodemailer-service";
+import {NodemailerService} from "../../src/services/nodemailer-service";
 import {sub} from "date-fns";
 import {randomUUID} from "crypto";
 import {ErrorsMessages, FieldError} from "../../src/utils/errors-messages";
@@ -28,7 +28,7 @@ describe('REGISTRATION_INTEGRATION', () => {
 
     describe('user registration', () => {
         const registerUserUseCase = AuthService.registerUser
-        const spy = jest.spyOn(nodemailerService, 'sendEmail').mockReturnValueOnce(Promise.resolve(true as SentMessageInfo))
+        const spy = jest.spyOn(NodemailerService, 'sendEmail').mockReturnValueOnce(Promise.resolve(true as SentMessageInfo))
         it('register user with correct data', async () => {
             const {login, email, password} = testSeeder.createUserDto()
             const result = await registerUserUseCase(login, email, password)
@@ -82,7 +82,7 @@ describe('REGISTRATION_INTEGRATION', () => {
 
     describe('resend confirmation code', () => {
         const resendConfirmationCodeUseCase = AuthService.resendConfirmationCode
-        jest.spyOn(nodemailerService, 'sendEmail').mockReturnValueOnce(Promise.resolve(true as SentMessageInfo))
+        jest.spyOn(NodemailerService, 'sendEmail').mockReturnValueOnce(Promise.resolve(true as SentMessageInfo))
 
         it('resend confirmation code to user with invalid email', async () => {
             const result = await resendConfirmationCodeUseCase('invalid@gmail.com')
@@ -90,7 +90,7 @@ describe('REGISTRATION_INTEGRATION', () => {
                 StatusCode.BadRequest,
                 new ErrorsMessages(new FieldError('email', 'Email is incorrect'))
             ))
-            expect(nodemailerService.sendEmail).not.toBeCalled()
+            expect(NodemailerService.sendEmail).not.toBeCalled()
         })
 
         it('resend confirmation code to the user with confirmed email', async () => {
@@ -103,14 +103,14 @@ describe('REGISTRATION_INTEGRATION', () => {
                 StatusCode.BadRequest,
                 new ErrorsMessages(new FieldError('email', 'Email is already confirmed'))
             ))
-            expect(nodemailerService.sendEmail).not.toBeCalled()
+            expect(NodemailerService.sendEmail).not.toBeCalled()
         })
 
         it('resend confirmation code to user with valid email', async () => {
             const {email} = await testSeeder.registerUser(testSeeder.createUserDto())
             const result = await resendConfirmationCodeUseCase(email)
             expect(result).toEqual(new Result(StatusCode.NoContent))
-            expect(nodemailerService.sendEmail).toBeCalledTimes(1)
+            expect(NodemailerService.sendEmail).toBeCalledTimes(1)
         })
     })
 })

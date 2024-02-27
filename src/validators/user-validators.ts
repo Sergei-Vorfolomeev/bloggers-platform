@@ -27,4 +27,4 @@ const validatePassword = body('password')
     .isLength({min: 6, max: 20}).withMessage('Length must be from 6 to 20 symbols')
 
 
-export const userValidator = () => [validateLogin, validateEmail, validatePassword, inputValidationMiddleware]
+export const userValidators = () => [validateLogin, validateEmail, validatePassword, inputValidationMiddleware]

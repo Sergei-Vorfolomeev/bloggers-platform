@@ -2,7 +2,8 @@ import {Router} from "express";
 import {
     APIErrorResult,
     LoginInputModel,
-    LoginSuccessViewModel,
+    LoginSuccessViewModel, NewPasswordRecoveryInputModel,
+    PasswordRecoveryInputModel,
     RegistrationConfirmationCodeModel,
     RegistrationEmailResendingModel,
     RequestType,
@@ -15,11 +16,12 @@ import {
 import {validateLoginOrEmail} from "../validators/login-or-email-validator";
 import {accessTokenGuard} from "../middlewares/access-token-guard";
 import {UsersQueryRepository} from "../repositories/users-query-repository";
-import {userValidator} from "../validators/user-validator";
+import {userValidators} from "../validators/user-validators";
 import {AuthService} from "../services/auth-service";
 import {StatusCode} from "../utils/result";
 import {emailValidator} from "../validators/email-validator";
 import {rateLimiter} from "../middlewares/rate-limiter-middleware";
+import {newPasswordValidators} from "../validators/new-password-validator";
 
 export const authRouter = Router()
 
@@ -60,7 +62,7 @@ authRouter.get('/me', accessTokenGuard,
         })
     })
 
-authRouter.post('/registration', rateLimiter, userValidator(),
+authRouter.post('/registration', rateLimiter, userValidators(),
     async (req: RequestWithBody<UserInputModel>, res: ResponseType) => {
         const {login, email, password} = req.body
         const {statusCode} = await AuthService.registerUser(login, email, password)
@@ -143,3 +145,31 @@ authRouter.post('/logout', async (req: RequestType, res: ResponseType) => {
             break
     }
 })
+
+authRouter.post('/password-recovery', rateLimiter, emailValidator(),
+    async (req: RequestWithBody<PasswordRecoveryInputModel>, res: ResponseType) => {
+        const {email} = req.body
+        const {statusCode} = await AuthService.recoverPassword(email)
+        switch (statusCode) {
+            case StatusCode.ServerError:
+                res.sendStatus(555)
+                break
+            case StatusCode.NoContent:
+                res.sendStatus(204)
+                break
+        }
+    })
+
+authRouter.post('new-password', rateLimiter, newPasswordValidators(),
+    async (req: RequestWithBody<NewPasswordRecoveryInputModel>, res: ResponseType) => {
+        const {recoveryCode, newPassword} = req.body
+        const {statusCode} = await AuthService.updatePassword(recoveryCode, newPassword)
+        switch (statusCode) {
+            case StatusCode.ServerError:
+                res.sendStatus(555)
+                break
+            case StatusCode.NoContent:
+                res.sendStatus(204)
+                break
+        }
+    })

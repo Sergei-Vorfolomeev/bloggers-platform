@@ -23,13 +23,10 @@ export const connectionsCollection = dataBase.collection<ConnectionDBModel>('con
 
 export const runDB = async () => {
     try {
-        // await client.connect()
-        // await client.db("admin").command({ping: 1})
         await mongoose.connect(settings.MONGO_URI, {dbName: 'bloggers-platform'})
         console.log('You successfully connected to MongoDB!')
     } catch (e) {
         console.log(e)
-        // await client.close()
         await mongoose.disconnect()
     }
 }

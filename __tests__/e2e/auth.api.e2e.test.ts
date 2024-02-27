@@ -1,5 +1,5 @@
 import {app, PATHS} from "../../src/app";
-import {nodemailerService} from "../../src/services/nodemailer-service";
+import {NodemailerService} from "../../src/services/nodemailer-service";
 import {MongoMemoryServer} from "mongodb-memory-server";
 import {SentMessageInfo} from "nodemailer";
 import {userSeeder} from "../utils/user-seeder";
@@ -22,7 +22,7 @@ describe('AUTH-e2e', () => {
 
     let user: any = null
     it('register user', async () => {
-        const spy = jest.spyOn(nodemailerService, 'sendEmail').mockReturnValueOnce(Promise.resolve(true as SentMessageInfo))
+        const spy = jest.spyOn(NodemailerService, 'sendEmail').mockReturnValueOnce(Promise.resolve(true as SentMessageInfo))
 
         await request(app)
             .post(`${PATHS.auth}/registration`)

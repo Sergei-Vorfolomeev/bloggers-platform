@@ -7,4 +7,4 @@ const validateContent = body('content')
     .isLength({min: 20, max: 300}).withMessage('Length must be from 20 to 300 symbols')
 
 
-export const commentValidator = () => [validateContent, inputValidationMiddleware]
+export const commentValidators = () => [validateContent, inputValidationMiddleware]

@@ -13,6 +13,7 @@ type RegisterUserDtoType = {
     expirationDate?: Date
     isConfirmed?: boolean
     refreshToken?: string
+    recoveryCode? : string
 }
 
 export const testSeeder = {
@@ -31,6 +32,7 @@ export const testSeeder = {
                            code,
                            expirationDate,
                            isConfirmed,
+                           recoveryCode
                        }: RegisterUserDtoType
     ) {
         const hashedPassword = await BcryptService.generateHash(password)
@@ -47,6 +49,9 @@ export const testSeeder = {
                 expirationDate: expirationDate ?? add(new Date(), {minutes: 30}),
                 isConfirmed: isConfirmed ?? false
             },
+            passwordRecovery: {
+                recoveryCode: recoveryCode ?? randomUUID()
+            }
         }
         const newUser = new UserModel(newUserDto)
         await newUser.save()

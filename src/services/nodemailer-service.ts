@@ -1,7 +1,7 @@
 import nodemailer from 'nodemailer'
 import {settings} from "../settings";
 
-export class nodemailerService {
+export class NodemailerService {
     static async sendEmail(email: string, subject: string, message: string) {
         try {
             const transporter = nodemailer.createTransport({
