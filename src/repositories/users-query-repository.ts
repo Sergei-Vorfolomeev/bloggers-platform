@@ -1,8 +1,7 @@
 import {UserViewModel} from "../services/types";
-import {usersCollection} from "../db/db";
-import {ObjectId, WithId} from "mongodb";
+import {ObjectId} from "mongodb";
 import {userMapper} from "../utils/user-mapper";
-import {UserDBModel, UsersSortParams} from "./types";
+import {UsersSortParams} from "./types";
 import {Paginator} from "../routers/types";
 import {UserModel} from "./models/user.model";
 

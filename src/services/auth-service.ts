@@ -143,7 +143,10 @@ export class AuthService {
             }).toISOString(),
         }
         await DevicesRepository.addNewDevice(newDevice)
-        return new Result(StatusCode.Success, null, tokens)
+        return new Result(StatusCode.Success, null, {
+            accessToken: tokens.accessToken,
+            refreshToken: tokens.refreshToken
+        })
     }
 
     static async generateTokens(
@@ -174,11 +177,15 @@ export class AuthService {
                 seconds: 20
             }).toISOString(),
         }
+        debugger
         const isUpdated = await DevicesRepository.updateRefreshToken(deviceWithNewRefreshToken)
         if (!isUpdated) {
-            new Result(StatusCode.ServerError)
+            return new Result(StatusCode.ServerError)
         }
-        return new Result(StatusCode.Success, null, tokens)
+        return new Result(StatusCode.Success, null, {
+            accessToken: tokens.accessToken,
+            refreshToken: tokens.refreshToken,
+        })
     }
 
     static async logout(refreshToken: string): Promise<Result> {

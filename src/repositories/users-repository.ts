@@ -1,11 +1,10 @@
 import {UserDBModel} from "./types";
-import {usersCollection} from "../db/db";
 import {ObjectId, WithId} from "mongodb";
 import {UserModel} from "./models/user.model";
 
 export class UsersRepository {
     static async findUserByLoginOrEmail(loginOrEmail: string): Promise<WithId<UserDBModel> | null> {
-        return await usersCollection.findOne({$or: [{login: loginOrEmail}, {email: loginOrEmail}]})
+        return UserModel.findOne().or([{login: loginOrEmail}, {email: loginOrEmail}]).exec()
     }
 
     static async createUser(user: UserDBModel): Promise<string | null> {

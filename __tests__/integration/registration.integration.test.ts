@@ -1,40 +1,39 @@
 import {MongoMemoryServer} from "mongodb-memory-server";
-import {settings} from "../../src/settings";
 import {AuthService} from "../../src/services/auth-service";
 import {testSeeder} from "../utils/test-seeder";
 import {Result, StatusCode} from "../../src/utils/result";
-import {client, usersCollection} from "../../src/db/db";
 import {nodemailerService} from "../../src/services/nodemailer-service";
 import {sub} from "date-fns";
 import {randomUUID} from "crypto";
 import {ErrorsMessages, FieldError} from "../../src/utils/errors-messages";
 import {SentMessageInfo} from "nodemailer";
+import mongoose from "mongoose";
+import {UserModel} from "../../src/repositories/models/user.model";
 
 
 describe('REGISTRATION_INTEGRATION', () => {
     beforeAll(async () => {
         const mongoServer = await MongoMemoryServer.create()
-        settings.MONGO_URI = mongoServer.getUri()
+        await mongoose.connect(mongoServer.getUri())
     })
 
     afterAll(async () => {
-        await usersCollection.deleteMany({})
-        await client.close()
+        await mongoose.disconnect()
     })
 
     beforeEach(async () => {
-        await usersCollection.deleteMany({})
+        await UserModel.deleteMany({})
         jest.clearAllMocks()
     });
 
     describe('user registration', () => {
         const registerUserUseCase = AuthService.registerUser
-        jest.spyOn(nodemailerService, 'sendEmail').mockReturnValueOnce(Promise.resolve(true as SentMessageInfo))
+        const spy = jest.spyOn(nodemailerService, 'sendEmail').mockReturnValueOnce(Promise.resolve(true as SentMessageInfo))
         it('register user with correct data', async () => {
             const {login, email, password} = testSeeder.createUserDto()
             const result = await registerUserUseCase(login, email, password)
             expect(result).toEqual(new Result(StatusCode.NoContent))
-            expect(nodemailerService.sendEmail).toBeCalledTimes(1)
+            expect(spy).toBeCalledTimes(1)
         })
     })
 

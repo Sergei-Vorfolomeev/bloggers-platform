@@ -1,9 +1,9 @@
 import {UserDBModel} from "../../src/repositories/types";
 import {randomUUID} from "crypto";
 import {add} from "date-fns/add";
-import {usersCollection} from "../../src/db/db";
 import {BcryptService} from "../../src/services/bcrypt-service";
 import {AuthService} from "../../src/services/auth-service";
+import {UserModel} from "../../src/repositories/models/user.model";
 
 type RegisterUserDtoType = {
     login: string
@@ -31,14 +31,13 @@ export const testSeeder = {
                            code,
                            expirationDate,
                            isConfirmed,
-                           refreshToken
                        }: RegisterUserDtoType
     ) {
         const hashedPassword = await BcryptService.generateHash(password)
         if (!hashedPassword) {
             throw new Error('error with bcrypt hashing password in testSeeder')
         }
-        const newUser: UserDBModel = {
+        const newUserDto: UserDBModel = {
             login,
             email,
             password: hashedPassword,
@@ -48,18 +47,20 @@ export const testSeeder = {
                 expirationDate: expirationDate ?? add(new Date(), {minutes: 30}),
                 isConfirmed: isConfirmed ?? false
             },
-            refreshToken: refreshToken ?? null
         }
-        const res = await usersCollection.insertOne(newUser)
+        const newUser = new UserModel(newUserDto)
+        await newUser.save()
         return {
-            id: res.insertedId.toString(),
-            ...newUser,
+            id: newUser._id.toString(),
+            ...newUserDto,
             password: password,
         }
     },
     async loginUser() {
+        const devices = ['Chrome', 'Safari', 'Mozilla', 'Tor', 'Iphone', 'MacOS', 'Linux', 'Android']
+        const randomIndex = Math.floor(Math.random() * 8)
         const user = await testSeeder.registerUser(testSeeder.createUserDto())
-        const response = await AuthService.login(user.email, user.password)
+        const response = await AuthService.login(user.email, user.password, devices[randomIndex], this.generateIp())
         return {
             email: user.email,
             login: user.login,
@@ -67,5 +68,14 @@ export const testSeeder = {
             accessToken: response.data!.accessToken,
             refreshToken: response.data!.refreshToken,
         }
+    },
+
+    generateIp() {
+        let ip = ''
+        for (let i = 0; i < 4; i++) {
+            const random = Math.floor(Math.random() * 256)
+            ip += `${random}.`
+        }
+        return ip.substring(0, ip.length - 1)
     }
 }

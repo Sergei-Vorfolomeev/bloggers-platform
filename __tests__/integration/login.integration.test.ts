@@ -1,25 +1,23 @@
 import {MongoMemoryServer} from "mongodb-memory-server";
-import {settings} from "../../src/settings";
-import {client, usersCollection} from "../../src/db/db";
 import {testSeeder} from "../utils/test-seeder";
 import {Result, StatusCode} from "../../src/utils/result";
 import {ErrorsMessages, FieldError} from "../../src/utils/errors-messages";
 import {AuthService} from "../../src/services/auth-service";
+import mongoose from "mongoose";
+import {UserModel} from "../../src/repositories/models/user.model";
 
 describe('LOGIN_INTEGRATION', () => {
     beforeAll(async () => {
         const mongoServer = await MongoMemoryServer.create()
-        settings.MONGO_URI = mongoServer.getUri()
-        await usersCollection.deleteMany({})
+        await mongoose.connect(mongoServer.getUri())
     })
 
     afterAll(async () => {
-        await usersCollection.deleteMany({})
-        await client.close()
+        await mongoose.disconnect()
     })
 
     beforeEach(async () => {
-        await usersCollection.deleteMany({})
+        await UserModel.deleteMany({})
     })
 
     describe('login user', () => {
@@ -96,7 +94,7 @@ describe('LOGIN_INTEGRATION', () => {
                     resolve(res)
                 }, 2000)
             })
-            expect(result).toEqual(new Result(StatusCode.ServerError, 'Error with generating or saving tokens'))
+            expect(result).toEqual(new Result(StatusCode.ServerError, ))
         })
     })
 })

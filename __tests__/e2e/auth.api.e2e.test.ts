@@ -1,10 +1,9 @@
 import {app, PATHS} from "../../src/app";
 import {nodemailerService} from "../../src/services/nodemailer-service";
 import {MongoMemoryServer} from "mongodb-memory-server";
-import {settings} from "../../src/settings";
-import {client, usersCollection} from "../../src/db/db";
 import {SentMessageInfo} from "nodemailer";
 import {userSeeder} from "../utils/user-seeder";
+import mongoose from "mongoose";
 
 const request = require('supertest')
 
@@ -12,20 +11,19 @@ describe('AUTH-e2e', () => {
 
     beforeAll(async () => {
         const mongoServer = await MongoMemoryServer.create()
-        settings.MONGO_URI = mongoServer.getUri()
-        await usersCollection.deleteMany({})
+        await mongoose.connect(mongoServer.getUri())
     })
 
     afterAll(async () => {
-        await usersCollection.deleteMany({})
         jest.restoreAllMocks()
-        await client.close()
+        await mongoose.disconnect()
     })
 
-    jest.spyOn(nodemailerService, 'sendEmail').mockReturnValueOnce(Promise.resolve(true as SentMessageInfo))
 
     let user: any = null
     it('register user', async () => {
+        const spy = jest.spyOn(nodemailerService, 'sendEmail').mockReturnValueOnce(Promise.resolve(true as SentMessageInfo))
+
         await request(app)
             .post(`${PATHS.auth}/registration`)
             .send({
@@ -34,6 +32,8 @@ describe('AUTH-e2e', () => {
                 password: 'test-pass'
             })
             .expect(204)
+
+        expect(spy).toHaveBeenCalled()
     })
 
     it('get registered user', async () => {
@@ -88,14 +88,15 @@ describe('AUTH-e2e', () => {
         expect(validRefreshToken).toContain('.')
         expect(res.body.accessToken).toEqual(expect.any(String))
         expect(res.body.accessToken).toContain('.')
-        await new Promise(resolve => {
-            setTimeout(() => {
-                resolve(1)
-            }, 500)
-        })
     })
 
     it('refresh all tokens', async () => {
+        await new Promise(resolve => {
+            setTimeout(() => {
+                resolve(1)
+            }, 1000)
+        })
+
         const res = await request(app)
             .post(`${PATHS.auth}/refresh-token`)
             .set('Cookie', `refreshToken=${validRefreshToken}`)
@@ -132,48 +133,58 @@ describe('AUTH-e2e', () => {
             .set('Cookie', `refreshToken=${validRefreshToken}`)
             .expect(401)
     })
-})
 
+    describe('test rate limit', () => {
 
-describe('test rate limit', () => {
+        let user: any = null
+        it('try to login many times', async () => {
 
-    let user: any = null
-    it('try to login many times', async () => {
-        user = await userSeeder.registerUser(app)
-        for (let i = 0; i < 5; i++) {
+            await new Promise(resolve => {
+                setTimeout(() => {
+                    resolve(1)
+                }, 10000)
+            })
+
+            user = await userSeeder.registerUser(app)
+            for (let i = 0; i < 5; i++) {
+                await request(app)
+                    .post(`${PATHS.auth}/login`)
+                    .send({
+                        loginOrEmail: user.email,
+                        password: `pass${i}`
+                    })
+                    .expect(401)
+            }
+        })
+
+        it('get 429 status - too many requests', async () => {
+            for (let i = 0; i < 5; i++) {
+                await request(app)
+                    .post(`${PATHS.auth}/login`)
+                    .send({
+                        loginOrEmail: user.email,
+                        password: `pass$`
+                    })
+                    .expect(429)
+            }
+
+            await new Promise(resolve => {
+                setTimeout(() => {
+                    resolve(1)
+                }, 10000)
+            })
+        })
+
+        it('401 after 10 sec', async () => {
             await request(app)
                 .post(`${PATHS.auth}/login`)
                 .send({
                     loginOrEmail: user.email,
-                    password: `pass${i}`
+                    password: `pass$`
                 })
                 .expect(401)
-        }
-    })
-
-    it('get 429 status - too many requests', async () => {
-        await request(app)
-            .post(`${PATHS.auth}/login`)
-            .send({
-                loginOrEmail: user.email,
-                password: `pass$`
-            })
-            .expect(429)
-
-        await new Promise(resolve => {
-            setTimeout(() => {
-                resolve(1)
-            }, 10000)
         })
     })
-
-    it('401 after 10 sec', async () => {
-        await request(app)
-            .post(`${PATHS.auth}/login`)
-            .send({
-                loginOrEmail: user.email,
-                password: `pass$`
-            })
-            .expect(401)
-    })
 })
+
+

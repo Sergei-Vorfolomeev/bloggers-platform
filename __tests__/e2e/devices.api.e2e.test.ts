@@ -1,23 +1,20 @@
 import {MongoMemoryServer} from "mongodb-memory-server";
-import {settings} from "../../src/settings";
-import {client, devicesCollection, usersCollection} from "../../src/db/db";
 import {userSeeder} from "../utils/user-seeder";
 import {app, PATHS} from "../../src/app";
 import {nodemailerService} from "../../src/services/nodemailer-service";
 import {SentMessageInfo} from "nodemailer";
+import mongoose from "mongoose";
 
 const request = require('supertest')
 
 describe('devices', () => {
     beforeAll(async () => {
         const mongoServer = await MongoMemoryServer.create()
-        settings.MONGO_URI = mongoServer.getUri()
+        await mongoose.connect(mongoServer.getUri())
     })
 
     afterAll(async () => {
-        await usersCollection.deleteMany({})
-        await devicesCollection.deleteMany({})
-        await client.close()
+        await mongoose.disconnect()
     })
 
     jest.spyOn(nodemailerService, 'sendEmail').mockReturnValueOnce(Promise.resolve(true as SentMessageInfo))

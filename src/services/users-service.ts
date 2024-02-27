@@ -42,7 +42,7 @@ export class UsersService {
         if (!payload) {
             return new Result(StatusCode.Unauthorized)
         }
-        const devices = await DevicesRepository.getAllDevicesByUserId(payload.user._id.toString())
+        const devices = await DevicesRepository.findAllDevicesByUserId(payload.user._id.toString())
         if (!devices) {
             return new Result(StatusCode.ServerError)
         }
@@ -65,7 +65,7 @@ export class UsersService {
         if (!device) {
             return new Result(StatusCode.NotFound)
         }
-        const userDevices = await DevicesRepository.getAllDevicesByUserId(user._id.toString())
+        const userDevices = await DevicesRepository.findAllDevicesByUserId(user._id.toString())
         if (!userDevices) {
             return new Result(StatusCode.ServerError)
         }
@@ -85,7 +85,7 @@ export class UsersService {
             return new Result(StatusCode.Unauthorized)
         }
         const {user, device} = payload
-        const userDevices = await DevicesRepository.getAllDevicesByUserId(user._id.toString())
+        const userDevices = await DevicesRepository.findAllDevicesByUserId(user._id.toString())
         if (!userDevices) {
             return new Result(StatusCode.ServerError)
         }
