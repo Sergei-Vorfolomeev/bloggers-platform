@@ -10,7 +10,7 @@ export class CommentsService {
         if (!post) {
             return new Result(StatusCode.NotFound, 'The post with provided id haven\'t been found')
         }
-        const user = await UsersRepository.getUserById(userId)
+        const user = await UsersRepository.findUserById(userId)
         if (!user) {
             return new Result(StatusCode.NotFound, 'The user haven\'t been found')
         }

@@ -1,6 +1,7 @@
 import {UserDBModel} from "./types";
 import {usersCollection} from "../db/db";
 import {ObjectId, WithId} from "mongodb";
+import {UserModel} from "./models/user.model";
 
 export class UsersRepository {
     static async findUserByLoginOrEmail(loginOrEmail: string): Promise<WithId<UserDBModel> | null> {
@@ -9,8 +10,9 @@ export class UsersRepository {
 
     static async createUser(user: UserDBModel): Promise<string | null> {
         try {
-            const res = await usersCollection.insertOne(user)
-            return res.insertedId.toString()
+            const newUser = new UserModel(user)
+            await newUser.save()
+            return newUser._id.toString()
         } catch (e) {
             console.error(e)
             return null
@@ -19,8 +21,8 @@ export class UsersRepository {
 
     static async deleteUser(id: string): Promise<boolean> {
         try {
-            const res = await usersCollection.deleteOne({_id: new ObjectId(id)})
-            return !!res.deletedCount
+            const res = await UserModel.deleteOne({_id: new ObjectId(id)})
+            return res.deletedCount === 1
         } catch (e) {
             console.error(e)
             return false
@@ -28,9 +30,9 @@ export class UsersRepository {
         }
     }
 
-    static async findByConfirmationCode(code: string) {
+    static async findByConfirmationCode(code: string): Promise<WithId<UserDBModel> | null> {
         try {
-            return await usersCollection.findOne({'emailConfirmation.confirmationCode': {$eq: code}})
+            return UserModel.findOne().where('emailConfirmation.confirmationCode').equals(code).exec()
         } catch (e) {
             console.error(e)
             return null
@@ -39,9 +41,10 @@ export class UsersRepository {
 
     static async confirmEmail(userId: ObjectId): Promise<boolean | null> {
         try {
-            const res = await usersCollection.updateOne({_id: userId}, {
-                $set: {'emailConfirmation.isConfirmed': true}
-            })
+            const res = await UserModel.updateOne(
+                {_id: userId},
+                {'emailConfirmation.isConfirmed': true}
+            )
             return res.matchedCount === 1
         } catch (e) {
             console.error(e)
@@ -51,9 +54,10 @@ export class UsersRepository {
 
     static async updateConfirmationCode(userId: ObjectId, newCode: string): Promise<boolean | null> {
         try {
-            const res = await usersCollection.updateOne({_id: userId}, {
-                $set: {'emailConfirmation.confirmationCode': newCode}
-            })
+            const res = await UserModel.updateOne(
+                {_id: userId},
+                {'emailConfirmation.confirmationCode': newCode}
+            )
             return res.matchedCount === 1
         } catch (e) {
             console.error(e)
@@ -61,23 +65,11 @@ export class UsersRepository {
         }
     }
 
-    static async saveRefreshToken(userId: ObjectId, refreshTokenHash: string | null): Promise<boolean> {
-        const res = await usersCollection.updateOne({_id: userId}, {
-            $set: {refreshToken: refreshTokenHash}
-        })
-        return res.matchedCount === 1
-    }
-
     static async findUserById(userId: string): Promise<WithId<UserDBModel> | null> {
-        return await usersCollection.findOne({_id: new ObjectId(userId)})
-    }
-
-    static async getUserById(userId: string): Promise<WithId<UserDBModel> | null> {
         try {
-            return await usersCollection.findOne({_id: new ObjectId(userId)})
+            return UserModel.findById(new ObjectId(userId)).exec()
         } catch (e) {
             console.error(e)
             return null
-        }
-    }
+        }    }
 }

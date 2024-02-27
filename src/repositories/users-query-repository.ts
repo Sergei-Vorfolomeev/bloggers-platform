@@ -4,6 +4,7 @@ import {ObjectId, WithId} from "mongodb";
 import {userMapper} from "../utils/user-mapper";
 import {UserDBModel, UsersSortParams} from "./types";
 import {Paginator} from "../routers/types";
+import {UserModel} from "./models/user.model";
 
 export class UsersQueryRepository {
     static async getUsers(sortParams: UsersSortParams): Promise<Paginator<UserViewModel[]> | null> {
@@ -24,14 +25,15 @@ export class UsersQueryRepository {
                     ]
                 }
             }
-            const totalCount = await usersCollection.countDocuments(filter)
+            const totalCount = await UserModel.countDocuments(filter)
             const pagesCount = totalCount === 0 ? 1 : Math.ceil(totalCount / pageSize)
-            const users = await usersCollection
+            const users = await UserModel
                 .find(filter)
                 .skip((pageNumber - 1) * pageSize)
                 .limit(pageSize)
-                .sort(sortBy, sortDirection)
-                .toArray()
+                .sort({[sortBy]: sortDirection})
+                .lean()
+                .exec()
             return {
                 items: users.map(userMapper),
                 page: pageNumber,
@@ -44,30 +46,10 @@ export class UsersQueryRepository {
     }
 
     static async getUserById(id: string): Promise<UserViewModel | null> {
-        const user = await usersCollection.findOne({_id: new ObjectId(id)})
+        const user = await UserModel.findById(new ObjectId(id)).lean().exec()
         if (!user) {
             return null
         }
         return userMapper(user)
     }
 }
-
-
-// if (searchLoginTerm) {
-//     const propertyForFilter = {
-//         login: {
-//             $regex: searchLoginTerm,
-//             $options: 'i'
-//         }
-//     }
-//     Object.assign(filter, propertyForFilter)
-// }
-// if (searchEmailTerm) {
-//     const propertyForFilter = {
-//         email: {
-//             $regex: searchEmailTerm,
-//             $options: 'i'
-//         }
-//     }
-//     Object.assign(filter, propertyForFilter)
-// }

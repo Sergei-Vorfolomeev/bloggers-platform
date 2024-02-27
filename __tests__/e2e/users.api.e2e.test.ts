@@ -1,6 +1,8 @@
 import {app, PATHS} from "../../src/app";
 import {ADMIN_LOGIN, ADMIN_PASSWORD} from "../../src/middlewares/basic-auth-guard";
 import {userSeeder} from "../utils/user-seeder";
+import {MongoMemoryServer} from "mongodb-memory-server";
+import mongoose from "mongoose";
 
 const request = require('supertest')
 
@@ -8,9 +10,18 @@ describe(PATHS.users, () => {
     const credentials = Buffer.from(`${ADMIN_LOGIN}:${ADMIN_PASSWORD}`).toString('base64')
 
     beforeAll(async () => {
+        const mongoServer = await MongoMemoryServer.create()
+        await mongoose.connect(mongoServer.getUri())
         await request(app)
             .delete(PATHS.__test__)
             .expect(204)
+    })
+
+    afterAll(async () => {
+        await request(app)
+            .delete(PATHS.__test__)
+            .expect(204)
+        await mongoose.disconnect()
     })
 
     it('get empty users', async () => {
@@ -62,7 +73,7 @@ describe(PATHS.users, () => {
             .post(PATHS.users)
             .set('Authorization', `Basic ${credentials}`)
             .send({
-                login: 'VALID',
+                login: 'valid',
                 email: 'valid@gmail.com',
                 password: 'validPassword',
             })
