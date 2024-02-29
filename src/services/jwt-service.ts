@@ -2,14 +2,17 @@ import jwt, {JwtPayload} from 'jsonwebtoken'
 import {UserDBModel} from "../repositories/types";
 import {WithId} from "mongodb";
 import {settings} from "../settings";
-import {UsersRepository} from "../repositories/users-repository";
 import {CryptoService} from "./crypto-service";
 import {DevicesRepository} from "../repositories/devices-repository";
-import {Result, StatusCode} from "../utils/result";
-import {log} from "util";
+import {UsersRepository} from "../repositories/users-repository";
 
 export class JwtService {
-    static createToken(user: WithId<UserDBModel>, deviceId: string, type: 'access' | 'refresh') {
+    private usersRepository: UsersRepository;
+
+    constructor() {
+        this.usersRepository = new UsersRepository()
+    }
+    createToken(user: WithId<UserDBModel>, deviceId: string, type: 'access' | 'refresh') {
         return jwt.sign(
             {
                 userId: user._id.toString(),
@@ -20,7 +23,7 @@ export class JwtService {
         )
     }
 
-    static async verifyToken(token: string, type: 'access' | 'refresh'): Promise<JwtPayload | null> {
+    async verifyToken(token: string, type: 'access' | 'refresh'): Promise<JwtPayload | null> {
         try {
             const secretKey = type === 'access' ? settings.SECRET_KEY_1 : settings.SECRET_KEY_2
             return jwt.verify(token, secretKey) as JwtPayload
@@ -30,13 +33,13 @@ export class JwtService {
         }
     }
 
-    static async verifyRefreshToken(refreshToken: string) {
-        const payload = await JwtService.verifyToken(refreshToken, 'refresh')
+    async verifyRefreshToken(refreshToken: string) {
+        const payload = await this.verifyToken(refreshToken, 'refresh')
         if (!payload) {
             return null
         }
         const {userId, deviceId} = payload
-        const user = await UsersRepository.findUserById(userId)
+        const user = await this.usersRepository.findUserById(userId)
         if (!user) {
             return null
         }

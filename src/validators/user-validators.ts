@@ -2,13 +2,15 @@ import {body} from "express-validator";
 import {inputValidationMiddleware} from "../middlewares/input-validation-middleware";
 import {UsersRepository} from "../repositories/users-repository";
 
+const usersRepository = new UsersRepository()
+
 const validateLogin = body('login')
     .notEmpty().withMessage('Field is required')
     .isString().trim().withMessage('Field must be string')
     .isLength({min: 3, max: 10}).withMessage('Length must be from 3 to 10 symbols')
     .matches('^[a-zA-Z0-9_-]*$').withMessage('Field is incorrect')
     .custom(async login => {
-        const user = await UsersRepository.findUserByLoginOrEmail(login)
+        const user = await usersRepository.findUserByLoginOrEmail(login)
         if (user) throw new Error()
     }).withMessage('User with such login already exists')
 
@@ -17,7 +19,7 @@ const validateEmail = body('email')
     .isString().trim().withMessage('Field must be string')
     .isEmail().withMessage('Field is incorrect')
     .custom(async email => {
-        const user = await UsersRepository.findUserByLoginOrEmail(email)
+        const user = await usersRepository.findUserByLoginOrEmail(email)
         if (user) throw new Error()
     }).withMessage('User with such email already exists')
 

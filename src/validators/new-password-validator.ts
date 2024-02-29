@@ -2,6 +2,8 @@ import {body} from "express-validator";
 import {inputValidationMiddleware} from "../middlewares/input-validation-middleware";
 import {UsersRepository} from "../repositories/users-repository";
 
+const usersRepository = new UsersRepository()
+
 const validatePassword = body('newPassword')
     .notEmpty().withMessage('Field is required')
     .isString().trim().withMessage('Field must be string')
@@ -12,7 +14,7 @@ const validateRecoveryCode = body('recoveryCode')
     .notEmpty().withMessage('Field is required')
     .isString().trim().withMessage('Field must be string')
     .custom(async recoveryCode => {
-        const user = await UsersRepository.findUserByRecoveryCode(recoveryCode)
+        const user = await usersRepository.findUserByRecoveryCode(recoveryCode)
         if (!user) throw new Error
     }).withMessage('Incorrect recovery code')
 

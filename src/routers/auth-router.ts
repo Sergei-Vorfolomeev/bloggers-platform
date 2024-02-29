@@ -25,6 +25,7 @@ import {newPasswordValidators} from "../validators/new-password-validator";
 
 export const authRouter = Router()
 
+
 authRouter.post(
     '/login', rateLimiter,
     validateLoginOrEmail(),

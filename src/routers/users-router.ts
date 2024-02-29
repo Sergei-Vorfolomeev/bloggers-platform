@@ -19,8 +19,16 @@ import {StatusCode} from "../utils/result";
 
 export const usersRouter = Router()
 
-usersRouter.get('/',
-    async (req: RequestWithQuery<UsersQueryParams>, res: ResponseWithBody<Paginator<UserViewModel[]>>) => {
+class UsersController {
+    private usersService: UsersService;
+
+    constructor() {
+        this.usersService = new UsersService()
+    }
+    async getUsers(
+        req: RequestWithQuery<UsersQueryParams>,
+        res: ResponseWithBody<Paginator<UserViewModel[]>>
+    ) {
         const {searchLoginTerm, searchEmailTerm, sortBy, sortDirection, pageSize, pageNumber} = req.query
         const sortParams = {
             searchLoginTerm: searchLoginTerm ?? null,
@@ -34,10 +42,9 @@ usersRouter.get('/',
         users
             ? res.status(200).send(users)
             : res.sendStatus(555)
-    })
+    }
 
-usersRouter.get('/:id',
-    async (req: RequestWithParams, res: ResponseWithBody<UserViewModel>) => {
+    async getUserById(req: RequestWithParams, res: ResponseWithBody<UserViewModel>) {
         const {id} = req.params
         if (!ObjectId.isValid(id)) {
             res.sendStatus(404)
@@ -47,14 +54,11 @@ usersRouter.get('/:id',
         user
             ? res.status(200).send(user)
             : res.sendStatus(404)
-    })
+    }
 
-usersRouter.post('/',
-    basicAuthGuard,
-    userValidators(),
-    async (req: RequestWithBody<UserInputModel>, res: ResponseWithBody<UserViewModel>) => {
+    async createUser(req: RequestWithBody<UserInputModel>, res: ResponseWithBody<UserViewModel>) {
         const {login, email, password} = req.body
-        const {statusCode, data: createdUserId} = await UsersService.createUser(login, email, password)
+        const {statusCode, data: createdUserId} = await this.usersService.createUser(login, email, password)
         switch (statusCode) {
             case StatusCode.ServerError: {
                 res.sendStatus(555);
@@ -67,17 +71,15 @@ usersRouter.post('/',
                     : res.sendStatus(400)
             }
         }
-    })
+    }
 
-usersRouter.delete('/:id',
-    basicAuthGuard,
-    async (req: RequestWithParams, res: ResponseType) => {
+    async deleteUser(req: RequestWithParams, res: ResponseType) {
         const {id} = req.params
         if (!ObjectId.isValid(id)) {
             res.sendStatus(404)
             return
         }
-        const {statusCode} = await UsersService.deleteUser(id)
+        const {statusCode} = await this.usersService.deleteUser(id)
         switch (statusCode) {
             case StatusCode.NotFound: {
                 res.sendStatus(404);
@@ -88,4 +90,12 @@ usersRouter.delete('/:id',
                 return
             }
         }
-    })
+    }
+}
+
+const usersController = new UsersController()
+
+usersRouter.get('/', usersController.getUsers)
+usersRouter.get('/:id', usersController.getUserById)
+usersRouter.post('/', basicAuthGuard, userValidators(), usersController.createUser)
+usersRouter.delete('/:id', basicAuthGuard, usersController.deleteUser)

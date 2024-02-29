@@ -7,7 +7,15 @@ import {DevicesRepository} from "../repositories/devices-repository";
 import {DeviceViewModel} from "./types";
 
 export class UsersService {
-    static async createUser(login: string, email: string, password: string): Promise<Result<string>> {
+    private usersRepository: UsersRepository
+    private jwtService: JwtService
+
+    constructor() {
+        this.usersRepository = new UsersRepository()
+        this.jwtService = new JwtService()
+    }
+
+    async createUser(login: string, email: string, password: string): Promise<Result<string>> {
         const hashedPassword = await BcryptService.generateHash(password)
         if (!hashedPassword) {
             return new Result(StatusCode.ServerError)
@@ -22,23 +30,23 @@ export class UsersService {
                 isConfirmed: true
             },
         }
-        const createdUserId = await UsersRepository.createUser(newUser)
+        const createdUserId = await this.usersRepository.createUser(newUser)
         if (!createdUserId) {
             return new Result(StatusCode.ServerError)
         }
         return new Result(StatusCode.Created, null, createdUserId)
     }
 
-    static async deleteUser(id: string): Promise<Result> {
-        const isDeleted = await UsersRepository.deleteUser(id)
+    async deleteUser(id: string): Promise<Result> {
+        const isDeleted = await this.usersRepository.deleteUser(id)
         if (!isDeleted) {
             return new Result(StatusCode.NotFound)
         }
         return new Result(StatusCode.NoContent)
     }
 
-    static async getDevices(refreshToken: string): Promise<Result<DeviceViewModel[]>> {
-        const payload = await JwtService.verifyRefreshToken(refreshToken)
+    async getDevices(refreshToken: string): Promise<Result<DeviceViewModel[]>> {
+        const payload = await this.jwtService.verifyRefreshToken(refreshToken)
         if (!payload) {
             return new Result(StatusCode.Unauthorized)
         }
@@ -55,8 +63,8 @@ export class UsersService {
         return new Result(StatusCode.Success, null, devicesForClient)
     }
 
-    static async deleteDeviceById(refreshToken: string, deviceId: string) {
-        const payload = await JwtService.verifyRefreshToken(refreshToken)
+    async deleteDeviceById(refreshToken: string, deviceId: string) {
+        const payload = await this.jwtService.verifyRefreshToken(refreshToken)
         if (!payload) {
             return new Result(StatusCode.Unauthorized)
         }
@@ -79,8 +87,8 @@ export class UsersService {
         return new Result(StatusCode.NoContent)
     }
 
-    static async deleteOtherDevices(refreshToken: string) {
-        const payload = await JwtService.verifyRefreshToken(refreshToken)
+    async deleteOtherDevices(refreshToken: string) {
+        const payload = await this.jwtService.verifyRefreshToken(refreshToken)
         if (!payload) {
             return new Result(StatusCode.Unauthorized)
         }

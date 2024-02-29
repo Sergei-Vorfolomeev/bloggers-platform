@@ -1,7 +1,7 @@
 import {CommentDBModel} from "../repositories/types";
 import {CommentsRepository} from "../repositories/comments-repository";
 import {Result, StatusCode} from "../utils/result";
-import {UsersRepository} from "../repositories/users-repository";
+import {usersRepository} from "../repositories/users-repository";
 import {PostsRepository} from "../repositories/posts-repository";
 
 export class CommentsService {
@@ -10,7 +10,7 @@ export class CommentsService {
         if (!post) {
             return new Result(StatusCode.NotFound, 'The post with provided id haven\'t been found')
         }
-        const user = await UsersRepository.findUserById(userId)
+        const user = await usersRepository.findUserById(userId)
         if (!user) {
             return new Result(StatusCode.NotFound, 'The user haven\'t been found')
         }

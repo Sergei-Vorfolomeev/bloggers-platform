@@ -2,7 +2,6 @@ import {BcryptService} from "./bcrypt-service";
 import {DeviceDBModel, UserDBModel} from "../repositories/types";
 import {randomUUID} from "crypto";
 import {add} from "date-fns/add";
-import {UsersRepository} from "../repositories/users-repository";
 import {Result, StatusCode} from "../utils/result";
 import {NodemailerService} from "./nodemailer-service";
 import {templateForRegistration} from "../templates/template-for-registration";
@@ -13,9 +12,18 @@ import {ObjectId, WithId} from "mongodb";
 import {CryptoService} from "./crypto-service";
 import {DevicesRepository} from "../repositories/devices-repository";
 import {templateForPasswordRecovery} from "../templates/template-for-password-recovery";
+import {UsersRepository} from "../repositories/users-repository";
 
 export class AuthService {
-    static async registerUser(login: string, email: string, password: string): Promise<Result> {
+    private usersRepository: UsersRepository
+    private jwtService: JwtService
+
+    constructor() {
+        this.usersRepository = new UsersRepository()
+        this.jwtService = new JwtService()
+    }
+
+    async registerUser(login: string, email: string, password: string): Promise<Result> {
         const hashedPassword = await BcryptService.generateHash(password)
         if (!hashedPassword) {
             return new Result(StatusCode.ServerError, 'Error with hashing password')
@@ -34,7 +42,7 @@ export class AuthService {
                 isConfirmed: false
             },
         }
-        const userId = await UsersRepository.createUser(newUser)
+        const userId = await this.usersRepository.createUser(newUser)
         if (!userId) {
             return new Result(StatusCode.ServerError, 'Error with creating user in db')
         }
@@ -45,8 +53,8 @@ export class AuthService {
         return new Result(StatusCode.NoContent)
     }
 
-    static async confirmEmailByCode(code: string): Promise<Result> {
-        const user = await UsersRepository.findByConfirmationCode(code)
+    async confirmEmailByCode(code: string): Promise<Result> {
+        const user = await this.usersRepository.findByConfirmationCode(code)
         if (!user) {
             return new Result(
                 StatusCode.BadRequest,
@@ -65,7 +73,7 @@ export class AuthService {
                 new ErrorsMessages(new FieldError('code', 'Confirmation code is expired'))
             )
         }
-        const isUpdated = await UsersRepository.confirmEmail(user._id)
+        const isUpdated = await this.usersRepository.confirmEmail(user._id)
         if (!isUpdated) {
             return new Result(
                 StatusCode.ServerError,
@@ -75,8 +83,8 @@ export class AuthService {
         return new Result(StatusCode.NoContent)
     }
 
-    static async resendConfirmationCode(email: string) {
-        const user = await UsersRepository.findUserByLoginOrEmail(email)
+    async resendConfirmationCode(email: string) {
+        const user = await this.usersRepository.findUserByLoginOrEmail(email)
         if (!user) {
             return new Result(
                 StatusCode.BadRequest,
@@ -97,7 +105,7 @@ export class AuthService {
                 new ErrorsMessages(new FieldError('email', 'Error with sending email'))
             )
         }
-        const isUpdated = await UsersRepository.updateConfirmationCode(user._id, newCode)
+        const isUpdated = await this.usersRepository.updateConfirmationCode(user._id, newCode)
         if (!isUpdated) {
             return new Result(
                 StatusCode.ServerError,
@@ -107,8 +115,8 @@ export class AuthService {
         return new Result(StatusCode.NoContent)
     }
 
-    static async login(loginOrEmail: string, password: string, deviceName: string, clientIp: string): Promise<Result<TokensPayload>> {
-        const user = await UsersRepository.findUserByLoginOrEmail(loginOrEmail)
+    async login(loginOrEmail: string, password: string, deviceName: string, clientIp: string): Promise<Result<TokensPayload>> {
+        const user = await this.usersRepository.findUserByLoginOrEmail(loginOrEmail)
         if (!user) {
             return new Result(
                 StatusCode.Unauthorized,
@@ -127,7 +135,7 @@ export class AuthService {
             )
         }
         const deviceId = new ObjectId()
-        const tokens = await AuthService.generateTokens(user, deviceId.toString())
+        const tokens = await this.generateTokens(user, deviceId.toString())
         if (!tokens) {
             return new Result(StatusCode.ServerError, 'Error with generating or saving tokens')
         }
@@ -150,23 +158,23 @@ export class AuthService {
         })
     }
 
-    static async generateTokens(
+    async generateTokens(
         user: WithId<UserDBModel>,
         deviceId: string
     ): Promise<TokensPayload & { encryptedRefreshToken: string } | null> {
-        const accessToken = JwtService.createToken(user, deviceId, 'access')
-        const refreshToken = JwtService.createToken(user, deviceId, 'refresh')
+        const accessToken = this.jwtService.createToken(user, deviceId, 'access')
+        const refreshToken = this.jwtService.createToken(user, deviceId, 'refresh')
         const encryptedRefreshToken = CryptoService.encrypt(refreshToken)
         return {accessToken, refreshToken, encryptedRefreshToken}
     }
 
-    static async updateTokens(refreshToken: string): Promise<Result<TokensPayload>> {
-        const payload = await JwtService.verifyRefreshToken(refreshToken)
+    async updateTokens(refreshToken: string): Promise<Result<TokensPayload>> {
+        const payload = await this.jwtService.verifyRefreshToken(refreshToken)
         if (!payload) {
             return new Result(StatusCode.Unauthorized)
         }
         const {user, device} = payload
-        const tokens = await AuthService.generateTokens(user, device._id.toString())
+        const tokens = await this.generateTokens(user, device._id.toString())
         if (!tokens) {
             return new Result(StatusCode.ServerError)
         }
@@ -189,8 +197,8 @@ export class AuthService {
         })
     }
 
-    static async logout(refreshToken: string): Promise<Result> {
-        const payload = await JwtService.verifyRefreshToken(refreshToken)
+    async logout(refreshToken: string): Promise<Result> {
+        const payload = await this.jwtService.verifyRefreshToken(refreshToken)
         if (!payload) {
             return new Result(StatusCode.Unauthorized)
         }
@@ -201,13 +209,13 @@ export class AuthService {
         return new Result(StatusCode.NoContent)
     }
 
-    static async recoverPassword(email: string): Promise<Result> {
-        const user =  await UsersRepository.findUserByLoginOrEmail(email)
+    async recoverPassword(email: string): Promise<Result> {
+        const user =  await this.usersRepository.findUserByLoginOrEmail(email)
         if (!user) {
             return new Result(StatusCode.NoContent)
         }
         const recoveryCode = randomUUID()
-        const isAdded = await UsersRepository.addRecoveryCode(user._id, recoveryCode)
+        const isAdded = await this.usersRepository.addRecoveryCode(user._id, recoveryCode)
         if (!isAdded) {
             return new Result(StatusCode.ServerError)
         }
@@ -218,8 +226,8 @@ export class AuthService {
         return new Result(StatusCode.NoContent)
     }
 
-    static async updatePassword(recoveryCode: string, newPassword: string): Promise<Result> {
-        const user = await UsersRepository.findUserByRecoveryCode(recoveryCode)
+    async updatePassword(recoveryCode: string, newPassword: string): Promise<Result> {
+        const user = await this.usersRepository.findUserByRecoveryCode(recoveryCode)
         if (!user) {
             return new Result(StatusCode.BadRequest)
         }
@@ -227,7 +235,7 @@ export class AuthService {
         if (!hashedPassword) {
             return new Result(StatusCode.ServerError)
         }
-        const isUpdated = await UsersRepository.updatePassword(user._id, hashedPassword)
+        const isUpdated = await this.usersRepository.updatePassword(user._id, hashedPassword)
         if (!isUpdated) {
             return new Result(StatusCode.ServerError)
         }
