@@ -2,6 +2,7 @@ import {NextFunction, Request, Response} from "express";
 import {JwtService} from "../services/jwt-service";
 import {UsersQueryRepository} from "../repositories/users-query-repository";
 import {JwtPayload} from "jsonwebtoken";
+import {jwtService} from "../composition-root";
 
 export const accessTokenGuard = async (req: Request, res: Response, next: NextFunction) => {
     if (!req.headers.authorization) {
@@ -13,7 +14,7 @@ export const accessTokenGuard = async (req: Request, res: Response, next: NextFu
         res.sendStatus(401)
         return
     }
-    const payload: JwtPayload | null = await JwtService.verifyToken(token, 'access')
+    const payload: JwtPayload | null = await jwtService.verifyToken(token, 'access')
     if (!payload) {
         res.sendStatus(401)
         return

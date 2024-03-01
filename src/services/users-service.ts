@@ -7,13 +7,7 @@ import {DevicesRepository} from "../repositories/devices-repository";
 import {DeviceViewModel} from "./types";
 
 export class UsersService {
-    private usersRepository: UsersRepository
-    private jwtService: JwtService
-
-    constructor() {
-        this.usersRepository = new UsersRepository()
-        this.jwtService = new JwtService()
-    }
+    constructor(private usersRepository: UsersRepository, private jwtService: JwtService) {}
 
     async createUser(login: string, email: string, password: string): Promise<Result<string>> {
         const hashedPassword = await BcryptService.generateHash(password)

@@ -7,7 +7,7 @@ import {PostModel} from "./models/post.model";
 import {CommentModel} from "./models/comment.model";
 
 export class BlogsRepository {
-    static async getBlogById(blogId: string): Promise<WithId<BlogDBModel> | null> {
+    async getBlogById(blogId: string): Promise<WithId<BlogDBModel> | null> {
         try {
             return BlogModel.findById(new ObjectId(blogId)).lean().exec()
         } catch (e) {
@@ -16,7 +16,7 @@ export class BlogsRepository {
         }
     }
 
-    static async createBlog(blog: BlogDBModel): Promise<string | null> {
+    async createBlog(blog: BlogDBModel): Promise<string | null> {
         try {
             const newBlog = new BlogModel(blog)
             await newBlog.save()
@@ -27,7 +27,7 @@ export class BlogsRepository {
         }
     }
 
-    static async updateBlog(id: string, blog: BlogInputModel): Promise<boolean> {
+    async updateBlog(id: string, blog: BlogInputModel): Promise<boolean> {
         try {
             const res = await BlogModel.updateOne({_id: new ObjectId(id)}, blog)
             return res.matchedCount === 1
@@ -37,7 +37,7 @@ export class BlogsRepository {
         }
     }
 
-    static async deleteBlog(id: string): Promise<boolean> {
+    async deleteBlog(id: string): Promise<boolean> {
         const session = await mongoose.startSession();
         await session.startTransaction();
         try {

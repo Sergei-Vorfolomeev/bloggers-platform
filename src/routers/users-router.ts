@@ -16,15 +16,12 @@ import {UsersService} from "../services/users-service";
 import {UsersQueryRepository} from "../repositories/users-query-repository";
 import {ObjectId} from "mongodb";
 import {StatusCode} from "../utils/result";
+import {usersController} from "../composition-root";
 
 export const usersRouter = Router()
 
-class UsersController {
-    private usersService: UsersService;
-
-    constructor() {
-        this.usersService = new UsersService()
-    }
+export class UsersController {
+    constructor(private usersService: UsersService) {}
     async getUsers(
         req: RequestWithQuery<UsersQueryParams>,
         res: ResponseWithBody<Paginator<UserViewModel[]>>
@@ -92,8 +89,6 @@ class UsersController {
         }
     }
 }
-
-const usersController = new UsersController()
 
 usersRouter.get('/', usersController.getUsers)
 usersRouter.get('/:id', usersController.getUserById)

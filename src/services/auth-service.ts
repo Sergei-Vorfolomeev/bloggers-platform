@@ -15,13 +15,7 @@ import {templateForPasswordRecovery} from "../templates/template-for-password-re
 import {UsersRepository} from "../repositories/users-repository";
 
 export class AuthService {
-    private usersRepository: UsersRepository
-    private jwtService: JwtService
-
-    constructor() {
-        this.usersRepository = new UsersRepository()
-        this.jwtService = new JwtService()
-    }
+    constructor(private usersRepository: UsersRepository, private jwtService: JwtService) {}
 
     async registerUser(login: string, email: string, password: string): Promise<Result> {
         const hashedPassword = await BcryptService.generateHash(password)

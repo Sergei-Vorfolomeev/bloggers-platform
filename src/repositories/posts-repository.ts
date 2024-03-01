@@ -6,7 +6,7 @@ import mongoose from "mongoose";
 import {CommentModel} from "./models/comment.model";
 
 export class PostsRepository {
-    static async getPostById(postId: string): Promise<WithId<PostDBModel> | null> {
+    async getPostById(postId: string): Promise<WithId<PostDBModel> | null> {
         try {
             return PostModel.findById(new ObjectId(postId)).lean().exec()
         } catch (e) {
@@ -15,7 +15,7 @@ export class PostsRepository {
         }
     }
 
-    static async createPost(post: PostDBModel): Promise<string | null> {
+    async createPost(post: PostDBModel): Promise<string | null> {
         try {
             const newPost = new PostModel(post)
             await newPost.save()
@@ -26,7 +26,7 @@ export class PostsRepository {
         }
     }
 
-    static async updatePost(id: string, post: PostInputModel): Promise<boolean> {
+    async updatePost(id: string, post: PostInputModel): Promise<boolean> {
         try {
             const res = await PostModel.updateOne({_id: new ObjectId(id)}, post)
             return res.matchedCount === 1
@@ -36,7 +36,7 @@ export class PostsRepository {
         }
     }
 
-    static async deletePost(id: string): Promise<boolean> {
+    async deletePost(id: string): Promise<boolean> {
         const session = await mongoose.startSession()
         await session.startTransaction()
         try {

@@ -4,7 +4,7 @@ import {CommentModel} from "./models/comment.model";
 
 export class CommentsRepository {
 
-    static async getCommentById(commentId: string): Promise<WithId<CommentDBModel> | null> {
+     async getCommentById(commentId: string): Promise<WithId<CommentDBModel> | null> {
         try {
             return CommentModel.findById(new ObjectId(commentId)).lean().exec()
         } catch (error) {
@@ -13,7 +13,7 @@ export class CommentsRepository {
         }
     }
 
-    static async createComment(comment: CommentDBModel): Promise<string | null> {
+    async createComment(comment: CommentDBModel): Promise<string | null> {
         try {
             const newComment = new CommentModel(comment)
             await newComment.save()
@@ -24,7 +24,7 @@ export class CommentsRepository {
         }
     }
 
-    static async updateComment(id: string, updatedComment: CommentDBModel): Promise<boolean> {
+    async updateComment(id: string, updatedComment: CommentDBModel): Promise<boolean> {
         try {
             const res = await CommentModel.updateOne(
                 {_id: new ObjectId(id)},
@@ -37,7 +37,7 @@ export class CommentsRepository {
         }
     }
 
-    static async deleteCommentById(id: string): Promise<boolean> {
+    async deleteCommentById(id: string): Promise<boolean> {
         try {
             const res = await CommentModel.deleteOne({_id: new ObjectId(id)})
             return res.deletedCount === 1

@@ -1,16 +1,21 @@
 import {CommentDBModel} from "../repositories/types";
 import {CommentsRepository} from "../repositories/comments-repository";
 import {Result, StatusCode} from "../utils/result";
-import {usersRepository} from "../repositories/users-repository";
 import {PostsRepository} from "../repositories/posts-repository";
+import {UsersRepository} from "../repositories/users-repository";
 
 export class CommentsService {
-    static async createComment(postId: string, userId: string, content: string): Promise<Result<string>> {
-        const post = await PostsRepository.getPostById(postId)
+    constructor(
+        private commentsRepository: CommentsRepository,
+        private usersRepository: UsersRepository,
+        private postsRepository: PostsRepository
+    ) {}
+    async createComment(postId: string, userId: string, content: string): Promise<Result<string>> {
+        const post = await this.postsRepository.getPostById(postId)
         if (!post) {
             return new Result(StatusCode.NotFound, 'The post with provided id haven\'t been found')
         }
-        const user = await usersRepository.findUserById(userId)
+        const user = await this.usersRepository.findUserById(userId)
         if (!user) {
             return new Result(StatusCode.NotFound, 'The user haven\'t been found')
         }
@@ -23,15 +28,15 @@ export class CommentsService {
             },
             createdAt: new Date().toISOString()
         }
-        const createdCommentId = await CommentsRepository.createComment(newComment)
+        const createdCommentId = await this.commentsRepository.createComment(newComment)
         if (!createdCommentId) {
             return new Result(StatusCode.ServerError, 'The comment haven\'t been created in the DB')
         }
         return new Result(StatusCode.Success, null, createdCommentId)
     }
 
-    static async updateComment(commentId: string, userId: string, content: string): Promise<Result> {
-        const comment = await CommentsRepository.getCommentById(commentId)
+    async updateComment(commentId: string, userId: string, content: string): Promise<Result> {
+        const comment = await this.commentsRepository.getCommentById(commentId)
         if (!comment) {
             return new Result(StatusCode.NotFound, 'The comment with provided id haven\'t been found')
         }
@@ -42,22 +47,22 @@ export class CommentsService {
             ...comment,
             content
         }
-        const isUpdated =  await CommentsRepository.updateComment(commentId, updatedComment)
+        const isUpdated =  await this.commentsRepository.updateComment(commentId, updatedComment)
         if (!isUpdated) {
             return new Result(StatusCode.ServerError, 'The comment haven\'t been updated in the DB')
         }
         return new Result(StatusCode.Success)
     }
 
-    static async deleteComment(commentId: string, userId: string): Promise<Result> {
-        const comment = await CommentsRepository.getCommentById(commentId)
+    async deleteComment(commentId: string, userId: string): Promise<Result> {
+        const comment = await this.commentsRepository.getCommentById(commentId)
         if (!comment) {
             return new Result(StatusCode.NotFound, 'The comment with provided id haven\'t been found')
         }
         if (comment.commentatorInfo.userId !== userId) {
             return new Result(StatusCode.Forbidden, 'This user does not have credentials')
         }
-        const isDeleted = await CommentsRepository.deleteCommentById(commentId)
+        const isDeleted = await this.commentsRepository.deleteCommentById(commentId)
         if (!isDeleted) {
             return new Result(StatusCode.ServerError, 'The comment haven\'t been deleted')
         }

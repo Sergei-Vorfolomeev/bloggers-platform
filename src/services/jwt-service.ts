@@ -7,11 +7,7 @@ import {DevicesRepository} from "../repositories/devices-repository";
 import {UsersRepository} from "../repositories/users-repository";
 
 export class JwtService {
-    private usersRepository: UsersRepository;
-
-    constructor() {
-        this.usersRepository = new UsersRepository()
-    }
+    constructor(private usersRepository: UsersRepository) {}
     createToken(user: WithId<UserDBModel>, deviceId: string, type: 'access' | 'refresh') {
         return jwt.sign(
             {

@@ -22,25 +22,30 @@ import {commentValidators} from "../validators/comment-validators";
 import {CommentsService} from "../services/comments-service";
 import {accessTokenGuard} from "../middlewares/access-token-guard";
 import {StatusCode} from "../utils/result";
+import {PostsRepository} from "../repositories/posts-repository";
+import {postsController} from "../composition-root";
 
 export const postsRouter = Router()
 
-postsRouter.get('/', async (req: RequestWithQuery<QueryParams>, res: ResponseType) => {
-    const {sortBy, sortDirection, pageNumber, pageSize} = req.query
-    const sortParams = {
-        sortBy: sortBy ?? 'createdAt',
-        sortDirection: sortDirection ?? 'desc',
-        pageNumber: pageNumber ? +pageNumber : 1,
-        pageSize: pageSize ? +pageSize : 10,
+export class PostsController {
+    constructor(private postsService: PostsService, private commentsService: CommentsService) {
     }
-    const posts = await PostsQueryRepository.getPosts(sortParams)
-    posts
-        ? res.status(200).send(posts)
-        : res.sendStatus(500)
-})
 
-postsRouter.get('/:id',
-    async (req: RequestWithParams, res: ResponseWithBody<PostViewModel>) => {
+    async getPosts(req: RequestWithQuery<QueryParams>, res: ResponseType) {
+        const {sortBy, sortDirection, pageNumber, pageSize} = req.query
+        const sortParams = {
+            sortBy: sortBy ?? 'createdAt',
+            sortDirection: sortDirection ?? 'desc',
+            pageNumber: pageNumber ? +pageNumber : 1,
+            pageSize: pageSize ? +pageSize : 10,
+        }
+        const posts = await PostsQueryRepository.getPosts(sortParams)
+        posts
+            ? res.status(200).send(posts)
+            : res.sendStatus(500)
+    }
+
+    async getPostById(req: RequestWithParams, res: ResponseWithBody<PostViewModel>) {
         const {id} = req.params
         if (!ObjectId.isValid(id)) {
             res.sendStatus(404)
@@ -50,11 +55,10 @@ postsRouter.get('/:id',
         post
             ? res.status(200).send(post)
             : res.sendStatus(404)
-    })
+    }
 
-postsRouter.post('/', basicAuthGuard, postValidators(),
-    async (req: RequestWithBody<PostInputModel>, res: ResponseWithBody<PostViewModel>) => {
-        const {statusCode, data: createdPostId} = await PostsService.createPost(req.body)
+    async createPost(req: RequestWithBody<PostInputModel>, res: ResponseWithBody<PostViewModel>) {
+        const {statusCode, data: createdPostId} = await this.postsService.createPost(req.body)
         switch (statusCode) {
             case StatusCode.BadRequest: {
                 res.sendStatus(400);
@@ -71,16 +75,15 @@ postsRouter.post('/', basicAuthGuard, postValidators(),
                     : res.sendStatus(400)
             }
         }
-    })
+    }
 
-postsRouter.put('/:id', basicAuthGuard, postValidators(),
-    async (req: RequestWithParamsAndBody<PostInputModel>, res: ResponseType) => {
+    async updatePost(req: RequestWithParamsAndBody<PostInputModel>, res: ResponseType) {
         const {id} = req.params
         if (!ObjectId.isValid(id)) {
             res.sendStatus(404)
             return
         }
-        const {statusCode} = await PostsService.updatePost(id, req.body)
+        const {statusCode} = await this.postsService.updatePost(id, req.body)
         switch (statusCode) {
             case StatusCode.NotFound: {
                 res.sendStatus(404);
@@ -95,16 +98,15 @@ postsRouter.put('/:id', basicAuthGuard, postValidators(),
                 return
             }
         }
-    })
+    }
 
-postsRouter.delete('/:id', basicAuthGuard,
-    async (req: RequestWithParams, res: ResponseType) => {
+    async deletePost(req: RequestWithParams, res: ResponseType) {
         const {id} = req.params
         if (!ObjectId.isValid(id)) {
             res.sendStatus(404)
             return
         }
-        const {statusCode} = await PostsService.deletePost(id)
+        const {statusCode} = await this.postsService.deletePost(id)
         switch (statusCode) {
             case StatusCode.NotFound: {
                 res.sendStatus(404);
@@ -115,10 +117,9 @@ postsRouter.delete('/:id', basicAuthGuard,
                 return
             }
         }
-    })
+    }
 
-postsRouter.get('/:id/comments',
-    async (req: RequestWithParamsAndQuery<QueryParams>, res: ResponseWithBody<Paginator<CommentViewModel[]>>) => {
+    async getCommentByPostId(req: RequestWithParamsAndQuery<QueryParams>, res: ResponseWithBody<Paginator<CommentViewModel[]>>) {
         const {id} = req.params
         const {sortBy, sortDirection, pageNumber, pageSize} = req.query
         if (!ObjectId.isValid(id)) {
@@ -135,10 +136,9 @@ postsRouter.get('/:id/comments',
         comments
             ? res.status(200).send(comments)
             : res.sendStatus(404)
-    })
+    }
 
-postsRouter.post('/:id/comments', accessTokenGuard, commentValidators(),
-    async (req: RequestWithParamsAndBody<CommentInputModel>, res: ResponseWithBody<CommentViewModel>) => {
+    async createComment(req: RequestWithParamsAndBody<CommentInputModel>, res: ResponseWithBody<CommentViewModel>) {
         const {id: postId} = req.params
         const {content} = req.body
         const {id: userId} = req.user
@@ -146,7 +146,7 @@ postsRouter.post('/:id/comments', accessTokenGuard, commentValidators(),
             res.sendStatus(404)
             return
         }
-        const {statusCode, data: createdCommentId} = await CommentsService.createComment(postId, userId, content)
+        const {statusCode, data: createdCommentId} = await this.commentsService.createComment(postId, userId, content)
         switch (statusCode) {
             case StatusCode.NotFound: {
                 res.sendStatus(404)
@@ -163,5 +163,14 @@ postsRouter.post('/:id/comments', accessTokenGuard, commentValidators(),
                     : res.sendStatus(404)
             }
         }
-    })
+    }
+}
+
+postsRouter.get('/', postsController.getPosts)
+postsRouter.get('/:id', postsController.getPostById)
+postsRouter.post('/', basicAuthGuard, postValidators(), postsController.createPost)
+postsRouter.put('/:id', basicAuthGuard, postValidators(), postsController.updatePost)
+postsRouter.delete('/:id', basicAuthGuard, postsController.deletePost)
+postsRouter.get('/:id/comments', postsController.getCommentByPostId)
+postsRouter.post('/:id/comments', accessTokenGuard, commentValidators(), postsController.createComment)
 

@@ -7,11 +7,15 @@ import {CommentsService} from "../services/comments-service";
 import {accessTokenGuard} from "../middlewares/access-token-guard";
 import {StatusCode} from "../utils/result";
 import {commentValidators} from "../validators/comment-validators";
+import {commentsController} from "../composition-root";
 
 export const commentsRouter = Router()
 
-commentsRouter.get('/:id',
-    async (req: RequestWithParams, res: ResponseWithBody<CommentViewModel>) => {
+export class CommentsController {
+    constructor(private commentsService: CommentsService) {
+    }
+
+    async getCommentById(req: RequestWithParams, res: ResponseWithBody<CommentViewModel>) {
         const {id} = req.params
         if (!ObjectId.isValid(id)) {
             res.sendStatus(404)
@@ -21,27 +25,33 @@ commentsRouter.get('/:id',
         comment
             ? res.status(200).send(comment)
             : res.sendStatus(404)
-    })
+    }
 
-commentsRouter.delete('/:id', accessTokenGuard,
-    async (req: RequestWithParams, res: ResponseType) => {
+    async deleteComment(req: RequestWithParams, res: ResponseType) {
         const {id: commentId} = req.params
         const {id: userId} = req.user
         if (!ObjectId.isValid(commentId)) {
             res.sendStatus(404)
             return
         }
-        const result = await CommentsService.deleteComment(commentId, userId)
-        switch(result.statusCode) {
-            case StatusCode.NotFound: res.sendStatus(404); break
-            case StatusCode.Forbidden: res.sendStatus(403); break
-            case StatusCode.ServerError: res.sendStatus(500); break
-            case StatusCode.Success: res.sendStatus(204); break
+        const result = await this.commentsService.deleteComment(commentId, userId)
+        switch (result.statusCode) {
+            case StatusCode.NotFound:
+                res.sendStatus(404);
+                break
+            case StatusCode.Forbidden:
+                res.sendStatus(403);
+                break
+            case StatusCode.ServerError:
+                res.sendStatus(500);
+                break
+            case StatusCode.Success:
+                res.sendStatus(204);
+                break
         }
-    })
+    }
 
-commentsRouter.put('/:id', accessTokenGuard, commentValidators(),
-    async (req: RequestWithParamsAndBody<CommentInputModel>, res: ResponseType) => {
+    async updateComment(req: RequestWithParamsAndBody<CommentInputModel>, res: ResponseType) {
         const {id: commentId} = req.params
         const {content} = req.body
         const {id: userId} = req.user
@@ -49,11 +59,24 @@ commentsRouter.put('/:id', accessTokenGuard, commentValidators(),
             res.sendStatus(404)
             return
         }
-        const result = await CommentsService.updateComment(commentId, userId, content)
+        const result = await this.commentsService.updateComment(commentId, userId, content)
         switch (result.statusCode) {
-            case StatusCode.NotFound: res.sendStatus(404); break
-            case StatusCode.Forbidden: res.sendStatus(403); break
-            case StatusCode.ServerError: res.sendStatus(500); break
-            case StatusCode.Success: res.sendStatus(204); break
+            case StatusCode.NotFound:
+                res.sendStatus(404);
+                break
+            case StatusCode.Forbidden:
+                res.sendStatus(403);
+                break
+            case StatusCode.ServerError:
+                res.sendStatus(500);
+                break
+            case StatusCode.Success:
+                res.sendStatus(204);
+                break
         }
-    })
+    }
+}
+
+commentsRouter.get('/:id', commentsController.getCommentById)
+commentsRouter.delete('/:id', accessTokenGuard, commentsController.deleteComment)
+commentsRouter.put('/:id', accessTokenGuard, commentValidators(), commentsController.updateComment)

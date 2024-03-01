@@ -1,8 +1,6 @@
 import {body} from "express-validator";
 import {inputValidationMiddleware} from "../middlewares/input-validation-middleware";
-import {UsersRepository} from "../repositories/users-repository";
-
-const usersRepository = new UsersRepository()
+import {usersRepository} from "../composition-root";
 
 const validateLogin = body('login')
     .notEmpty().withMessage('Field is required')

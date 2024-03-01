@@ -6,9 +6,11 @@ import {Result, StatusCode} from "../utils/result";
 import {ErrorsMessages, FieldError} from "../utils/errors-messages";
 
 export class PostsService {
-    static async createPost(inputData: PostInputModel): Promise<Result<string>> {
+    constructor(private postsRepository: PostsRepository, private blogsRepository: BlogsRepository) {
+    }
+    async createPost(inputData: PostInputModel): Promise<Result<string>> {
         const {title, shortDescription, content, blogId} = inputData
-        const blog = await BlogsRepository.getBlogById(blogId)
+        const blog = await this.blogsRepository.getBlogById(blogId)
         if (!blog) {
             return new Result(
                 StatusCode.BadRequest,
@@ -20,16 +22,16 @@ export class PostsService {
             blogName: blog.name,
             createdAt: new Date().toISOString(),
         }
-        const createdPostId = await PostsRepository.createPost(newPost)
+        const createdPostId = await this.postsRepository.createPost(newPost)
         if (!createdPostId) {
             return new Result(StatusCode.ServerError)
         }
         return new Result(StatusCode.Created, null, createdPostId)
     }
 
-    static async updatePost(id: string, inputData: PostInputModel): Promise<Result> {
+    async updatePost(id: string, inputData: PostInputModel): Promise<Result> {
         const {title, shortDescription, content, blogId} = inputData
-        const post = await PostsRepository.getPostById(id)
+        const post = await this.postsRepository.getPostById(id)
         if (!post) {
             return new Result(StatusCode.NotFound)
         }
@@ -37,15 +39,15 @@ export class PostsService {
             ...post,
             title, shortDescription, content, blogId
         }
-        const isUpdated = await PostsRepository.updatePost(id, newPost)
+        const isUpdated = await this.postsRepository.updatePost(id, newPost)
         if (!isUpdated) {
             return new Result(StatusCode.ServerError)
         }
         return new Result(StatusCode.NoContent)
     }
 
-    static async deletePost(id: string): Promise<Result> {
-        const isDeleted = await PostsRepository.deletePost(id)
+    async deletePost(id: string): Promise<Result> {
+        const isDeleted = await this.postsRepository.deletePost(id)
         if (!isDeleted) {
             return new Result(StatusCode.NotFound)
         }
