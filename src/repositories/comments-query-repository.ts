@@ -7,7 +7,10 @@ import {SortParams} from "./types";
 import {CommentModel} from "./models/comment.model";
 
 export class CommentsQueryRepository {
-    static async getCommentById(id: string): Promise<CommentViewModel | null> {
+    constructor(protected postsQueryRepository: PostsQueryRepository) {
+    }
+
+    async getCommentById(id: string): Promise<CommentViewModel | null> {
         try {
             const comment = await CommentModel.findById(new ObjectId(id)).lean().exec()
             if (!comment) {
@@ -20,10 +23,10 @@ export class CommentsQueryRepository {
         }
     }
 
-    static async getCommentsByPostId(postId: string, sortParams: SortParams): Promise<Paginator<CommentViewModel[]> | null> {
+    async getCommentsByPostId(postId: string, sortParams: SortParams): Promise<Paginator<CommentViewModel[]> | null> {
         try {
             const {sortBy, sortDirection, pageNumber, pageSize} = sortParams
-            const post = await PostsQueryRepository.getPostById(postId)
+            const post = await this.postsQueryRepository.getPostById(postId)
             if (!post) {
                 return null
             }

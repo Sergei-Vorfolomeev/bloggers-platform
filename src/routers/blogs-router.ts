@@ -27,7 +27,11 @@ import {blogsController} from "../composition-root";
 export const blogsRouter = Router()
 
 export class BlogsController {
-    constructor(private blogsService: BlogsService) {
+    constructor(
+        protected blogsService: BlogsService,
+        protected blogsQueryRepository: BlogsQueryRepository,
+        protected postsQueryRepository: PostsQueryRepository,
+        ) {
     }
 
     async getBlogs(req: RequestWithQuery<BlogsQueryParams>, res: ResponseWithBody<Paginator<BlogViewModel[]> | null>) {
@@ -39,7 +43,7 @@ export class BlogsController {
             pageNumber: pageNumber ? +pageNumber : 1,
             pageSize: pageSize ? +pageSize : 10,
         }
-        const blogs = await BlogsQueryRepository.getBlogs(sortParams)
+        const blogs = await this.blogsQueryRepository.getBlogs(sortParams)
         blogs
             ? res.status(200).send(blogs)
             : res.sendStatus(555)
@@ -51,7 +55,7 @@ export class BlogsController {
             res.sendStatus(404)
             return
         }
-        const blog = await BlogsQueryRepository.getBlogById(id)
+        const blog = await this.blogsQueryRepository.getBlogById(id)
         blog
             ? res.status(200).send(blog)
             : res.sendStatus(404)
@@ -70,7 +74,7 @@ export class BlogsController {
             pageNumber: pageNumber ? +pageNumber : 1,
             pageSize: pageSize ? +pageSize : 10,
         }
-        const posts = await PostsQueryRepository.getPostsByBlogId(id, sortParams)
+        const posts = await this.postsQueryRepository.getPostsByBlogId(id, sortParams)
         posts
             ? res.status(200).send(posts)
             : res.sendStatus(404)
@@ -84,7 +88,7 @@ export class BlogsController {
                 return
             }
             case StatusCode.Created: {
-                const blog = await BlogsQueryRepository.getBlogById(createdBlogId!)
+                const blog = await this.blogsQueryRepository.getBlogById(createdBlogId!)
                 blog
                     ? res.status(201).send(blog)
                     : res.sendStatus(400)
@@ -113,7 +117,7 @@ export class BlogsController {
                 return
             }
             case StatusCode.Created: {
-                const post = await PostsQueryRepository.getPostById(createdPostId!)
+                const post = await this.postsQueryRepository.getPostById(createdPostId!)
                 post
                     ? res.status(201).send(post)
                     : res.sendStatus(400)

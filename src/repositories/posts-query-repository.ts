@@ -7,7 +7,10 @@ import {BlogsQueryRepository} from "./blogs-query-repository";
 import {PostModel} from "./models/post.model";
 
 export class PostsQueryRepository {
-    static async getPostsWithFilter(filter: {}, sortParams: SortParams): Promise<Paginator<PostViewModel[]> | null> {
+    constructor(protected blogsQueryRepository: BlogsQueryRepository) {
+    }
+
+    async getPostsWithFilter(filter: {}, sortParams: SortParams): Promise<Paginator<PostViewModel[]> | null> {
         try {
             const {sortBy, sortDirection, pageSize, pageNumber} = sortParams
             const posts = await PostModel
@@ -32,7 +35,7 @@ export class PostsQueryRepository {
         }
     }
 
-    static async getPosts(sortParams: SortParams): Promise<Paginator<PostViewModel[]> | null> {
+    async getPosts(sortParams: SortParams): Promise<Paginator<PostViewModel[]> | null> {
         try {
             let filter = {}
             return await this.getPostsWithFilter(filter, sortParams)
@@ -42,7 +45,7 @@ export class PostsQueryRepository {
         }
     }
 
-    static async getPostById(id: string): Promise<PostViewModel | null> {
+    async getPostById(id: string): Promise<PostViewModel | null> {
         try {
             const post = await PostModel.findById(new ObjectId(id))
             if (!post) {
@@ -55,9 +58,9 @@ export class PostsQueryRepository {
         }
     }
 
-    static async getPostsByBlogId(id: string, sortParams: SortParams): Promise<Paginator<PostViewModel[]> | null> {
+    async getPostsByBlogId(id: string, sortParams: SortParams): Promise<Paginator<PostViewModel[]> | null> {
         try {
-            const blog = await BlogsQueryRepository.getBlogById(id)
+            const blog = await this.blogsQueryRepository.getBlogById(id)
             if (!blog) {
                 return null
             }

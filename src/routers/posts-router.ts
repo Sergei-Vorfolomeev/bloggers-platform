@@ -8,7 +8,8 @@ import {
     QueryParams,
     RequestWithBody,
     RequestWithParams,
-    RequestWithParamsAndBody, RequestWithParamsAndQuery,
+    RequestWithParamsAndBody,
+    RequestWithParamsAndQuery,
     RequestWithQuery,
     ResponseType,
     ResponseWithBody
@@ -22,13 +23,17 @@ import {commentValidators} from "../validators/comment-validators";
 import {CommentsService} from "../services/comments-service";
 import {accessTokenGuard} from "../middlewares/access-token-guard";
 import {StatusCode} from "../utils/result";
-import {PostsRepository} from "../repositories/posts-repository";
 import {postsController} from "../composition-root";
 
 export const postsRouter = Router()
 
 export class PostsController {
-    constructor(private postsService: PostsService, private commentsService: CommentsService) {
+    constructor(
+        protected postsService: PostsService,
+        protected commentsService: CommentsService,
+        protected postsQueryRepository: PostsQueryRepository,
+        protected commentsQueryRepository: CommentsQueryRepository,
+    ) {
     }
 
     async getPosts(req: RequestWithQuery<QueryParams>, res: ResponseType) {
@@ -39,7 +44,7 @@ export class PostsController {
             pageNumber: pageNumber ? +pageNumber : 1,
             pageSize: pageSize ? +pageSize : 10,
         }
-        const posts = await PostsQueryRepository.getPosts(sortParams)
+        const posts = await this.postsQueryRepository.getPosts(sortParams)
         posts
             ? res.status(200).send(posts)
             : res.sendStatus(500)
@@ -51,7 +56,7 @@ export class PostsController {
             res.sendStatus(404)
             return
         }
-        const post = await PostsQueryRepository.getPostById(id)
+        const post = await this.postsQueryRepository.getPostById(id)
         post
             ? res.status(200).send(post)
             : res.sendStatus(404)
@@ -69,7 +74,7 @@ export class PostsController {
                 return
             }
             case StatusCode.Created: {
-                const post = await PostsQueryRepository.getPostById(createdPostId!)
+                const post = await this.postsQueryRepository.getPostById(createdPostId!)
                 post
                     ? res.status(201).send(post)
                     : res.sendStatus(400)
@@ -132,7 +137,7 @@ export class PostsController {
             pageNumber: pageNumber ? +pageNumber : 1,
             pageSize: pageSize ? +pageSize : 10,
         }
-        const comments = await CommentsQueryRepository.getCommentsByPostId(id, sortParams)
+        const comments = await this.commentsQueryRepository.getCommentsByPostId(id, sortParams)
         comments
             ? res.status(200).send(comments)
             : res.sendStatus(404)
@@ -157,7 +162,7 @@ export class PostsController {
                 return
             }
             case StatusCode.Success: {
-                const createdComment = await CommentsQueryRepository.getCommentById(createdCommentId!)
+                const createdComment = await this.commentsQueryRepository.getCommentById(createdCommentId!)
                 createdComment
                     ? res.status(201).send(createdComment)
                     : res.sendStatus(404)

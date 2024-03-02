@@ -27,7 +27,10 @@ import {authController} from "../composition-root";
 export const authRouter = Router()
 
 export class AuthController {
-    constructor(private authService: AuthService) {
+    constructor(
+        protected authService: AuthService,
+        protected usersQueryRepository: UsersQueryRepository,
+    ) {
     }
 
     async login(req: RequestWithBody<LoginInputModel>, res: ResponseWithBody<LoginSuccessViewModel>) {
@@ -51,7 +54,7 @@ export class AuthController {
 
     async me(req: RequestType, res: ResponseWithBody<UserOutputModel>) {
         const {id: userId} = req.user
-        const user = await UsersQueryRepository.getUserById(userId)
+        const user = await this.usersQueryRepository.getUserById(userId)
         if (!user) {
             res.sendStatus(401)
             return

@@ -1,8 +1,6 @@
 import {NextFunction, Request, Response} from "express";
-import {JwtService} from "../services/jwt-service";
-import {UsersQueryRepository} from "../repositories/users-query-repository";
 import {JwtPayload} from "jsonwebtoken";
-import {jwtService} from "../composition-root";
+import {jwtService, usersQueryRepository} from "../composition-root";
 
 export const accessTokenGuard = async (req: Request, res: Response, next: NextFunction) => {
     if (!req.headers.authorization) {
@@ -19,7 +17,7 @@ export const accessTokenGuard = async (req: Request, res: Response, next: NextFu
         res.sendStatus(401)
         return
     }
-    const user = await UsersQueryRepository.getUserById(payload.userId)
+    const user = await usersQueryRepository.getUserById(payload.userId)
     if (!user) {
         res.sendStatus(401)
         return

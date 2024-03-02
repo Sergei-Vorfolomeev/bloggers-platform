@@ -6,7 +6,7 @@ import {Paginator} from "../routers/types";
 import {BlogModel} from "./models/blog.model";
 
 export class BlogsQueryRepository {
-    static async getBlogs(sortParams: BlogsSortParams): Promise<Paginator<BlogViewModel[]> | null> {
+    async getBlogs(sortParams: BlogsSortParams): Promise<Paginator<BlogViewModel[]> | null> {
         try {
             const {searchNameTerm, sortBy, sortDirection, pageNumber, pageSize} = sortParams
             let filter = {}
@@ -39,7 +39,7 @@ export class BlogsQueryRepository {
         }
     }
 
-    static async getBlogById(id: string): Promise<BlogViewModel | null> {
+    async getBlogById(id: string): Promise<BlogViewModel | null> {
         try {
             const blog = await BlogModel.findById(new ObjectId(id)).lean().exec()
             if (!blog) {

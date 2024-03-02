@@ -12,8 +12,10 @@ import {commentsController} from "../composition-root";
 export const commentsRouter = Router()
 
 export class CommentsController {
-    constructor(private commentsService: CommentsService) {
-    }
+    constructor(
+        private commentsService: CommentsService,
+        private commentsQueryRepository: CommentsQueryRepository,
+    ) {}
 
     async getCommentById(req: RequestWithParams, res: ResponseWithBody<CommentViewModel>) {
         const {id} = req.params
@@ -21,7 +23,7 @@ export class CommentsController {
             res.sendStatus(404)
             return
         }
-        const comment = await CommentsQueryRepository.getCommentById(id)
+        const comment = await this.commentsQueryRepository.getCommentById(id)
         comment
             ? res.status(200).send(comment)
             : res.sendStatus(404)

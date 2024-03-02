@@ -6,7 +6,7 @@ import {Paginator} from "../routers/types";
 import {UserModel} from "./models/user.model";
 
 export class UsersQueryRepository {
-    static async getUsers(sortParams: UsersSortParams): Promise<Paginator<UserViewModel[]> | null> {
+    async getUsers(sortParams: UsersSortParams): Promise<Paginator<UserViewModel[]> | null> {
         try {
             const {searchLoginTerm, searchEmailTerm, sortBy, sortDirection, pageSize, pageNumber} = sortParams
             const filter: any = {}
@@ -44,7 +44,7 @@ export class UsersQueryRepository {
         }
     }
 
-    static async getUserById(id: string): Promise<UserViewModel | null> {
+    async getUserById(id: string): Promise<UserViewModel | null> {
         const user = await UserModel.findById(new ObjectId(id)).lean().exec()
         if (!user) {
             return null
