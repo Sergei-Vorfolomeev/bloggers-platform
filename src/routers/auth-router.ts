@@ -175,12 +175,12 @@ export class AuthController {
 }
 
 
-authRouter.post('/login', rateLimiter, validateLoginOrEmail(), authController.login)
-authRouter.get('/me', accessTokenGuard, authController.me)
-authRouter.post('/registration', rateLimiter, userValidators(), authController.registration)
-authRouter.post('/registration-confirmation', rateLimiter, authController.registrationConfirmation)
-authRouter.post('/registration-email-resending', rateLimiter, emailValidator(), authController.registrationEmailResending)
-authRouter.post('/refresh-token', authController.refreshToken)
-authRouter.post('/logout', authController.logout)
-authRouter.post('/password-recovery', rateLimiter, emailValidator(), authController.passwordRecovery)
-authRouter.post('/new-password', rateLimiter, newPasswordValidators(), authController.newPassword)
+authRouter.post('/login', rateLimiter, validateLoginOrEmail(), authController.login.bind(authController))
+authRouter.get('/me', accessTokenGuard, authController.me.bind(authController))
+authRouter.post('/registration', rateLimiter, userValidators(), authController.registration.bind(authController))
+authRouter.post('/registration-confirmation', rateLimiter, authController.registrationConfirmation.bind(authController))
+authRouter.post('/registration-email-resending', rateLimiter, emailValidator(), authController.registrationEmailResending.bind(authController))
+authRouter.post('/refresh-token', authController.refreshToken.bind(authController))
+authRouter.post('/logout', authController.logout.bind(authController))
+authRouter.post('/password-recovery', rateLimiter, emailValidator(), authController.passwordRecovery.bind(authController))
+authRouter.post('/new-password', rateLimiter, newPasswordValidators(), authController.newPassword.bind(authController))

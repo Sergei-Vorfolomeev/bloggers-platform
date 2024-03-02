@@ -83,6 +83,6 @@ export class DevicesController {
     }
 }
 
-devicesRouter.get('/', devicesController.getDevices)
-devicesRouter.delete('/:id', devicesController.deleteDeviceById)
-devicesRouter.delete('/', devicesController.deleteDevices)
+devicesRouter.get('/', devicesController.getDevices.bind(devicesController))
+devicesRouter.delete('/:id', devicesController.deleteDeviceById.bind(devicesController))
+devicesRouter.delete('/', devicesController.deleteDevices.bind(devicesController))

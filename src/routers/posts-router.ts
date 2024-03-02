@@ -166,11 +166,11 @@ export class PostsController {
     }
 }
 
-postsRouter.get('/', postsController.getPosts)
-postsRouter.get('/:id', postsController.getPostById)
-postsRouter.post('/', basicAuthGuard, postValidators(), postsController.createPost)
-postsRouter.put('/:id', basicAuthGuard, postValidators(), postsController.updatePost)
-postsRouter.delete('/:id', basicAuthGuard, postsController.deletePost)
-postsRouter.get('/:id/comments', postsController.getCommentByPostId)
-postsRouter.post('/:id/comments', accessTokenGuard, commentValidators(), postsController.createComment)
+postsRouter.get('/', postsController.getPosts.bind(postsController))
+postsRouter.get('/:id', postsController.getPostById.bind(postsController))
+postsRouter.post('/', basicAuthGuard, postValidators(), postsController.createPost.bind(postsController))
+postsRouter.put('/:id', basicAuthGuard, postValidators(), postsController.updatePost.bind(postsController))
+postsRouter.delete('/:id', basicAuthGuard, postsController.deletePost.bind(postsController))
+postsRouter.get('/:id/comments', postsController.getCommentByPostId.bind(postsController))
+postsRouter.post('/:id/comments', accessTokenGuard, commentValidators(), postsController.createComment.bind(postsController))
 

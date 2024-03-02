@@ -22,7 +22,7 @@ export const usersRouter = Router()
 
 export class UsersController {
     constructor(private usersService: UsersService) {}
-    async getUsers(
+    async getUsers (
         req: RequestWithQuery<UsersQueryParams>,
         res: ResponseWithBody<Paginator<UserViewModel[]>>
     ) {
@@ -41,7 +41,7 @@ export class UsersController {
             : res.sendStatus(555)
     }
 
-    async getUserById(req: RequestWithParams, res: ResponseWithBody<UserViewModel>) {
+    async getUserById (req: RequestWithParams, res: ResponseWithBody<UserViewModel>) {
         const {id} = req.params
         if (!ObjectId.isValid(id)) {
             res.sendStatus(404)
@@ -53,7 +53,7 @@ export class UsersController {
             : res.sendStatus(404)
     }
 
-    async createUser(req: RequestWithBody<UserInputModel>, res: ResponseWithBody<UserViewModel>) {
+    async createUser (req: RequestWithBody<UserInputModel>, res: ResponseWithBody<UserViewModel>) {
         const {login, email, password} = req.body
         const {statusCode, data: createdUserId} = await this.usersService.createUser(login, email, password)
         switch (statusCode) {
@@ -70,7 +70,7 @@ export class UsersController {
         }
     }
 
-    async deleteUser(req: RequestWithParams, res: ResponseType) {
+    async deleteUser (req: RequestWithParams, res: ResponseType) {
         const {id} = req.params
         if (!ObjectId.isValid(id)) {
             res.sendStatus(404)
@@ -90,7 +90,7 @@ export class UsersController {
     }
 }
 
-usersRouter.get('/', usersController.getUsers)
-usersRouter.get('/:id', usersController.getUserById)
-usersRouter.post('/', basicAuthGuard, userValidators(), usersController.createUser)
-usersRouter.delete('/:id', basicAuthGuard, usersController.deleteUser)
+usersRouter.get('/', usersController.getUsers.bind(usersController))
+usersRouter.get('/:id', usersController.getUserById.bind(usersController))
+usersRouter.post('/', basicAuthGuard, userValidators(), usersController.createUser.bind(usersController))
+usersRouter.delete('/:id', basicAuthGuard, usersController.deleteUser.bind(usersController))

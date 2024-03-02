@@ -77,6 +77,6 @@ export class CommentsController {
     }
 }
 
-commentsRouter.get('/:id', commentsController.getCommentById)
-commentsRouter.delete('/:id', accessTokenGuard, commentsController.deleteComment)
-commentsRouter.put('/:id', accessTokenGuard, commentValidators(), commentsController.updateComment)
+commentsRouter.get('/:id', commentsController.getCommentById.bind(commentsRouter))
+commentsRouter.delete('/:id', accessTokenGuard, commentsController.deleteComment.bind(commentsRouter))
+commentsRouter.put('/:id', accessTokenGuard, commentValidators(), commentsController.updateComment.bind(commentsRouter))

@@ -12,6 +12,8 @@ import {BlogsRepository} from "./repositories/blogs-repository";
 import {CommentsService} from "./services/comments-service";
 import {CommentsRepository} from "./repositories/comments-repository";
 import {CommentsController} from "./routers/comments-router";
+import {BlogsController} from "./routers/blogs-router";
+import {BlogsService} from "./services/blogs-service";
 
 export const usersRepository = new UsersRepository()
 export const blogsRepository = new BlogsRepository()
@@ -22,10 +24,12 @@ export const jwtService = new JwtService(usersRepository)
 export const usersService = new UsersService(usersRepository, jwtService)
 export const authService = new AuthService(usersRepository, jwtService)
 export const postsService = new PostsService(postsRepository, blogsRepository)
+export const blogsService = new BlogsService(blogsRepository, postsService)
 export const commentsService = new CommentsService(commentsRepository, usersRepository, postsRepository)
 
-export const usersController = new UsersController(usersService)
 export const authController = new AuthController(authService)
+export const usersController = new UsersController(usersService)
 export const devicesController = new DevicesController(usersService)
+export const blogsController = new BlogsController(blogsService)
 export const postsController = new PostsController(postsService, commentsService)
 export const commentsController = new CommentsController(commentsService)

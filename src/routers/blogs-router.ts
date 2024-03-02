@@ -22,58 +22,62 @@ import {BlogViewModel, PostViewModel} from "../services/types";
 import {postValidatorsWithoutBlogIdValidation} from "../validators/post-validators";
 import {PostsQueryRepository} from "../repositories/posts-query-repository";
 import {StatusCode} from "../utils/result";
+import {blogsController} from "../composition-root";
 
 export const blogsRouter = Router()
 
-blogsRouter.get('/', async (req: RequestWithQuery<BlogsQueryParams>, res: ResponseWithBody<Paginator<BlogViewModel[]> | null>) => {
-    const {searchNameTerm, sortBy, sortDirection, pageNumber, pageSize} = req.query
-    const sortParams = {
-        searchNameTerm: searchNameTerm ?? null,
-        sortBy: sortBy ?? 'createdAt',
-        sortDirection: sortDirection ?? 'desc',
-        pageNumber: pageNumber ? +pageNumber : 1,
-        pageSize: pageSize ? +pageSize : 10,
+export class BlogsController {
+    constructor(private blogsService: BlogsService) {
     }
-    const blogs = await BlogsQueryRepository.getBlogs(sortParams)
-    blogs
-        ? res.status(200).send(blogs)
-        : res.sendStatus(555)
-})
 
-blogsRouter.get('/:id', async (req: RequestWithParams, res: ResponseWithBody<BlogViewModel>) => {
-    const {id} = req.params
-    if (!ObjectId.isValid(id)) {
-        res.sendStatus(404)
-        return
+    async getBlogs(req: RequestWithQuery<BlogsQueryParams>, res: ResponseWithBody<Paginator<BlogViewModel[]> | null>) {
+        const {searchNameTerm, sortBy, sortDirection, pageNumber, pageSize} = req.query
+        const sortParams = {
+            searchNameTerm: searchNameTerm ?? null,
+            sortBy: sortBy ?? 'createdAt',
+            sortDirection: sortDirection ?? 'desc',
+            pageNumber: pageNumber ? +pageNumber : 1,
+            pageSize: pageSize ? +pageSize : 10,
+        }
+        const blogs = await BlogsQueryRepository.getBlogs(sortParams)
+        blogs
+            ? res.status(200).send(blogs)
+            : res.sendStatus(555)
     }
-    const blog = await BlogsQueryRepository.getBlogById(id)
-    blog
-        ? res.status(200).send(blog)
-        : res.sendStatus(404)
-})
 
-blogsRouter.get('/:id/posts', async (req: RequestWithParamsAndQuery<QueryParams>, res: ResponseWithBody<Paginator<PostViewModel[]> | null>) => {
-    const {id} = req.params
-    const {sortBy, sortDirection, pageNumber, pageSize} = req.query
-    if (!ObjectId.isValid(id)) {
-        res.sendStatus(404)
-        return
+    async getBlogById(req: RequestWithParams, res: ResponseWithBody<BlogViewModel>) {
+        const {id} = req.params
+        if (!ObjectId.isValid(id)) {
+            res.sendStatus(404)
+            return
+        }
+        const blog = await BlogsQueryRepository.getBlogById(id)
+        blog
+            ? res.status(200).send(blog)
+            : res.sendStatus(404)
     }
-    const sortParams = {
-        sortBy: sortBy ?? 'createdAt',
-        sortDirection: sortDirection ?? 'desc',
-        pageNumber: pageNumber ? +pageNumber : 1,
-        pageSize: pageSize ? +pageSize : 10,
-    }
-    const posts = await PostsQueryRepository.getPostsByBlogId(id, sortParams)
-    posts
-        ? res.status(200).send(posts)
-        : res.sendStatus(404)
-})
 
-blogsRouter.post('/', basicAuthGuard, blogValidators(),
-    async (req: RequestWithBody<BlogInputModel>, res: ResponseType) => {
-        const {statusCode, data: createdBlogId} = await BlogsService.createBlog(req.body)
+    async getPostsByBlogId(req: RequestWithParamsAndQuery<QueryParams>, res: ResponseWithBody<Paginator<PostViewModel[]> | null>) {
+        const {id} = req.params
+        const {sortBy, sortDirection, pageNumber, pageSize} = req.query
+        if (!ObjectId.isValid(id)) {
+            res.sendStatus(404)
+            return
+        }
+        const sortParams = {
+            sortBy: sortBy ?? 'createdAt',
+            sortDirection: sortDirection ?? 'desc',
+            pageNumber: pageNumber ? +pageNumber : 1,
+            pageSize: pageSize ? +pageSize : 10,
+        }
+        const posts = await PostsQueryRepository.getPostsByBlogId(id, sortParams)
+        posts
+            ? res.status(200).send(posts)
+            : res.sendStatus(404)
+    }
+
+    async createBlog(req: RequestWithBody<BlogInputModel>, res: ResponseType) {
+        const {statusCode, data: createdBlogId} = await this.blogsService.createBlog(req.body)
         switch (statusCode) {
             case StatusCode.ServerError: {
                 res.sendStatus(555);
@@ -86,16 +90,15 @@ blogsRouter.post('/', basicAuthGuard, blogValidators(),
                     : res.sendStatus(400)
             }
         }
-    })
+    }
 
-blogsRouter.post('/:id/posts', basicAuthGuard, postValidatorsWithoutBlogIdValidation(),
-    async (req: RequestWithParamsAndBody<Omit<PostInputModel, 'blogId'>>, res: ResponseType) => {
+    async createPostWithinBlog(req: RequestWithParamsAndBody<Omit<PostInputModel, 'blogId'>>, res: ResponseType) {
         const {id} = req.params
         if (!ObjectId.isValid(id)) {
             res.sendStatus(404)
             return
         }
-        const {statusCode, data: createdPostId} = await BlogsService.createPostWithinBlog(id, req.body)
+        const {statusCode, data: createdPostId} = await this.blogsService.createPostWithinBlog(id, req.body)
         switch (statusCode) {
             case StatusCode.BadRequest: {
                 res.sendStatus(400);
@@ -116,16 +119,15 @@ blogsRouter.post('/:id/posts', basicAuthGuard, postValidatorsWithoutBlogIdValida
                     : res.sendStatus(400)
             }
         }
-    })
+    }
 
-blogsRouter.put('/:id', basicAuthGuard, blogValidators(),
-    async (req: RequestWithParamsAndBody<BlogInputModel>, res: ResponseType) => {
+    async updateBlog(req: RequestWithParamsAndBody<BlogInputModel>, res: ResponseType) {
         const {id} = req.params
         if (!ObjectId.isValid(id)) {
             res.sendStatus(404)
             return
         }
-        const {statusCode} = await BlogsService.updateBlog(id, req.body)
+        const {statusCode} = await this.blogsService.updateBlog(id, req.body)
         switch (statusCode) {
             case StatusCode.NotFound: {
                 res.sendStatus(404);
@@ -140,16 +142,15 @@ blogsRouter.put('/:id', basicAuthGuard, blogValidators(),
                 return
             }
         }
-    })
+    }
 
-blogsRouter.delete('/:id', basicAuthGuard,
-    async (req: RequestWithParams, res: ResponseType) => {
+    async deleteBlog(req: RequestWithParams, res: ResponseType) {
         const {id} = req.params
         if (!ObjectId.isValid(id)) {
             res.sendStatus(404)
             return
         }
-        const {statusCode} = await BlogsService.deleteBlog(id)
+        const {statusCode} = await this.blogsService.deleteBlog(id)
         switch (statusCode) {
             case StatusCode.NotFound: {
                 res.sendStatus(404);
@@ -160,4 +161,13 @@ blogsRouter.delete('/:id', basicAuthGuard,
                 return
             }
         }
-    })
+    }
+}
+
+blogsRouter.get('/', blogsController.getBlogs.bind(blogsController))
+blogsRouter.get('/:id', blogsController.getBlogById.bind(blogsController))
+blogsRouter.get('/:id/posts', blogsController.getPostsByBlogId.bind(blogsController))
+blogsRouter.post('/', basicAuthGuard, blogValidators(), blogsController.createBlog.bind(blogsController))
+blogsRouter.post('/:id/posts', basicAuthGuard, postValidatorsWithoutBlogIdValidation(), blogsController.createPostWithinBlog.bind(blogsController))
+blogsRouter.put('/:id', basicAuthGuard, blogValidators(), blogsController.updateBlog.bind(blogsController))
+blogsRouter.delete('/:id', basicAuthGuard, blogsController.deleteBlog.bind(blogsController))
