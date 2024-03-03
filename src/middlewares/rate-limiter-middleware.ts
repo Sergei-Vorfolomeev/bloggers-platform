@@ -1,7 +1,7 @@
 import {Request, Response, NextFunction} from "express";
 import {sub} from "date-fns/sub";
 import {ConnectionDBModel} from "../repositories/types";
-import {ConnectionModel} from "../repositories/models/connection.model";
+import {ConnectionModel} from "../db/mongoose/models/connection.model";
 
 export const rateLimiter = async (req: Request, res: Response, next: NextFunction) => {
     const {ip, originalUrl} = req

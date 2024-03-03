@@ -3,7 +3,7 @@ import {ObjectId} from "mongodb";
 import {BlogsSortParams} from "./types";
 import {BlogViewModel} from "../services/types";
 import {Paginator} from "../routers/types";
-import {BlogModel} from "./models/blog.model";
+import {BlogModel} from "../db/mongoose/models/blog.model";
 
 export class BlogsQueryRepository {
     async getBlogs(sortParams: BlogsSortParams): Promise<Paginator<BlogViewModel[]> | null> {

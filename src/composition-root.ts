@@ -1,17 +1,24 @@
-import {UsersRepository} from "./repositories/users-repository";
-import {UsersService} from "./services/users-service";
-import {JwtService} from "./services/jwt-service";
-import {AuthService} from "./services/auth-service";
-import {PostsRepository} from "./repositories/posts-repository";
-import {PostsService} from "./services/posts-service";
-import {BlogsRepository} from "./repositories/blogs-repository";
-import {CommentsService} from "./services/comments-service";
-import {CommentsRepository} from "./repositories/comments-repository";
-import {BlogsService} from "./services/blogs-service";
-import {UsersQueryRepository} from "./repositories/users-query-repository";
-import {BlogsQueryRepository} from "./repositories/blogs-query-repository";
-import {CommentsQueryRepository} from "./repositories/comments-query-repository";
-import {PostsQueryRepository} from "./repositories/posts-query-repository";
+import {
+    UsersRepository,
+    PostsRepository,
+    BlogsRepository,
+    CommentsRepository,
+    UsersQueryRepository,
+    BlogsQueryRepository,
+    CommentsQueryRepository,
+    PostsQueryRepository, DevicesRepository
+} from "./repositories";
+import {
+    UsersService,
+    JwtService,
+    AuthService,
+    PostsService,
+    CommentsService,
+    BlogsService,
+    NodemailerService,
+    BcryptService,
+    CryptoService,
+} from "./services";
 import {
     UsersController,
     BlogsController,
@@ -29,10 +36,21 @@ export const postsRepository = new PostsRepository()
 export const postsQueryRepository = new PostsQueryRepository(blogsQueryRepository)
 export const commentsRepository = new CommentsRepository()
 export const commentsQueryRepository = new CommentsQueryRepository(postsQueryRepository)
+export const devicesRepository = new DevicesRepository()
 
-export const jwtService = new JwtService(usersRepository)
-export const usersService = new UsersService(usersRepository, jwtService)
-export const authService = new AuthService(usersRepository, jwtService)
+export const cryptoService = new CryptoService()
+export const nodemailerService = new NodemailerService()
+export const bcryptService = new BcryptService()
+export const jwtService = new JwtService(usersRepository, devicesRepository, cryptoService)
+export const usersService = new UsersService(usersRepository, devicesRepository, jwtService, bcryptService)
+export const authService = new AuthService(
+    usersRepository,
+    devicesRepository,
+    nodemailerService,
+    jwtService,
+    bcryptService,
+    cryptoService,
+)
 export const postsService = new PostsService(postsRepository, blogsRepository)
 export const blogsService = new BlogsService(blogsRepository, postsService)
 export const commentsService = new CommentsService(commentsRepository, usersRepository, postsRepository)

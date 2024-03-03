@@ -1,24 +1,27 @@
-import {BcryptService} from "./bcrypt-service";
+import {BcryptService, JwtService, CryptoService, NodemailerService} from "./index";
 import {DeviceDBModel, UserDBModel} from "../repositories/types";
 import {randomUUID} from "crypto";
 import {add} from "date-fns/add";
 import {Result, StatusCode} from "../utils/result";
-import {NodemailerService} from "./nodemailer-service";
 import {templateForRegistration} from "../templates/template-for-registration";
 import {ErrorsMessages, FieldError} from "../utils/errors-messages";
 import {TokensPayload} from "./types";
-import {JwtService} from "./jwt-service";
 import {ObjectId, WithId} from "mongodb";
-import {CryptoService} from "./crypto-service";
-import {DevicesRepository} from "../repositories/devices-repository";
 import {templateForPasswordRecovery} from "../templates/template-for-password-recovery";
-import {UsersRepository} from "../repositories/users-repository";
+import {DevicesRepository, UsersRepository} from "../repositories";
 
 export class AuthService {
-    constructor(private usersRepository: UsersRepository, private jwtService: JwtService) {}
+    constructor(
+        protected usersRepository: UsersRepository,
+        protected devicesRepository: DevicesRepository,
+        protected nodemailerService: NodemailerService,
+        protected jwtService: JwtService,
+        protected bcryptService: BcryptService,
+        protected cryptoService: CryptoService,
+    ) {}
 
     async registerUser(login: string, email: string, password: string): Promise<Result> {
-        const hashedPassword = await BcryptService.generateHash(password)
+        const hashedPassword = await this.bcryptService.generateHash(password)
         if (!hashedPassword) {
             return new Result(StatusCode.ServerError, 'Error with hashing password')
         }
@@ -40,7 +43,7 @@ export class AuthService {
         if (!userId) {
             return new Result(StatusCode.ServerError, 'Error with creating user in db')
         }
-        const info = await NodemailerService.sendEmail(email, 'Confirm your email', templateForRegistration(newUser.emailConfirmation.confirmationCode))
+        const info = await this.nodemailerService.sendEmail(email, 'Confirm your email', templateForRegistration(newUser.emailConfirmation.confirmationCode))
         if (!info) {
             return new Result(StatusCode.ServerError, 'Error with sending email')
         }
@@ -92,7 +95,7 @@ export class AuthService {
             )
         }
         const newCode = randomUUID()
-        const info = await NodemailerService.sendEmail(email, 'Confirm your email', templateForRegistration(newCode))
+        const info = await this.nodemailerService.sendEmail(email, 'Confirm your email', templateForRegistration(newCode))
         if (!info) {
             return new Result(
                 StatusCode.ServerError,
@@ -119,7 +122,7 @@ export class AuthService {
                 )
             )
         }
-        const isMatched = await BcryptService.comparePasswords(password, user.password)
+        const isMatched = await this.bcryptService.comparePasswords(password, user.password)
         if (!isMatched) {
             return new Result(
                 StatusCode.Unauthorized,
@@ -145,7 +148,7 @@ export class AuthService {
                 seconds: 20
             }).toISOString(),
         }
-        await DevicesRepository.addNewDevice(newDevice)
+        await this.devicesRepository.addNewDevice(newDevice)
         return new Result(StatusCode.Success, null, {
             accessToken: tokens.accessToken,
             refreshToken: tokens.refreshToken
@@ -158,7 +161,7 @@ export class AuthService {
     ): Promise<TokensPayload & { encryptedRefreshToken: string } | null> {
         const accessToken = this.jwtService.createToken(user, deviceId, 'access')
         const refreshToken = this.jwtService.createToken(user, deviceId, 'refresh')
-        const encryptedRefreshToken = CryptoService.encrypt(refreshToken)
+        const encryptedRefreshToken = this.cryptoService.encrypt(refreshToken)
         return {accessToken, refreshToken, encryptedRefreshToken}
     }
 
@@ -181,7 +184,7 @@ export class AuthService {
             }).toISOString(),
         }
         debugger
-        const isUpdated = await DevicesRepository.updateRefreshToken(deviceWithNewRefreshToken)
+        const isUpdated = await this.devicesRepository.updateRefreshToken(deviceWithNewRefreshToken)
         if (!isUpdated) {
             return new Result(StatusCode.ServerError)
         }
@@ -196,7 +199,7 @@ export class AuthService {
         if (!payload) {
             return new Result(StatusCode.Unauthorized)
         }
-        const isDeleted = await DevicesRepository.deleteDevice(payload.device._id.toString())
+        const isDeleted = await this.devicesRepository.deleteDevice(payload.device._id.toString())
         if (!isDeleted) {
             return new Result(StatusCode.ServerError)
         }
@@ -213,7 +216,7 @@ export class AuthService {
         if (!isAdded) {
             return new Result(StatusCode.ServerError)
         }
-        const isSent = await NodemailerService.sendEmail(email, 'Password recovery', templateForPasswordRecovery(recoveryCode))
+        const isSent = await this.nodemailerService.sendEmail(email, 'Password recovery', templateForPasswordRecovery(recoveryCode))
         if (!isSent) {
             return new Result(StatusCode.ServerError)
         }
@@ -225,7 +228,7 @@ export class AuthService {
         if (!user) {
             return new Result(StatusCode.BadRequest)
         }
-        const hashedPassword = await BcryptService.generateHash(newPassword)
+        const hashedPassword = await this.bcryptService.generateHash(newPassword)
         if (!hashedPassword) {
             return new Result(StatusCode.ServerError)
         }

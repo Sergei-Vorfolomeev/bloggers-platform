@@ -1,16 +1,19 @@
 import {UserDBModel} from "../repositories/types";
-import {UsersRepository} from "../repositories/users-repository";
-import {BcryptService} from "./bcrypt-service";
+import {BcryptService, JwtService} from "./index";
 import {Result, StatusCode} from "../utils/result";
-import {JwtService} from "./jwt-service";
-import {DevicesRepository} from "../repositories/devices-repository";
 import {DeviceViewModel} from "./types";
+import {DevicesRepository, UsersRepository} from "../repositories";
 
 export class UsersService {
-    constructor(protected usersRepository: UsersRepository, protected jwtService: JwtService) {}
+    constructor(
+        protected usersRepository: UsersRepository,
+        protected devicesRepository: DevicesRepository,
+        protected jwtService: JwtService,
+        protected bcryptService: BcryptService,
+    ) {}
 
     async createUser(login: string, email: string, password: string): Promise<Result<string>> {
-        const hashedPassword = await BcryptService.generateHash(password)
+        const hashedPassword = await this.bcryptService.generateHash(password)
         if (!hashedPassword) {
             return new Result(StatusCode.ServerError)
         }
@@ -44,7 +47,7 @@ export class UsersService {
         if (!payload) {
             return new Result(StatusCode.Unauthorized)
         }
-        const devices = await DevicesRepository.findAllDevicesByUserId(payload.user._id.toString())
+        const devices = await this.devicesRepository.findAllDevicesByUserId(payload.user._id.toString())
         if (!devices) {
             return new Result(StatusCode.ServerError)
         }
@@ -63,18 +66,18 @@ export class UsersService {
             return new Result(StatusCode.Unauthorized)
         }
         const {user} = payload
-        const device = await DevicesRepository.findDeviceById(deviceId)
+        const device = await this.devicesRepository.findDeviceById(deviceId)
         if (!device) {
             return new Result(StatusCode.NotFound)
         }
-        const userDevices = await DevicesRepository.findAllDevicesByUserId(user._id.toString())
+        const userDevices = await this.devicesRepository.findAllDevicesByUserId(user._id.toString())
         if (!userDevices) {
             return new Result(StatusCode.ServerError)
         }
         if (!userDevices.find(device => device._id.toString() === deviceId)) {
             return new Result(StatusCode.Forbidden)
         }
-        const isDeleted = await DevicesRepository.deleteDeviceById(deviceId)
+        const isDeleted = await this.devicesRepository.deleteDeviceById(deviceId)
         if (!isDeleted) {
             return new Result(StatusCode.ServerError)
         }
@@ -87,13 +90,13 @@ export class UsersService {
             return new Result(StatusCode.Unauthorized)
         }
         const {user, device} = payload
-        const userDevices = await DevicesRepository.findAllDevicesByUserId(user._id.toString())
+        const userDevices = await this.devicesRepository.findAllDevicesByUserId(user._id.toString())
         if (!userDevices) {
             return new Result(StatusCode.ServerError)
         }
         userDevices.map(async (el) => {
             if (el._id.toString() !== device._id.toString()) {
-                await DevicesRepository.deleteDeviceById(el._id.toString())
+                await this.devicesRepository.deleteDeviceById(el._id.toString())
             }
         })
         return new Result(StatusCode.NoContent)

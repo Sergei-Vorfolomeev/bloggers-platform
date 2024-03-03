@@ -1,10 +1,10 @@
 import {app, PATHS} from "../../src/app";
-import {NodemailerService} from "../../src/services/nodemailer-service";
 import {MongoMemoryServer} from "mongodb-memory-server";
 import {SentMessageInfo} from "nodemailer";
 import {userSeeder} from "../utils/user-seeder";
 import mongoose from "mongoose";
-import {UserModel} from "../../src/repositories/models/user.model";
+import {UserModel} from "../../src/db/mongoose/models/user.model";
+import {nodemailerService} from "../../src/composition-root";
 
 const request = require('supertest')
 
@@ -23,7 +23,7 @@ describe('AUTH-e2e', () => {
 
     let user: any = null
     it('register user', async () => {
-        const spy = jest.spyOn(NodemailerService, 'sendEmail').mockReturnValueOnce(Promise.resolve(true as SentMessageInfo))
+        const spy = jest.spyOn(nodemailerService, 'sendEmail').mockReturnValueOnce(Promise.resolve(true as SentMessageInfo))
 
         await request(app)
             .post(`${PATHS.auth}/registration`)

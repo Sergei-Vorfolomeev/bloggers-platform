@@ -1,9 +1,9 @@
 import {ObjectId, WithId} from "mongodb";
 import {PostDBModel} from "./types";
 import {PostInputModel} from "../routers/types";
-import {PostModel} from "./models/post.model";
+import {PostModel} from "../db/mongoose/models/post.model";
 import mongoose from "mongoose";
-import {CommentModel} from "./models/comment.model";
+import {CommentModel} from "../db/mongoose/models/comment.model";
 
 export class PostsRepository {
     async getPostById(postId: string): Promise<WithId<PostDBModel> | null> {
