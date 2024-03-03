@@ -2,9 +2,9 @@ import {MongoMemoryServer} from "mongodb-memory-server";
 import {testSeeder} from "../utils/test-seeder";
 import {Result, StatusCode} from "../../src/utils/result";
 import {ErrorsMessages, FieldError} from "../../src/utils/errors-messages";
-import {AuthService} from "../../src/services/auth-service";
 import mongoose from "mongoose";
 import {UserModel} from "../../src/repositories/models/user.model";
+import {authService} from "../../src/composition-root";
 
 describe('LOGIN_INTEGRATION', () => {
     beforeAll(async () => {
@@ -21,7 +21,7 @@ describe('LOGIN_INTEGRATION', () => {
     })
 
     describe('login user', () => {
-        const loginUseCase = AuthService.login
+        const loginUseCase = authService.login.bind(authService)
 
         it('login user with correct data', async () => {
             const user = await testSeeder.registerUser(testSeeder.createUserDto())
@@ -48,7 +48,7 @@ describe('LOGIN_INTEGRATION', () => {
         })
 
         it('login user with error in creating tokens', async () => {
-            jest.spyOn(AuthService, 'generateTokens').mockReturnValueOnce(Promise.resolve(null));
+            jest.spyOn(authService, 'generateTokens').mockReturnValueOnce(Promise.resolve(null));
             const user = await testSeeder.registerUser(testSeeder.createUserDto())
             const response = await loginUseCase(user.email, user.password, 'Chrome', '1.1.1.1')
             expect(response).toEqual(new Result(StatusCode.ServerError, 'Error with generating or saving tokens'))
@@ -56,7 +56,7 @@ describe('LOGIN_INTEGRATION', () => {
     })
 
     describe('update tokens', () => {
-        const updateTokensUseCase = AuthService.updateTokens
+        const updateTokensUseCase = authService.updateTokens.bind(authService)
 
         it('update the access and refresh token', async () => {
             const {refreshToken} = await testSeeder.loginUser()
@@ -87,7 +87,7 @@ describe('LOGIN_INTEGRATION', () => {
 
         it('update the access token with error in generating tokens ', async () => {
             const {refreshToken} = await testSeeder.loginUser()
-            jest.spyOn(AuthService, 'generateTokens').mockReturnValueOnce(Promise.resolve(null));
+            jest.spyOn(authService, 'generateTokens').mockReturnValueOnce(Promise.resolve(null));
             const result = await new Promise((resolve) => {
                 setTimeout(async () => {
                     const res = await updateTokensUseCase(refreshToken)

@@ -1,0 +1,6 @@
+export {BlogsController} from './blogs-controller'
+export {PostsController} from './posts-controller'
+export {DevicesController} from './devices-controller'
+export {AuthController} from './auth-controller'
+export {UsersController} from './users-controller'
+export {CommentsController} from './comments-controller'

@@ -1,9 +1,9 @@
 import {MongoMemoryServer} from "mongodb-memory-server";
 import {testSeeder} from "../utils/test-seeder";
-import {AuthService} from "../../src/services/auth-service";
 import {Result, StatusCode} from "../../src/utils/result";
 import {UserModel} from "../../src/repositories/models/user.model";
 import mongoose from "mongoose";
+import {authService} from "../../src/composition-root";
 
 describe('LOGOUT_INTEGRATION', () => {
     beforeAll(async () => {
@@ -19,7 +19,7 @@ describe('LOGOUT_INTEGRATION', () => {
         await UserModel.deleteMany({})
     })
 
-    const logoutUseCase = AuthService.logout
+    const logoutUseCase = authService.logout.bind(authService)
 
     it('successful logout', async () => {
         const {refreshToken} = await testSeeder.loginUser()

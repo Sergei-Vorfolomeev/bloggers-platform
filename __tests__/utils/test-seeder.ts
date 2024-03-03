@@ -2,8 +2,8 @@ import {UserDBModel} from "../../src/repositories/types";
 import {randomUUID} from "crypto";
 import {add} from "date-fns/add";
 import {BcryptService} from "../../src/services/bcrypt-service";
-import {AuthService} from "../../src/services/auth-service";
 import {UserModel} from "../../src/repositories/models/user.model";
+import {authService} from "../../src/composition-root";
 
 type RegisterUserDtoType = {
     login: string
@@ -65,7 +65,7 @@ export const testSeeder = {
         const devices = ['Chrome', 'Safari', 'Mozilla', 'Tor', 'Iphone', 'MacOS', 'Linux', 'Android']
         const randomIndex = Math.floor(Math.random() * 8)
         const user = await testSeeder.registerUser(testSeeder.createUserDto())
-        const response = await AuthService.login(user.email, user.password, devices[randomIndex], this.generateIp())
+        const response = await authService.login(user.email, user.password, devices[randomIndex], this.generateIp())
         return {
             email: user.email,
             login: user.login,

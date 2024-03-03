@@ -1,5 +1,4 @@
 import {MongoMemoryServer} from "mongodb-memory-server";
-import {AuthService} from "../../src/services/auth-service";
 import {testSeeder} from "../utils/test-seeder";
 import {Result, StatusCode} from "../../src/utils/result";
 import {NodemailerService} from "../../src/services/nodemailer-service";
@@ -9,6 +8,7 @@ import {ErrorsMessages, FieldError} from "../../src/utils/errors-messages";
 import {SentMessageInfo} from "nodemailer";
 import mongoose from "mongoose";
 import {UserModel} from "../../src/repositories/models/user.model";
+import {authService} from "../../src/composition-root";
 
 
 describe('REGISTRATION_INTEGRATION', () => {
@@ -27,7 +27,7 @@ describe('REGISTRATION_INTEGRATION', () => {
     });
 
     describe('user registration', () => {
-        const registerUserUseCase = AuthService.registerUser
+        const registerUserUseCase = authService.registerUser.bind(authService)
         const spy = jest.spyOn(NodemailerService, 'sendEmail').mockReturnValueOnce(Promise.resolve(true as SentMessageInfo))
         it('register user with correct data', async () => {
             const {login, email, password} = testSeeder.createUserDto()
@@ -38,7 +38,7 @@ describe('REGISTRATION_INTEGRATION', () => {
     })
 
     describe('code confirmation', () => {
-        const confirmEmailByCodeUseCase = AuthService.confirmEmailByCode
+        const confirmEmailByCodeUseCase = authService.confirmEmailByCode.bind(authService)
 
         it('confirm user email by valid code', async () => {
             const {emailConfirmation} = await testSeeder.registerUser(testSeeder.createUserDto())
@@ -81,7 +81,7 @@ describe('REGISTRATION_INTEGRATION', () => {
     })
 
     describe('resend confirmation code', () => {
-        const resendConfirmationCodeUseCase = AuthService.resendConfirmationCode
+        const resendConfirmationCodeUseCase = authService.resendConfirmationCode.bind(authService)
         jest.spyOn(NodemailerService, 'sendEmail').mockReturnValueOnce(Promise.resolve(true as SentMessageInfo))
 
         it('resend confirmation code to user with invalid email', async () => {

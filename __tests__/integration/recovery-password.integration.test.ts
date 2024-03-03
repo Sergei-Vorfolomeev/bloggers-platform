@@ -1,11 +1,11 @@
 import {MongoMemoryServer} from "mongodb-memory-server";
 import mongoose from "mongoose";
-import {AuthService} from "../../src/services/auth-service";
 import {testSeeder} from "../utils/test-seeder";
 import {Result, StatusCode} from "../../src/utils/result";
 import {NodemailerService} from "../../src/services/nodemailer-service";
 import {SentMessageInfo} from "nodemailer";
 import {UserModel} from "../../src/repositories/models/user.model";
+import {authService} from "../../src/composition-root";
 
 describe('RECOVERY_PASSWORD_INTEGRATION', () => {
 
@@ -24,7 +24,7 @@ describe('RECOVERY_PASSWORD_INTEGRATION', () => {
     })
 
     describe('recovery password', () => {
-        const recoveryPasswordUseCase = AuthService.recoverPassword
+        const recoveryPasswordUseCase = authService.recoverPassword.bind(authService)
         const spy = jest.spyOn(NodemailerService, 'sendEmail').mockReturnValue(Promise.resolve(true as SentMessageInfo))
 
         it('successful sending code', async () => {
@@ -42,7 +42,7 @@ describe('RECOVERY_PASSWORD_INTEGRATION', () => {
     })
 
     describe('pass new password', () => {
-        const recoveryPasswordUseCase = AuthService.updatePassword
+        const recoveryPasswordUseCase = authService.updatePassword.bind(authService)
 
         it('successful updating password', async () => {
             const {passwordRecovery} = await testSeeder.registerUser(testSeeder.createUserDto())
@@ -51,7 +51,7 @@ describe('RECOVERY_PASSWORD_INTEGRATION', () => {
         })
 
         it('update password with invalid recovery code', async () => {
-            const {passwordRecovery} = await testSeeder.registerUser(testSeeder.createUserDto())
+            await testSeeder.registerUser(testSeeder.createUserDto())
             const result = await recoveryPasswordUseCase('invalid code', 'newPassword')
             expect(result).toEqual(new Result(StatusCode.BadRequest))
         })
