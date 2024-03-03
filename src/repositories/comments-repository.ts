@@ -1,6 +1,6 @@
 import {CommentDBModel} from "./types";
 import {ObjectId, WithId} from "mongodb";
-import {CommentModel} from "./models/comment.model";
+import {CommentModel} from "../db/mongoose/models/comment.model";
 
 export class CommentsRepository {
 

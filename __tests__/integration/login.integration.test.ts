@@ -3,7 +3,7 @@ import {testSeeder} from "../utils/test-seeder";
 import {Result, StatusCode} from "../../src/utils/result";
 import {ErrorsMessages, FieldError} from "../../src/utils/errors-messages";
 import mongoose from "mongoose";
-import {UserModel} from "../../src/repositories/models/user.model";
+import {UserModel} from "../../src/db/mongoose/models/user.model";
 import {authService} from "../../src/composition-root";
 
 describe('LOGIN_INTEGRATION', () => {

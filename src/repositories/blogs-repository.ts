@@ -1,10 +1,10 @@
 import {ObjectId, WithId} from "mongodb";
 import {BlogDBModel} from "./types";
 import {BlogInputModel} from "../routers/types";
-import {BlogModel} from "./models/blog.model";
+import {BlogModel} from "../db/mongoose/models/blog.model";
 import mongoose from "mongoose";
-import {PostModel} from "./models/post.model";
-import {CommentModel} from "./models/comment.model";
+import {PostModel} from "../db/mongoose/models/post.model";
+import {CommentModel} from "../db/mongoose/models/comment.model";
 
 export class BlogsRepository {
     async getBlogById(blogId: string): Promise<WithId<BlogDBModel> | null> {

@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import {ConnectionDBModel} from "../types";
+import {ConnectionDBModel} from "../../../repositories/types";
 
 export const ConnectionSchema = new mongoose.Schema<ConnectionDBModel>({
     ip: {type: String, required: true},

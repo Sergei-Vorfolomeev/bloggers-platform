@@ -2,10 +2,9 @@ import {MongoMemoryServer} from "mongodb-memory-server";
 import mongoose from "mongoose";
 import {testSeeder} from "../utils/test-seeder";
 import {Result, StatusCode} from "../../src/utils/result";
-import {NodemailerService} from "../../src/services/nodemailer-service";
 import {SentMessageInfo} from "nodemailer";
-import {UserModel} from "../../src/repositories/models/user.model";
-import {authService} from "../../src/composition-root";
+import {UserModel} from "../../src/db/mongoose/models/user.model";
+import {authService, nodemailerService} from "../../src/composition-root";
 
 describe('RECOVERY_PASSWORD_INTEGRATION', () => {
 
@@ -25,7 +24,7 @@ describe('RECOVERY_PASSWORD_INTEGRATION', () => {
 
     describe('recovery password', () => {
         const recoveryPasswordUseCase = authService.recoverPassword.bind(authService)
-        const spy = jest.spyOn(NodemailerService, 'sendEmail').mockReturnValue(Promise.resolve(true as SentMessageInfo))
+        const spy = jest.spyOn(nodemailerService, 'sendEmail').mockReturnValue(Promise.resolve(true as SentMessageInfo))
 
         it('successful sending code', async () => {
             const {email} = await testSeeder.registerUser(testSeeder.createUserDto())

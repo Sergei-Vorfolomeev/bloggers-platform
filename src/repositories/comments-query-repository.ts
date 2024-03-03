@@ -4,7 +4,7 @@ import {commentMapper} from "../utils/comment-mapper";
 import {PostsQueryRepository} from "./posts-query-repository";
 import {Paginator} from "../routers/types";
 import {SortParams} from "./types";
-import {CommentModel} from "./models/comment.model";
+import {CommentModel} from "../db/mongoose/models/comment.model";
 
 export class CommentsQueryRepository {
     constructor(protected postsQueryRepository: PostsQueryRepository) {
