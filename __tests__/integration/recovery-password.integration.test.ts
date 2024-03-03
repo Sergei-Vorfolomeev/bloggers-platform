@@ -4,7 +4,8 @@ import {testSeeder} from "../utils/test-seeder";
 import {Result, StatusCode} from "../../src/utils/result";
 import {SentMessageInfo} from "nodemailer";
 import {UserModel} from "../../src/db/mongoose/models/user.model";
-import {authService, nodemailerService} from "../../src/composition-root";
+import {container} from "../../src/composition-root";
+import {AuthService, NodemailerService} from "../../src/services";
 
 describe('RECOVERY_PASSWORD_INTEGRATION', () => {
 
@@ -21,6 +22,9 @@ describe('RECOVERY_PASSWORD_INTEGRATION', () => {
         await UserModel.deleteMany({})
         jest.resetAllMocks()
     })
+
+    const authService = container.resolve(AuthService)
+    const nodemailerService = container.resolve(NodemailerService)
 
     describe('recovery password', () => {
         const recoveryPasswordUseCase = authService.recoverPassword.bind(authService)

@@ -1,7 +1,9 @@
 import {UserDBModel} from "./types";
 import {ObjectId, WithId} from "mongodb";
 import {UserModel} from "../db/mongoose/models/user.model";
+import {injectable} from "inversify";
 
+@injectable()
 export class UsersRepository {
     async findUserByLoginOrEmail(loginOrEmail: string): Promise<WithId<UserDBModel> | null> {
         return UserModel.findOne().or([{login: loginOrEmail}, {email: loginOrEmail}]).lean().exec()

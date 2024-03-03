@@ -4,7 +4,8 @@ import {Result, StatusCode} from "../../src/utils/result";
 import {ErrorsMessages, FieldError} from "../../src/utils/errors-messages";
 import mongoose from "mongoose";
 import {UserModel} from "../../src/db/mongoose/models/user.model";
-import {authService} from "../../src/composition-root";
+import {container} from "../../src/composition-root";
+import {AuthService} from "../../src/services";
 
 describe('LOGIN_INTEGRATION', () => {
     beforeAll(async () => {
@@ -19,6 +20,8 @@ describe('LOGIN_INTEGRATION', () => {
     beforeEach(async () => {
         await UserModel.deleteMany({})
     })
+
+    const authService = container.resolve(AuthService)
 
     describe('login user', () => {
         const loginUseCase = authService.login.bind(authService)

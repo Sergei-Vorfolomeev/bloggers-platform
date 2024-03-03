@@ -5,9 +5,11 @@ import {Paginator} from "../routers/types";
 import {PostViewModel} from "../services/types";
 import {BlogsQueryRepository} from "./blogs-query-repository";
 import {PostModel} from "../db/mongoose/models/post.model";
+import {inject, injectable} from "inversify";
 
+@injectable()
 export class PostsQueryRepository {
-    constructor(protected blogsQueryRepository: BlogsQueryRepository) {
+    constructor(@inject(BlogsQueryRepository) protected blogsQueryRepository: BlogsQueryRepository) {
     }
 
     async getPostsWithFilter(filter: {}, sortParams: SortParams): Promise<Paginator<PostViewModel[]> | null> {

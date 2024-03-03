@@ -4,7 +4,9 @@ import {BlogsSortParams} from "./types";
 import {BlogViewModel} from "../services/types";
 import {Paginator} from "../routers/types";
 import {BlogModel} from "../db/mongoose/models/blog.model";
+import {injectable} from "inversify";
 
+@injectable()
 export class BlogsQueryRepository {
     async getBlogs(sortParams: BlogsSortParams): Promise<Paginator<BlogViewModel[]> | null> {
         try {

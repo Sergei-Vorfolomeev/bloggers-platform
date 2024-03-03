@@ -4,7 +4,9 @@ import {userMapper} from "../utils/user-mapper";
 import {UsersSortParams} from "./types";
 import {Paginator} from "../routers/types";
 import {UserModel} from "../db/mongoose/models/user.model";
+import {injectable} from "inversify";
 
+@injectable()
 export class UsersQueryRepository {
     async getUsers(sortParams: UsersSortParams): Promise<Paginator<UserViewModel[]> | null> {
         try {

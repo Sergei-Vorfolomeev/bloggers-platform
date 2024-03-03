@@ -2,7 +2,8 @@ import {UserDBModel} from "../../src/repositories/types";
 import {randomUUID} from "crypto";
 import {add} from "date-fns/add";
 import {UserModel} from "../../src/db/mongoose/models/user.model";
-import {authService, bcryptService} from "../../src/composition-root";
+import {container} from "../../src/composition-root";
+import {AuthService, BcryptService} from "../../src/services";
 
 type RegisterUserDtoType = {
     login: string
@@ -14,6 +15,9 @@ type RegisterUserDtoType = {
     refreshToken?: string
     recoveryCode? : string
 }
+
+const authService = container.resolve(AuthService)
+const bcryptService = container.resolve(BcryptService)
 
 export const testSeeder = {
     createUserDto() {

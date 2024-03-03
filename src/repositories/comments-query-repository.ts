@@ -5,9 +5,12 @@ import {PostsQueryRepository} from "./posts-query-repository";
 import {Paginator} from "../routers/types";
 import {SortParams} from "./types";
 import {CommentModel} from "../db/mongoose/models/comment.model";
+import {inject, injectable} from "inversify";
 
+@injectable()
 export class CommentsQueryRepository {
-    constructor(protected postsQueryRepository: PostsQueryRepository) {
+    constructor(
+        @inject(PostsQueryRepository) protected postsQueryRepository: PostsQueryRepository) {
     }
 
     async getCommentById(id: string): Promise<CommentViewModel | null> {

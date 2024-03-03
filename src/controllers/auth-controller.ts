@@ -1,5 +1,5 @@
-import {AuthService} from "../services/auth-service";
-import {UsersQueryRepository} from "../repositories/users-query-repository";
+import {AuthService} from "../services";
+import {UsersQueryRepository} from "../repositories";
 import {
     APIErrorResult,
     LoginInputModel,
@@ -15,11 +15,13 @@ import {
     UserOutputModel
 } from "../routers/types";
 import {StatusCode} from "../utils/result";
+import {inject, injectable} from "inversify";
 
+@injectable()
 export class AuthController {
     constructor(
-        protected authService: AuthService,
-        protected usersQueryRepository: UsersQueryRepository,
+        @inject(AuthService) protected authService: AuthService,
+        @inject(UsersQueryRepository) protected usersQueryRepository: UsersQueryRepository,
     ) {
     }
 

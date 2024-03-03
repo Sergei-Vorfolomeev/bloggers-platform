@@ -4,7 +4,9 @@ import {PostInputModel} from "../routers/types";
 import {PostModel} from "../db/mongoose/models/post.model";
 import mongoose from "mongoose";
 import {CommentModel} from "../db/mongoose/models/comment.model";
+import {injectable} from "inversify";
 
+@injectable()
 export class PostsRepository {
     async getPostById(postId: string): Promise<WithId<PostDBModel> | null> {
         try {

@@ -1,14 +1,14 @@
 import {CommentDBModel} from "../repositories/types";
-import {CommentsRepository} from "../repositories/comments-repository";
+import {CommentsRepository, PostsRepository, UsersRepository} from "../repositories";
 import {Result, StatusCode} from "../utils/result";
-import {PostsRepository} from "../repositories/posts-repository";
-import {UsersRepository} from "../repositories/users-repository";
+import {inject, injectable} from "inversify";
 
+@injectable()
 export class CommentsService {
     constructor(
-        private commentsRepository: CommentsRepository,
-        private usersRepository: UsersRepository,
-        private postsRepository: PostsRepository
+        @inject(CommentsRepository) protected commentsRepository: CommentsRepository,
+        @inject(UsersRepository) protected usersRepository: UsersRepository,
+        @inject(PostsRepository) protected postsRepository: PostsRepository,
     ) {}
     async createComment(postId: string, userId: string, content: string): Promise<Result<string>> {
         const post = await this.postsRepository.getPostById(postId)
