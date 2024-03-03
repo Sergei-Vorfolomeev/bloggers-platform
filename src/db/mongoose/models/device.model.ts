@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import {DeviceDBModel} from "../types";
+import {DeviceDBModel} from "../../../repositories/types";
 
 export const DeviceSchema = new mongoose.Schema<DeviceDBModel>({
     userId: {type: String, required: true},

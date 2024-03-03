@@ -1,10 +1,10 @@
 import {DeviceDBModel} from "./types";
 import {ObjectId} from "mongodb";
-import {DeviceModel} from "./models/device.model";
+import {DeviceModel} from "../db/mongoose/models/device.model";
 
 export class DevicesRepository {
 
-    static async findDeviceById(deviceId: string): Promise<DeviceDBModel | null> {
+    async findDeviceById(deviceId: string): Promise<DeviceDBModel | null> {
         try {
             return DeviceModel.findById(new ObjectId(deviceId)).lean().exec()
         } catch (e) {
@@ -13,7 +13,7 @@ export class DevicesRepository {
         }
     }
 
-    static async findAllDevicesByUserId(userId: string): Promise<DeviceDBModel[] | null> {
+    async findAllDevicesByUserId(userId: string): Promise<DeviceDBModel[] | null> {
         try {
             return DeviceModel.find().where('userId').equals(userId).lean().exec()
         } catch (e) {
@@ -22,7 +22,7 @@ export class DevicesRepository {
         }
     }
 
-    static async addNewDevice(device: DeviceDBModel): Promise<string | null> {
+    async addNewDevice(device: DeviceDBModel): Promise<string | null> {
         try {
             const newDevice = new DeviceModel(device)
             await newDevice.save()
@@ -33,7 +33,7 @@ export class DevicesRepository {
         }
     }
 
-    static async updateRefreshToken(deviceWithNewRefreshToken: DeviceDBModel): Promise<boolean> {
+    async updateRefreshToken(deviceWithNewRefreshToken: DeviceDBModel): Promise<boolean> {
         try {
             const res = await DeviceModel.updateOne(
                 {_id: deviceWithNewRefreshToken._id},
@@ -46,7 +46,7 @@ export class DevicesRepository {
         }
     }
 
-    static async deleteDevice(deviceId: string): Promise<boolean> {
+    async deleteDevice(deviceId: string): Promise<boolean> {
         try {
             const res = await DeviceModel.deleteOne({_id: new ObjectId(deviceId)})
             return res.deletedCount === 1
@@ -56,7 +56,7 @@ export class DevicesRepository {
         }
     }
 
-    static async deleteDeviceById(deviceId: string): Promise<boolean> {
+    async deleteDeviceById(deviceId: string): Promise<boolean> {
         try {
             const res = await DeviceModel.deleteOne({_id: new ObjectId(deviceId)})
             return res.deletedCount === 1

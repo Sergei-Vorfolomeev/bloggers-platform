@@ -4,7 +4,7 @@ import {SortParams} from "./types";
 import {Paginator} from "../routers/types";
 import {PostViewModel} from "../services/types";
 import {BlogsQueryRepository} from "./blogs-query-repository";
-import {PostModel} from "./models/post.model";
+import {PostModel} from "../db/mongoose/models/post.model";
 
 export class PostsQueryRepository {
     constructor(protected blogsQueryRepository: BlogsQueryRepository) {

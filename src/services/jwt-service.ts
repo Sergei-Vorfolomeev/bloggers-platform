@@ -3,11 +3,14 @@ import {UserDBModel} from "../repositories/types";
 import {WithId} from "mongodb";
 import {settings} from "../settings";
 import {CryptoService} from "./crypto-service";
-import {DevicesRepository} from "../repositories/devices-repository";
-import {UsersRepository} from "../repositories/users-repository";
+import {DevicesRepository, UsersRepository} from "../repositories";
 
 export class JwtService {
-    constructor(private usersRepository: UsersRepository) {}
+    constructor(
+        protected usersRepository: UsersRepository,
+        protected devicesRepository: DevicesRepository,
+        protected cryptoService: CryptoService,
+    ) {}
     createToken(user: WithId<UserDBModel>, deviceId: string, type: 'access' | 'refresh') {
         return jwt.sign(
             {
@@ -39,11 +42,11 @@ export class JwtService {
         if (!user) {
             return null
         }
-        const device = await DevicesRepository.findDeviceById(deviceId)
+        const device = await this.devicesRepository.findDeviceById(deviceId)
         if (!device) {
             return null
         }
-        const decryptedRefreshToken = CryptoService.decrypt(device.refreshToken)
+        const decryptedRefreshToken = this.cryptoService.decrypt(device.refreshToken)
         const isMatched = refreshToken === decryptedRefreshToken
         if (!isMatched) {
             return null

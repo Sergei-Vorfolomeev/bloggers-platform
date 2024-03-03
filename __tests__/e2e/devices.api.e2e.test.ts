@@ -1,9 +1,9 @@
 import {MongoMemoryServer} from "mongodb-memory-server";
 import {userSeeder} from "../utils/user-seeder";
 import {app, PATHS} from "../../src/app";
-import {NodemailerService} from "../../src/services/nodemailer-service";
 import {SentMessageInfo} from "nodemailer";
 import mongoose from "mongoose";
+import {nodemailerService} from "../../src/composition-root";
 
 const request = require('supertest')
 
@@ -17,7 +17,7 @@ describe('devices', () => {
         await mongoose.disconnect()
     })
 
-    jest.spyOn(NodemailerService, 'sendEmail').mockReturnValueOnce(Promise.resolve(true as SentMessageInfo))
+    jest.spyOn(nodemailerService, 'sendEmail').mockReturnValueOnce(Promise.resolve(true as SentMessageInfo))
 
     let tokens1: any = null
     let tokens2: any = null

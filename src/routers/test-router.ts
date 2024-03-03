@@ -1,9 +1,9 @@
 import {Request, Response, Router} from "express";
-import {BlogModel} from "../repositories/models/blog.model";
-import {PostModel} from "../repositories/models/post.model";
-import {UserModel} from "../repositories/models/user.model";
-import {CommentModel} from "../repositories/models/comment.model";
-import {DeviceModel} from "../repositories/models/device.model";
+import {BlogModel} from "../db/mongoose/models/blog.model";
+import {PostModel} from "../db/mongoose/models/post.model";
+import {UserModel} from "../db/mongoose/models/user.model";
+import {CommentModel} from "../db/mongoose/models/comment.model";
+import {DeviceModel} from "../db/mongoose/models/device.model";
 
 export const testRouter = Router()
 

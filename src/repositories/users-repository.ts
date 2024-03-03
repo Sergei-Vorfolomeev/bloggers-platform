@@ -1,6 +1,6 @@
 import {UserDBModel} from "./types";
 import {ObjectId, WithId} from "mongodb";
-import {UserModel} from "./models/user.model";
+import {UserModel} from "../db/mongoose/models/user.model";
 
 export class UsersRepository {
     async findUserByLoginOrEmail(loginOrEmail: string): Promise<WithId<UserDBModel> | null> {

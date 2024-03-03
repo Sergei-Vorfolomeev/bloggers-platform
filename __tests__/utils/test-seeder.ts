@@ -1,9 +1,8 @@
 import {UserDBModel} from "../../src/repositories/types";
 import {randomUUID} from "crypto";
 import {add} from "date-fns/add";
-import {BcryptService} from "../../src/services/bcrypt-service";
-import {UserModel} from "../../src/repositories/models/user.model";
-import {authService} from "../../src/composition-root";
+import {UserModel} from "../../src/db/mongoose/models/user.model";
+import {authService, bcryptService} from "../../src/composition-root";
 
 type RegisterUserDtoType = {
     login: string
@@ -35,7 +34,7 @@ export const testSeeder = {
                            recoveryCode
                        }: RegisterUserDtoType
     ) {
-        const hashedPassword = await BcryptService.generateHash(password)
+        const hashedPassword = await bcryptService.generateHash(password)
         if (!hashedPassword) {
             throw new Error('error with bcrypt hashing password in testSeeder')
         }

@@ -1,7 +1,7 @@
 import {MongoMemoryServer} from "mongodb-memory-server";
 import {testSeeder} from "../utils/test-seeder";
 import {Result, StatusCode} from "../../src/utils/result";
-import {UserModel} from "../../src/repositories/models/user.model";
+import {UserModel} from "../../src/db/mongoose/models/user.model";
 import mongoose from "mongoose";
 import {authService} from "../../src/composition-root";
 
