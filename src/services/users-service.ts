@@ -3,15 +3,13 @@ import {BcryptService, JwtService} from "./index";
 import {Result, StatusCode} from "../utils/result";
 import {DeviceViewModel} from "./types";
 import {DevicesRepository, UsersRepository} from "../repositories";
-import {inject, injectable} from "inversify";
 
-@injectable()
 export class UsersService {
     constructor(
-        @inject(UsersRepository) protected usersRepository: UsersRepository,
-        @inject(DevicesRepository) protected devicesRepository: DevicesRepository,
-        @inject(JwtService) protected jwtService: JwtService,
-        @inject(BcryptService) protected bcryptService: BcryptService,
+        protected usersRepository: UsersRepository,
+        protected devicesRepository: DevicesRepository,
+        protected jwtService: JwtService,
+        protected bcryptService: BcryptService,
     ) {}
 
     async createUser(login: string, email: string, password: string): Promise<Result<string>> {

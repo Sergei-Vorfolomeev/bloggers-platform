@@ -4,8 +4,7 @@ import {Result, StatusCode} from "../../src/utils/result";
 import {ErrorsMessages, FieldError} from "../../src/utils/errors-messages";
 import mongoose from "mongoose";
 import {UserModel} from "../../src/db/mongoose/models/user.model";
-import {container} from "../../src/composition-root";
-import {AuthService} from "../../src/services";
+import {authService} from "../../src/composition-root";
 
 describe('LOGIN_INTEGRATION', () => {
     beforeAll(async () => {

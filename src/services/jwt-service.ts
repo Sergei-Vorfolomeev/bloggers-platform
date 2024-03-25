@@ -4,14 +4,12 @@ import {WithId} from "mongodb";
 import {settings} from "../settings";
 import {CryptoService} from "./crypto-service";
 import {DevicesRepository, UsersRepository} from "../repositories";
-import {injectable, inject} from "inversify";
 
-@injectable()
 export class JwtService {
     constructor(
-        @inject(UsersRepository) protected usersRepository: UsersRepository,
-        @inject(DevicesRepository) protected devicesRepository: DevicesRepository,
-        @inject(CryptoService) protected cryptoService: CryptoService,
+        protected usersRepository: UsersRepository,
+        protected devicesRepository: DevicesRepository,
+        protected cryptoService: CryptoService,
     ) {}
     createToken(user: WithId<UserDBModel>, deviceId: string, type: 'access' | 'refresh') {
         return jwt.sign(

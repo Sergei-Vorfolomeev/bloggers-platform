@@ -9,17 +9,15 @@ import {TokensPayload} from "./types";
 import {ObjectId, WithId} from "mongodb";
 import {templateForPasswordRecovery} from "../templates/template-for-password-recovery";
 import {DevicesRepository, UsersRepository} from "../repositories";
-import {injectable, inject} from "inversify";
 
-@injectable()
 export class AuthService {
     constructor(
-        @inject(UsersRepository) protected usersRepository: UsersRepository,
-        @inject(DevicesRepository) protected devicesRepository: DevicesRepository,
-        @inject(NodemailerService) protected nodemailerService: NodemailerService,
-        @inject(JwtService) protected jwtService: JwtService,
-        @inject(BcryptService) protected bcryptService: BcryptService,
-        @inject(CryptoService) protected cryptoService: CryptoService,
+        protected usersRepository: UsersRepository,
+        protected devicesRepository: DevicesRepository,
+        protected nodemailerService: NodemailerService,
+        protected jwtService: JwtService,
+        protected bcryptService: BcryptService,
+        protected cryptoService: CryptoService,
     ) {}
 
     async registerUser(login: string, email: string, password: string): Promise<Result> {

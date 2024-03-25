@@ -5,9 +5,7 @@ import {BlogModel} from "../db/mongoose/models/blog.model";
 import mongoose from "mongoose";
 import {PostModel} from "../db/mongoose/models/post.model";
 import {CommentModel} from "../db/mongoose/models/comment.model";
-import {injectable} from "inversify";
 
-@injectable()
 export class BlogsRepository {
     async getBlogById(blogId: string): Promise<WithId<BlogDBModel> | null> {
         try {

@@ -2,8 +2,7 @@ import {UserDBModel} from "../../src/repositories/types";
 import {randomUUID} from "crypto";
 import {add} from "date-fns/add";
 import {UserModel} from "../../src/db/mongoose/models/user.model";
-import {container} from "../../src/composition-root";
-import {AuthService, BcryptService} from "../../src/services";
+import {authService, bcryptService} from "../../src/composition-root";
 
 type RegisterUserDtoType = {
     login: string

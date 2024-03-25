@@ -7,8 +7,7 @@ import {ErrorsMessages, FieldError} from "../../src/utils/errors-messages";
 import {SentMessageInfo} from "nodemailer";
 import mongoose from "mongoose";
 import {UserModel} from "../../src/db/mongoose/models/user.model";
-import {container} from "../../src/composition-root";
-import {AuthService, NodemailerService} from "../../src/services";
+import {authService, nodemailerService} from "../../src/composition-root";
 
 
 describe('REGISTRATION_INTEGRATION', () => {

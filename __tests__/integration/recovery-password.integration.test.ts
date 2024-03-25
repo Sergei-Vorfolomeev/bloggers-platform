@@ -4,8 +4,7 @@ import {testSeeder} from "../utils/test-seeder";
 import {Result, StatusCode} from "../../src/utils/result";
 import {SentMessageInfo} from "nodemailer";
 import {UserModel} from "../../src/db/mongoose/models/user.model";
-import {container} from "../../src/composition-root";
-import {AuthService, NodemailerService} from "../../src/services";
+import {authService, nodemailerService} from "../../src/composition-root";
 
 describe('RECOVERY_PASSWORD_INTEGRATION', () => {
 
