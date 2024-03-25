@@ -20,6 +20,7 @@ describe('AUTH-e2e', () => {
         await mongoose.disconnect()
     })
 
+    const nodemailerService = container.get(NodemailerService)
 
     let user: any = null
     it('register user', async () => {

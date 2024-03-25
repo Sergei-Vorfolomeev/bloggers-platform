@@ -5,9 +5,12 @@ import {userValidators} from "../validators/user-validators";
 import {emailValidator} from "../validators/email-validator";
 import {rateLimiter} from "../middlewares/rate-limiter-middleware";
 import {newPasswordValidators} from "../validators/new-password-validator";
-import {authController} from "../composition-root";
+import {container} from "../composition-root";
+import {AuthController} from "../controllers";
 
 export const authRouter = Router()
+
+const authController = container.resolve(AuthController)
 
 authRouter.post('/login', rateLimiter, validateLoginOrEmail(), authController.login.bind(authController))
 authRouter.get('/me', accessTokenGuard, authController.me.bind(authController))

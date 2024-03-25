@@ -1,9 +1,12 @@
 import {Router} from "express";
 import {userValidators} from "../validators/user-validators";
 import {basicAuthGuard} from "../middlewares/basic-auth-guard";
-import {usersController} from "../composition-root";
+import {container} from "../composition-root";
+import {UsersController} from "../controllers";
 
 export const usersRouter = Router()
+
+const usersController = container.resolve(UsersController)
 
 usersRouter.get('/', usersController.getUsers.bind(usersController))
 usersRouter.get('/:id', usersController.getUserById.bind(usersController))
