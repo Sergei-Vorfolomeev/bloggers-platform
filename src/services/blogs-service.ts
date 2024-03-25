@@ -1,12 +1,18 @@
-import {BlogsRepository} from "../repositories/blogs-repository";
+import {BlogsRepository} from "../repositories";
 import {BlogDBModel} from "../repositories/types";
 import {BlogInputModel, PostInputModel} from "../routers/types";
 import {PostsService} from "./posts-service";
 import {Result, StatusCode} from "../utils/result";
+import {inject, injectable} from "inversify";
 
+@injectable()
 export class BlogsService {
-    constructor(private blogsRepository: BlogsRepository, private postsService: PostsService) {
+    constructor(
+        @inject(BlogsRepository) protected blogsRepository: BlogsRepository,
+        @inject(PostsService) protected postsService: PostsService
+    ) {
     }
+
     async createBlog(inputData: BlogInputModel): Promise<Result<string>> {
         const {name, description, websiteUrl} = inputData
         const newBlog: BlogDBModel = {

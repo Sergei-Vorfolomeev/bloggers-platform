@@ -1,6 +1,8 @@
 import crypto from 'crypto'
 import {settings} from "../settings";
+import {injectable} from "inversify";
 
+@injectable()
 export class CryptoService {
     encrypt(data: string) {
         // Создадим шифратор

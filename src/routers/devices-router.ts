@@ -1,7 +1,10 @@
 import {Router} from "express";
-import {devicesController} from "../composition-root";
+import {container} from "../composition-root";
+import {DevicesController} from "../controllers";
 
 export const devicesRouter = Router()
+
+const devicesController = container.resolve(DevicesController)
 
 devicesRouter.get('/', devicesController.getDevices.bind(devicesController))
 devicesRouter.delete('/:id', devicesController.deleteDeviceById.bind(devicesController))

@@ -1,6 +1,5 @@
-import {BlogsService} from "../services/blogs-service";
-import {BlogsQueryRepository} from "../repositories/blogs-query-repository";
-import {PostsQueryRepository} from "../repositories/posts-query-repository";
+import {BlogsService} from "../services";
+import {BlogsQueryRepository, PostsQueryRepository} from "../repositories";
 import {
     BlogInputModel,
     BlogsQueryParams,
@@ -13,12 +12,14 @@ import {
 import {BlogViewModel, PostViewModel} from "../services/types";
 import {ObjectId} from "mongodb";
 import {StatusCode} from "../utils/result";
+import {inject, injectable} from "inversify";
 
+@injectable()
 export class BlogsController {
     constructor(
-        protected blogsService: BlogsService,
-        protected blogsQueryRepository: BlogsQueryRepository,
-        protected postsQueryRepository: PostsQueryRepository,
+        @inject(BlogsService) protected blogsService: BlogsService,
+        @inject(BlogsQueryRepository) protected blogsQueryRepository: BlogsQueryRepository,
+        @inject(PostsQueryRepository) protected postsQueryRepository: PostsQueryRepository,
     ) {
     }
 

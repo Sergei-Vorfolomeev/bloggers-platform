@@ -3,7 +3,8 @@ import {testSeeder} from "../utils/test-seeder";
 import {Result, StatusCode} from "../../src/utils/result";
 import {UserModel} from "../../src/db/mongoose/models/user.model";
 import mongoose from "mongoose";
-import {authService} from "../../src/composition-root";
+import {container} from "../../src/composition-root";
+import {AuthService} from "../../src/services";
 
 describe('LOGOUT_INTEGRATION', () => {
     beforeAll(async () => {
@@ -19,6 +20,7 @@ describe('LOGOUT_INTEGRATION', () => {
         await UserModel.deleteMany({})
     })
 
+    const authService = container.resolve(AuthService)
     const logoutUseCase = authService.logout.bind(authService)
 
     it('successful logout', async () => {

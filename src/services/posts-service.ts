@@ -1,12 +1,16 @@
 import {PostInputModel} from "../routers/types";
 import {PostDBModel} from "../repositories/types";
-import {PostsRepository} from "../repositories/posts-repository";
-import {BlogsRepository} from "../repositories/blogs-repository";
+import {PostsRepository, BlogsRepository} from "../repositories";
 import {Result, StatusCode} from "../utils/result";
 import {ErrorsMessages, FieldError} from "../utils/errors-messages";
+import {inject, injectable} from "inversify";
 
+@injectable()
 export class PostsService {
-    constructor(private postsRepository: PostsRepository, private blogsRepository: BlogsRepository) {
+    constructor(
+        @inject(PostsRepository) protected postsRepository: PostsRepository,
+        @inject(BlogsRepository) protected blogsRepository: BlogsRepository,
+    ) {
     }
     async createPost(inputData: PostInputModel): Promise<Result<string>> {
         const {title, shortDescription, content, blogId} = inputData
