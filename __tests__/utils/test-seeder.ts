@@ -15,9 +15,6 @@ type RegisterUserDtoType = {
     recoveryCode? : string
 }
 
-const authService = container.resolve(AuthService)
-const bcryptService = container.resolve(BcryptService)
-
 export const testSeeder = {
     createUserDto() {
         const random = Math.floor(Math.random() * 1000)

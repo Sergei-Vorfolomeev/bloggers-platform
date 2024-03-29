@@ -25,8 +25,6 @@ describe('REGISTRATION_INTEGRATION', () => {
         jest.clearAllMocks()
     });
 
-    const authService = container.resolve(AuthService)
-    const nodemailerService = container.resolve(NodemailerService)
 
     describe('user registration', () => {
         const registerUserUseCase = authService.registerUser.bind(authService)

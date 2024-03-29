@@ -15,13 +15,12 @@ import {
     UserOutputModel
 } from "../routers/types";
 import {StatusCode} from "../utils/result";
-import {inject, injectable} from "inversify";
 
-@injectable()
+
 export class AuthController {
     constructor(
-        @inject(AuthService) protected authService: AuthService,
-        @inject(UsersQueryRepository) protected usersQueryRepository: UsersQueryRepository,
+        protected authService: AuthService,
+        protected usersQueryRepository: UsersQueryRepository,
     ) {
     }
 

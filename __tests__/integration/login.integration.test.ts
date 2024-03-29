@@ -20,7 +20,6 @@ describe('LOGIN_INTEGRATION', () => {
         await UserModel.deleteMany({})
     })
 
-    const authService = container.resolve(AuthService)
 
     describe('login user', () => {
         const loginUseCase = authService.login.bind(authService)

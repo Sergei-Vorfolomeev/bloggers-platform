@@ -1,11 +1,7 @@
 import {NextFunction, Request, Response} from "express";
 import {JwtPayload} from "jsonwebtoken";
-import {container} from "../composition-root";
-import {JwtService} from "../services";
-import {UsersQueryRepository} from "../repositories";
+import {jwtService, usersQueryRepository} from "../composition-root";
 
-const jwtService = container.resolve(JwtService)
-const usersQueryRepository = container.resolve(UsersQueryRepository)
 
 export const accessTokenGuard = async (req: Request, res: Response, next: NextFunction) => {
     if (!req.headers.authorization) {
