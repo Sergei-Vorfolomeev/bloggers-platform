@@ -22,6 +22,9 @@ describe('RECOVERY_PASSWORD_INTEGRATION', () => {
         jest.resetAllMocks()
     })
 
+    const authService = container.resolve(AuthService)
+    const nodemailerService = container.resolve(NodemailerService)
+
     describe('recovery password', () => {
         const recoveryPasswordUseCase = authService.recoverPassword.bind(authService)
         const spy = jest.spyOn(nodemailerService, 'sendEmail').mockReturnValue(Promise.resolve(true as SentMessageInfo))

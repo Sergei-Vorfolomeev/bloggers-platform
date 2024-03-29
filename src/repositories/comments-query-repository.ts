@@ -7,7 +7,8 @@ import {SortParams} from "./types";
 import {CommentModel} from "../db/mongoose/models/comment.model";
 
 export class CommentsQueryRepository {
-    constructor(protected postsQueryRepository: PostsQueryRepository) {
+    constructor(
+        @inject(PostsQueryRepository) protected postsQueryRepository: PostsQueryRepository) {
     }
 
     async getCommentById(id: string): Promise<CommentViewModel | null> {
