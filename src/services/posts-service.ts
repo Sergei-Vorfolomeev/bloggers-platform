@@ -3,13 +3,11 @@ import {PostDBModel} from "../repositories/types";
 import {PostsRepository, BlogsRepository} from "../repositories";
 import {Result, StatusCode} from "../utils/result";
 import {ErrorsMessages, FieldError} from "../utils/errors-messages";
-import {inject, injectable} from "inversify";
 
-@injectable()
 export class PostsService {
     constructor(
-        @inject(PostsRepository) protected postsRepository: PostsRepository,
-        @inject(BlogsRepository) protected blogsRepository: BlogsRepository,
+        protected postsRepository: PostsRepository,
+        protected blogsRepository: BlogsRepository,
     ) {
     }
     async createPost(inputData: PostInputModel): Promise<Result<string>> {

@@ -3,12 +3,9 @@ import {basicAuthGuard} from "../middlewares/basic-auth-guard";
 import {postValidators} from "../validators/post-validators";
 import {commentValidators} from "../validators/comment-validators";
 import {accessTokenGuard} from "../middlewares/access-token-guard";
-import {container} from "../composition-root";
-import {PostsController} from "../controllers";
+import {postsController} from "../composition-root";
 
 export const postsRouter = Router()
-
-const postsController = container.resolve(PostsController)
 
 postsRouter.get('/', postsController.getPosts.bind(postsController))
 postsRouter.get('/:id', postsController.getPostById.bind(postsController))

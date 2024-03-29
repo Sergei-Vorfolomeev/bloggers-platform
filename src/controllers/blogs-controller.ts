@@ -12,14 +12,12 @@ import {
 import {BlogViewModel, PostViewModel} from "../services/types";
 import {ObjectId} from "mongodb";
 import {StatusCode} from "../utils/result";
-import {inject, injectable} from "inversify";
 
-@injectable()
 export class BlogsController {
     constructor(
-        @inject(BlogsService) protected blogsService: BlogsService,
-        @inject(BlogsQueryRepository) protected blogsQueryRepository: BlogsQueryRepository,
-        @inject(PostsQueryRepository) protected postsQueryRepository: PostsQueryRepository,
+        protected blogsService: BlogsService,
+        protected blogsQueryRepository: BlogsQueryRepository,
+        protected postsQueryRepository: PostsQueryRepository,
     ) {
     }
 

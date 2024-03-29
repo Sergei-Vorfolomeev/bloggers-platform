@@ -4,7 +4,7 @@ import {SentMessageInfo} from "nodemailer";
 import {userSeeder} from "../utils/user-seeder";
 import mongoose from "mongoose";
 import {UserModel} from "../../src/db/mongoose/models/user.model";
-import {nodemailerService} from "../../src/composition-root";
+import {NodemailerService} from "../../src/services";
 
 const request = require('supertest')
 
@@ -20,7 +20,7 @@ describe('AUTH-e2e', () => {
         await mongoose.disconnect()
     })
 
-    const nodemailerService = container.get(NodemailerService)
+    const nodemailerService = new NodemailerService()
 
     let user: any = null
     it('register user', async () => {

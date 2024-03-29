@@ -2,12 +2,9 @@ import {Router} from "express";
 import {basicAuthGuard} from "../middlewares/basic-auth-guard";
 import {blogValidators} from "../validators/blog-validators";
 import {postValidatorsWithoutBlogIdValidation} from "../validators/post-validators";
-import {container} from "../composition-root";
-import {BlogsController} from "../controllers";
+import {blogsController} from "../composition-root";
 
 export const blogsRouter = Router()
-
-const blogsController = container.resolve(BlogsController)
 
 blogsRouter.get('/', blogsController.getBlogs.bind(blogsController))
 blogsRouter.get('/:id', blogsController.getBlogById.bind(blogsController))

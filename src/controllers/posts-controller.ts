@@ -14,15 +14,13 @@ import {
 import {CommentViewModel, PostViewModel} from "../services/types";
 import {ObjectId} from "mongodb";
 import {StatusCode} from "../utils/result";
-import {inject, injectable} from "inversify";
 
-@injectable()
 export class PostsController {
     constructor(
-        @inject(PostsService) protected postsService: PostsService,
-        @inject(CommentsService) protected commentsService: CommentsService,
-        @inject(PostsQueryRepository) protected postsQueryRepository: PostsQueryRepository,
-        @inject(CommentsQueryRepository) protected commentsQueryRepository: CommentsQueryRepository,
+        protected postsService: PostsService,
+        protected commentsService: CommentsService,
+        protected postsQueryRepository: PostsQueryRepository,
+        protected commentsQueryRepository: CommentsQueryRepository,
     ) {
     }
 

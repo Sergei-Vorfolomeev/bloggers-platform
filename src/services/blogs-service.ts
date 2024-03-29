@@ -3,13 +3,11 @@ import {BlogDBModel} from "../repositories/types";
 import {BlogInputModel, PostInputModel} from "../routers/types";
 import {PostsService} from "./posts-service";
 import {Result, StatusCode} from "../utils/result";
-import {inject, injectable} from "inversify";
 
-@injectable()
 export class BlogsService {
     constructor(
-        @inject(BlogsRepository) protected blogsRepository: BlogsRepository,
-        @inject(PostsService) protected postsService: PostsService
+        protected blogsRepository: BlogsRepository,
+        protected postsService: PostsService
     ) {
     }
 
