@@ -29,11 +29,24 @@ export type CommentViewModel = {
     content: string
     commentatorInfo: CommentatorInfo
     createdAt: string
+    // likesInfo: LikesInfoViewModel
 }
 
 export type CommentatorInfo = {
     userId: string
     userLogin: string
+}
+
+export type LikesInfoViewModel = {
+    likesCount: number
+    dislikesCount: number
+    myStatus: LikeStatus
+}
+
+export enum LikeStatus {
+    None,
+    Like,
+    Dislike,
 }
 
 export type DeviceViewModel = {
