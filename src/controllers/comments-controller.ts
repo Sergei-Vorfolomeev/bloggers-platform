@@ -77,4 +77,8 @@ export class CommentsController {
                 break
         }
     }
+
+    async updateLikeStatus() {
+        
+    }
 }

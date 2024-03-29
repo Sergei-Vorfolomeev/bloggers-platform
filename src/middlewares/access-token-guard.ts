@@ -1,7 +1,5 @@
 import {NextFunction, Request, Response} from "express";
 import {JwtPayload} from "jsonwebtoken";
-import {JwtService} from "../services";
-import {UsersQueryRepository} from "../repositories";
 import {jwtService, usersQueryRepository} from "../composition-root";
 
 

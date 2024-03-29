@@ -1,5 +1,6 @@
 import {Request, Response} from 'express'
 import {SortDirection} from "mongodb";
+import {LikeStatus} from "../services/types";
 
 type ParamsType = {
     id: string
@@ -100,5 +101,9 @@ export type NewPasswordRecoveryInputModel = {
 
 export type PasswordRecoveryInputModel = {
     email: string
+}
+
+export type LikeInputModel = {
+    likeStatus: LikeStatus
 }
 
