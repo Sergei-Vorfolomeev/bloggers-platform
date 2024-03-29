@@ -11,13 +11,11 @@ import {
 import {UserViewModel} from "../services/types";
 import {ObjectId} from "mongodb";
 import {StatusCode} from "../utils/result";
-import {injectable, inject} from "inversify";
 
-@injectable()
 export class UsersController {
     constructor(
-        @inject(UsersService) protected usersService: UsersService,
-        @inject(UsersQueryRepository) protected usersQueryRepository: UsersQueryRepository,
+        protected usersService: UsersService,
+        protected usersQueryRepository: UsersQueryRepository,
     ) {
     }
 

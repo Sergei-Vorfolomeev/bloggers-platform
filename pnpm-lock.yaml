@@ -20,9 +20,6 @@ dependencies:
   express-validator:
     specifier: ^7.0.1
     version: 7.0.1
-  inversify:
-    specifier: ^6.0.2
-    version: 6.0.2
   jest:
     specifier: ^29.7.0
     version: 29.7.0(@types/node@20.11.16)(ts-node@10.9.2)
@@ -1896,10 +1893,6 @@ packages:
 
   /inherits@2.0.4:
     resolution: {integrity: sha512-k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ==}
-
-  /inversify@6.0.2:
-    resolution: {integrity: sha512-i9m8j/7YIv4mDuYXUAcrpKPSaju/CIly9AHK5jvCBeoiM/2KEsuCQTTP+rzSWWpLYWRukdXFSl6ZTk2/uumbiA==}
-    dev: false
 
   /ip-address@9.0.5:
     resolution: {integrity: sha512-zHtQzGojZXTwZTHQqra+ETKd4Sn3vgi7uBmlPoXVWZqYvuKmtI0l/VZTjqGmJY9x88GGOaZ9+G9ES8hC4T4X8g==}

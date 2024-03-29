@@ -7,7 +7,7 @@ import {BlogsQueryRepository} from "./blogs-query-repository";
 import {PostModel} from "../db/mongoose/models/post.model";
 
 export class PostsQueryRepository {
-    constructor(@inject(BlogsQueryRepository) protected blogsQueryRepository: BlogsQueryRepository) {
+    constructor(protected blogsQueryRepository: BlogsQueryRepository) {
     }
 
     async getPostsWithFilter(filter: {}, sortParams: SortParams): Promise<Paginator<PostViewModel[]> | null> {

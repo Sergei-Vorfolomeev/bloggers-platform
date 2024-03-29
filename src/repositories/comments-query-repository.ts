@@ -8,7 +8,7 @@ import {CommentModel} from "../db/mongoose/models/comment.model";
 
 export class CommentsQueryRepository {
     constructor(
-        @inject(PostsQueryRepository) protected postsQueryRepository: PostsQueryRepository) {
+        protected postsQueryRepository: PostsQueryRepository) {
     }
 
     async getCommentById(id: string): Promise<CommentViewModel | null> {

@@ -1,9 +1,6 @@
 import {body} from "express-validator";
 import {inputValidationMiddleware} from "../middlewares/input-validation-middleware";
-import {container} from "../composition-root";
-import {BlogsQueryRepository} from "../repositories";
-
-const blogsQueryRepository = container.resolve(BlogsQueryRepository)
+import {blogsQueryRepository} from "../composition-root";
 
 const validateTitle = body('title')
     .trim()

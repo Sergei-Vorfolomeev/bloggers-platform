@@ -7,7 +7,7 @@ import {ErrorsMessages, FieldError} from "../../src/utils/errors-messages";
 import {SentMessageInfo} from "nodemailer";
 import mongoose from "mongoose";
 import {UserModel} from "../../src/db/mongoose/models/user.model";
-import {authService, nodemailerService} from "../../src/composition-root";
+import {nodemailerService, authService} from "../../src/composition-root";
 
 
 describe('REGISTRATION_INTEGRATION', () => {
@@ -25,8 +25,6 @@ describe('REGISTRATION_INTEGRATION', () => {
         jest.clearAllMocks()
     });
 
-    const authService = container.resolve(AuthService)
-    const nodemailerService = container.resolve(NodemailerService)
 
     describe('user registration', () => {
         const registerUserUseCase = authService.registerUser.bind(authService)

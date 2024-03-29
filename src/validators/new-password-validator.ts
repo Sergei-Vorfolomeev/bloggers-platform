@@ -1,6 +1,6 @@
 import {body} from "express-validator";
 import {inputValidationMiddleware} from "../middlewares/input-validation-middleware";
-import {UsersRepository} from "../repositories/users-repository";
+import {UsersRepository} from "../repositories";
 
 const usersRepository = new UsersRepository()
 
