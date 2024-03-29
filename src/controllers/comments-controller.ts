@@ -1,5 +1,5 @@
-import {CommentsService} from "../services/comments-service";
-import {CommentsQueryRepository} from "../repositories/comments-query-repository";
+import {CommentsService} from "../services";
+import {CommentsQueryRepository} from "../repositories";
 import {
     CommentInputModel,
     RequestWithParams,
@@ -76,5 +76,9 @@ export class CommentsController {
                 res.sendStatus(204);
                 break
         }
+    }
+
+    async updateLikeStatus() {
+        
     }
 }
