@@ -1,7 +1,5 @@
-import {PostsService} from "../services/posts-service";
-import {CommentsService} from "../services/comments-service";
-import {PostsQueryRepository} from "../repositories/posts-query-repository";
-import {CommentsQueryRepository} from "../repositories/comments-query-repository";
+import {PostsService, CommentsService} from "../services";
+import {PostsQueryRepository, CommentsQueryRepository} from "../repositories";
 import {
     CommentInputModel,
     Paginator,
@@ -16,13 +14,15 @@ import {
 import {CommentViewModel, PostViewModel} from "../services/types";
 import {ObjectId} from "mongodb";
 import {StatusCode} from "../utils/result";
+import {inject, injectable} from "inversify";
 
+@injectable()
 export class PostsController {
     constructor(
-        protected postsService: PostsService,
-        protected commentsService: CommentsService,
-        protected postsQueryRepository: PostsQueryRepository,
-        protected commentsQueryRepository: CommentsQueryRepository,
+        @inject(PostsService) protected postsService: PostsService,
+        @inject(CommentsService) protected commentsService: CommentsService,
+        @inject(PostsQueryRepository) protected postsQueryRepository: PostsQueryRepository,
+        @inject(CommentsQueryRepository) protected commentsQueryRepository: CommentsQueryRepository,
     ) {
     }
 

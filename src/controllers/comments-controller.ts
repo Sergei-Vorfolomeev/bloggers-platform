@@ -10,11 +10,13 @@ import {
 import {CommentViewModel} from "../services/types";
 import {ObjectId} from "mongodb";
 import {StatusCode} from "../utils/result";
+import {inject, injectable} from "inversify";
 
+@injectable()
 export class CommentsController {
     constructor(
-        private commentsService: CommentsService,
-        private commentsQueryRepository: CommentsQueryRepository,
+        @inject(CommentsService) protected commentsService: CommentsService,
+        @inject(CommentsQueryRepository) protected commentsQueryRepository: CommentsQueryRepository,
     ) {}
 
     async getCommentById(req: RequestWithParams, res: ResponseWithBody<CommentViewModel>) {

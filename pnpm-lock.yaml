@@ -20,6 +20,9 @@ dependencies:
   express-validator:
     specifier: ^7.0.1
     version: 7.0.1
+  inversify:
+    specifier: ^6.0.2
+    version: 6.0.2
   jest:
     specifier: ^29.7.0
     version: 29.7.0(@types/node@20.11.16)(ts-node@10.9.2)
@@ -38,6 +41,9 @@ dependencies:
   nodemailer:
     specifier: ^6.9.9
     version: 6.9.9
+  reflect-metadata:
+    specifier: ^0.2.1
+    version: 0.2.1
 
 devDependencies:
   '@types/bcrypt':
@@ -1891,6 +1897,10 @@ packages:
   /inherits@2.0.4:
     resolution: {integrity: sha512-k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ==}
 
+  /inversify@6.0.2:
+    resolution: {integrity: sha512-i9m8j/7YIv4mDuYXUAcrpKPSaju/CIly9AHK5jvCBeoiM/2KEsuCQTTP+rzSWWpLYWRukdXFSl6ZTk2/uumbiA==}
+    dev: false
+
   /ip-address@9.0.5:
     resolution: {integrity: sha512-zHtQzGojZXTwZTHQqra+ETKd4Sn3vgi7uBmlPoXVWZqYvuKmtI0l/VZTjqGmJY9x88GGOaZ9+G9ES8hC4T4X8g==}
     engines: {node: '>= 12'}
@@ -3057,6 +3067,10 @@ packages:
     dependencies:
       picomatch: 2.3.1
     dev: true
+
+  /reflect-metadata@0.2.1:
+    resolution: {integrity: sha512-i5lLI6iw9AU3Uu4szRNPPEkomnkjRTaVt9hy/bn5g/oSzekBSMeLZblcjP74AW0vBabqERLLIrz+gR8QYR54Tw==}
+    dev: false
 
   /require-directory@2.1.1:
     resolution: {integrity: sha512-fGxEI7+wsG9xrvdjsrlmL22OMTTiHRwAMroiEeMgq8gzoLC/PQr7RsRDSTLUg/bZAZtF+TVIkHc6/4RIKrui+Q==}

@@ -1,5 +1,5 @@
-import {UsersService} from "../services/users-service";
-import {UsersQueryRepository} from "../repositories/users-query-repository";
+import {UsersService} from "../services";
+import {UsersQueryRepository} from "../repositories";
 import {
     Paginator,
     RequestWithBody,
@@ -11,11 +11,13 @@ import {
 import {UserViewModel} from "../services/types";
 import {ObjectId} from "mongodb";
 import {StatusCode} from "../utils/result";
+import {injectable, inject} from "inversify";
 
+@injectable()
 export class UsersController {
     constructor(
-        protected usersService: UsersService,
-        protected usersQueryRepository: UsersQueryRepository,
+        @inject(UsersService) protected usersService: UsersService,
+        @inject(UsersQueryRepository) protected usersQueryRepository: UsersQueryRepository,
     ) {
     }
 

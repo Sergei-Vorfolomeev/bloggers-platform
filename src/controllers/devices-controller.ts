@@ -1,11 +1,13 @@
-import {UsersService} from "../services/users-service";
+import {UsersService} from "../services";
 import {RequestType, RequestWithParams, ResponseType, ResponseWithBody} from "../routers/types";
 import {DeviceViewModel} from "../services/types";
 import {StatusCode} from "../utils/result";
 import {ObjectId} from "mongodb";
+import {inject, injectable} from "inversify";
 
+@injectable()
 export class DevicesController {
-    constructor(private usersService: UsersService) {
+    constructor(@inject(UsersService) protected usersService: UsersService) {
     }
 
     async getDevices(req: RequestType, res: ResponseWithBody<DeviceViewModel[]>) {

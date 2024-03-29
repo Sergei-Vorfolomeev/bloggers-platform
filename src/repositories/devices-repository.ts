@@ -3,7 +3,6 @@ import {ObjectId} from "mongodb";
 import {DeviceModel} from "../db/mongoose/models/device.model";
 
 export class DevicesRepository {
-
     async findDeviceById(deviceId: string): Promise<DeviceDBModel | null> {
         try {
             return DeviceModel.findById(new ObjectId(deviceId)).lean().exec()
