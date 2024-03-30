@@ -1,5 +1,5 @@
 import {ObjectId, SortDirection} from "mongodb";
-import {CommentatorInfo} from "../services/types";
+import {CommentatorInfo, LikeStatus} from "../services/types";
 
 export type PostDBModel = {
     title: string
@@ -40,6 +40,15 @@ export type CommentDBModel = {
     commentatorInfo: CommentatorInfo
     postId: string
     createdAt: string
+    likesCount: number
+    dislikesCount: number
+}
+
+export type LikeDBModel = {
+    userId: string,
+    postId?: string
+    commentId?: string,
+    likeStatus: LikeStatus,
 }
 
 export type DeviceDBModel = {

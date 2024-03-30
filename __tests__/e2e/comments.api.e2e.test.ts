@@ -1,8 +1,8 @@
 import {app, PATHS} from "../../src/app";
-import {createPost} from "../utils/create-posts";
 import {userSeeder} from "../utils/user-seeder";
 import mongoose from "mongoose";
 import {MongoMemoryServer} from "mongodb-memory-server";
+import {postTestHelper} from "../utils/post-test-helper";
 
 const request = require('supertest')
 
@@ -39,7 +39,7 @@ describe(PATHS.comments, () => {
     })
 
     it('create comment without token', async () => {
-        const post = await createPost(app)
+        const post = await postTestHelper.createPost(app)
         await request(app)
             .post(`${PATHS.posts}/${post.id}/comments`)
             .send({
@@ -49,7 +49,7 @@ describe(PATHS.comments, () => {
     })
 
     it('create invalid comment', async () => {
-        const post = await createPost(app)
+        const post = await postTestHelper.createPost(app)
         await request(app)
             .post(`${PATHS.posts}/${post.id}/comments`)
             .set('Authorization', `Bearer ${token}`)
@@ -67,7 +67,7 @@ describe(PATHS.comments, () => {
     let comment: any = null
     it('create valid comment', async () => {
         const userInfo = await userSeeder.meRequest(app, token)
-        post = await createPost(app)
+        post = await postTestHelper.createPost(app)
         const res = await request(app)
             .post(`${PATHS.posts}/${post.id}/comments`)
             .set('Authorization', `Bearer ${token}`)

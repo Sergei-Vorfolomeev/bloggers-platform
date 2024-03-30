@@ -8,7 +8,7 @@ const validatePassword = body('newPassword')
     .notEmpty().withMessage('Field is required')
     .isString().trim().withMessage('Field must be string')
     .isLength({min: 6, max: 20}).withMessage('Length must be from 6 to 20 symbols')
-debugger
+
 
 const validateRecoveryCode = body('recoveryCode')
     .notEmpty().withMessage('Field is required')

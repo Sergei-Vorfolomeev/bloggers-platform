@@ -3,7 +3,7 @@ import {
     BlogDBModel,
     CommentDBModel,
     ConnectionDBModel,
-    DeviceDBModel,
+    DeviceDBModel, LikeDBModel,
     PostDBModel,
     UserDBModel
 } from "../repositories/types";
@@ -19,6 +19,7 @@ export const usersCollection = dataBase.collection<UserDBModel>('users')
 export const commentsCollection = dataBase.collection<CommentDBModel>('comments')
 export const devicesCollection = dataBase.collection<DeviceDBModel>('devices')
 export const connectionsCollection = dataBase.collection<ConnectionDBModel>('connections')
+export const likesCollection = dataBase.collection<LikeDBModel>('likes')
 
 
 export const runDB = async () => {

@@ -29,7 +29,7 @@ export type CommentViewModel = {
     content: string
     commentatorInfo: CommentatorInfo
     createdAt: string
-    // likesInfo: LikesInfoViewModel
+    likesInfo?: LikesInfoViewModel
 }
 
 export type CommentatorInfo = {
@@ -43,11 +43,7 @@ export type LikesInfoViewModel = {
     myStatus: LikeStatus
 }
 
-export enum LikeStatus {
-    None,
-    Like,
-    Dislike,
-}
+export type LikeStatus = "None" | "Like" | "Dislike"
 
 export type DeviceViewModel = {
     deviceId: string

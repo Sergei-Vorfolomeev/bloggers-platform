@@ -27,6 +27,7 @@ import {
     AuthController,
     DevicesController
 } from "./controllers";
+import {LikesRepository} from "./repositories/likes-repository";
 
 export const usersRepository = new UsersRepository()
 export const usersQueryRepository = new UsersQueryRepository()
@@ -37,6 +38,7 @@ export const postsQueryRepository = new PostsQueryRepository(blogsQueryRepositor
 export const commentsRepository = new CommentsRepository()
 export const commentsQueryRepository = new CommentsQueryRepository(postsQueryRepository)
 export const devicesRepository = new DevicesRepository()
+export const likesRepository = new LikesRepository()
 
 export const cryptoService = new CryptoService()
 export const nodemailerService = new NodemailerService()
@@ -53,7 +55,7 @@ export const authService = new AuthService(
 )
 export const postsService = new PostsService(postsRepository, blogsRepository)
 export const blogsService = new BlogsService(blogsRepository, postsService)
-export const commentsService = new CommentsService(commentsRepository, usersRepository, postsRepository)
+export const commentsService = new CommentsService(commentsRepository, usersRepository, postsRepository, likesRepository)
 
 export const usersController = new UsersController(usersService, usersQueryRepository)
 export const authController = new AuthController(authService, usersQueryRepository)

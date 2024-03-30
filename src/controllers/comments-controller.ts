@@ -1,7 +1,7 @@
 import {CommentsService} from "../services";
 import {CommentsQueryRepository} from "../repositories";
 import {
-    CommentInputModel,
+    CommentInputModel, LikeInputModel,
     RequestWithParams,
     RequestWithParamsAndBody,
     ResponseType,
@@ -45,7 +45,7 @@ export class CommentsController {
                 res.sendStatus(403);
                 break
             case StatusCode.ServerError:
-                res.sendStatus(500);
+                res.sendStatus(555);
                 break
             case StatusCode.Success:
                 res.sendStatus(204);
@@ -70,7 +70,7 @@ export class CommentsController {
                 res.sendStatus(403);
                 break
             case StatusCode.ServerError:
-                res.sendStatus(500);
+                res.sendStatus(555);
                 break
             case StatusCode.Success:
                 res.sendStatus(204);
@@ -78,7 +78,29 @@ export class CommentsController {
         }
     }
 
-    async updateLikeStatus() {
-        
+    /* TODO: validate LikeStatus */
+    async updateLikeStatus(req: RequestWithParamsAndBody<LikeInputModel>, res: ResponseType) {
+        const {id: commentId} = req.params
+        const {likeStatus} = req.body
+        const {id: userId} = req.user
+        if (!ObjectId.isValid(commentId)) {
+            res.sendStatus(404)
+            return
+        }
+        const result = await this.commentsService.updateLikeStatus(commentId, userId, likeStatus)
+        switch (result.statusCode) {
+            case StatusCode.NotFound:
+                res.sendStatus(404);
+                break
+            case StatusCode.Forbidden:
+                res.sendStatus(403);
+                break
+            case StatusCode.ServerError:
+                res.sendStatus(555);
+                break
+            case StatusCode.Success:
+                res.sendStatus(204);
+                break
+        }
     }
 }

@@ -18,7 +18,7 @@ export class JwtService {
                 deviceId
             },
             type === 'access' ? settings.SECRET_KEY_1 : settings.SECRET_KEY_2,
-            {expiresIn: type === 'access' ? '10s' : '20s'}
+            {expiresIn: type === 'access' ? '300s' : '600s'}
         )
     }
 
