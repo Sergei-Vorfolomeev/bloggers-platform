@@ -31,6 +31,27 @@ describe('LIKE-e2e', () => {
         comment = await postTestHelper.createPostWithComment(app, tokens.accessToken)
     })
 
+    it('get comment by unauthorized user', async () => {
+        const response = await request(app)
+            .get(`${PATHS.comments}/${comment.id}`)
+            .expect(200)
+
+        expect(response.body).toEqual({
+            id: comment.id,
+            content: comment.content,
+            commentatorInfo: {
+                userId: comment.commentatorInfo.userId,
+                userLogin: comment.commentatorInfo.userLogin
+            },
+            createdAt: expect.any(String),
+            likesInfo: {
+                dislikesCount: 0,
+                likesCount: 0,
+                myStatus: "None",
+            },
+        })
+    })
+
     it('add like', async () => {
         await request(app)
             .put(`${PATHS.comments}/${comment.id}/like-status`)
@@ -39,5 +60,27 @@ describe('LIKE-e2e', () => {
                 "likeStatus": "Like"
             })
             .expect(204)
+    })
+
+    it('get comment by authorized user', async () => {
+        const response = await request(app)
+            .get(`${PATHS.comments}/${comment.id}`)
+            .set('Authorization', `Bearer ${tokens.accessToken}`)
+            .expect(200)
+
+        expect(response.body).toEqual({
+            id: comment.id,
+            content: comment.content,
+            commentatorInfo: {
+                userId: comment.commentatorInfo.userId,
+                userLogin: comment.commentatorInfo.userLogin
+            },
+            createdAt: expect.any(String),
+            likesInfo: {
+                dislikesCount: 0,
+                likesCount: 1,
+                myStatus: "Like",
+            },
+        })
     })
 })

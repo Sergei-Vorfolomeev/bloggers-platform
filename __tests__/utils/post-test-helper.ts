@@ -6,7 +6,7 @@ import {UserViewModel} from "../../src/services/types";
 const request = require('supertest')
 
 export const postTestHelper = {
-    async createPost (app: any) {
+    async createPost(app: any) {
         const blog = await blogTestHelper.createBlog(app)
         const response = await request(app)
             .post(PATHS.posts)
@@ -21,10 +21,10 @@ export const postTestHelper = {
         return response.body
     },
 
-    async createPosts (app: any, count: number) {
+    async createPosts(app: any, count: number) {
         const blog = await blogTestHelper.createBlog(app)
         const posts = []
-        for (let i=0; i<count; i++) {
+        for (let i = 0; i < count; i++) {
             try {
                 const response = await request(app)
                     .post(PATHS.posts)
@@ -63,7 +63,12 @@ export const postTestHelper = {
                 userId: expect.any(String),
                 userLogin: expect.any(String)
             },
-            createdAt: expect.any(String)
+            createdAt: expect.any(String),
+            likesInfo: {
+                dislikesCount: 0,
+                likesCount: 0,
+                myStatus: "None",
+            },
         })
         return comment
     }

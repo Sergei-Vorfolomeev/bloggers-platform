@@ -1,5 +1,5 @@
-import {CommentsService} from "../services";
-import {CommentsQueryRepository} from "../repositories";
+import {CommentsService, UsersService} from "../services";
+import {CommentsQueryRepository, LikesQueryRepository} from "../repositories";
 import {
     CommentInputModel, LikeInputModel,
     RequestWithParams,
@@ -15,18 +15,47 @@ export class CommentsController {
     constructor(
         protected commentsService: CommentsService,
         protected commentsQueryRepository: CommentsQueryRepository,
-    ) {}
+        protected likesQueryRepository: LikesQueryRepository,
+        protected usersService: UsersService,
+    ) {
+    }
 
     async getCommentById(req: RequestWithParams, res: ResponseWithBody<CommentViewModel>) {
-        const {id} = req.params
-        if (!ObjectId.isValid(id)) {
+        const {id: commentId} = req.params
+        if (!ObjectId.isValid(commentId)) {
             res.sendStatus(404)
             return
         }
-        const comment = await this.commentsQueryRepository.getCommentById(id)
-        comment
-            ? res.status(200).send(comment)
-            : res.sendStatus(404)
+        const comment = await this.commentsQueryRepository.getCommentById(commentId)
+        if (!comment) {
+            res.sendStatus(404)
+            return
+        }
+        let commentView: CommentViewModel = {
+            ...comment,
+            likesInfo: {
+                ...comment.likesInfo,
+                myStatus: 'None'
+            }
+        }
+        if (!req.headers.authorization) {
+            res.status(200).send(commentView)
+            return
+        }
+        const [, token] = req.headers.authorization.split(' ')
+
+        const userId = await this.usersService.getUserId(token)
+        if (!userId) {
+            res.status(200).send(commentView)
+            return
+        }
+        const likeStatus = await this.likesQueryRepository.getLikeStatus(commentId, userId)
+        if (!likeStatus) {
+            res.sendStatus(555)
+            return
+        }
+        commentView.likesInfo.myStatus = likeStatus
+        res.status(200).send(commentView)
     }
 
     async deleteComment(req: RequestWithParams, res: ResponseType) {

@@ -4,7 +4,7 @@ import {ObjectId, WithId} from "mongodb";
 import {CommentModel} from "../db/mongoose/models/comment.model";
 
 export class LikesRepository {
-    async getCommentLikeByUserId(userId: string, commentId: string): Promise<WithId<LikeDBModel> | null> {
+    async getCommentLikeStatusByUserId(userId: string, commentId: string): Promise<WithId<LikeDBModel> | null> {
         try {
             return await LikeModel.findOne({ userId, commentId }).lean().exec()
         } catch (e) {

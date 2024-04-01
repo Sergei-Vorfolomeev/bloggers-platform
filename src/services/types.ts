@@ -29,7 +29,7 @@ export type CommentViewModel = {
     content: string
     commentatorInfo: CommentatorInfo
     createdAt: string
-    likesInfo?: LikesInfoViewModel
+    likesInfo: LikesInfoViewModel
 }
 
 export type CommentatorInfo = {

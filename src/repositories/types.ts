@@ -40,8 +40,10 @@ export type CommentDBModel = {
     commentatorInfo: CommentatorInfo
     postId: string
     createdAt: string
-    likesCount: number
-    dislikesCount: number
+    likesInfo: {
+        likesCount: number
+        dislikesCount: number
+    }
 }
 
 export type LikeDBModel = {

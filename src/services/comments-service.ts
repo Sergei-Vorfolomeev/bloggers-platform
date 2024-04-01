@@ -1,7 +1,7 @@
 import {CommentDBModel, LikeDBModel} from "../repositories/types";
-import {CommentsRepository, PostsRepository, UsersRepository, LikesRepository} from "../repositories";
+import {CommentsRepository, LikesRepository, PostsRepository, UsersRepository} from "../repositories";
 import {Result, StatusCode} from "../utils/result";
-import {LikeStatus} from "./types";
+import {CommentViewModel, LikeStatus} from "./types";
 
 export class CommentsService {
     constructor(
@@ -11,6 +11,34 @@ export class CommentsService {
         protected likesRepository: LikesRepository,
     ) {
     }
+
+    // async getCommentById(commentId: string, userId: string | undefined): Promise<Result<CommentViewModel>> {
+    //     const comment = await this.commentsRepository.getCommentById(commentId)
+    //     if (!comment) {
+    //         return new Result(StatusCode.NotFound)
+    //     }
+    //     // если пользователь не залогинен
+    //     if (!userId) {
+    //         const agregatedComment = {
+    //             ...comment,
+    //             likesInfo: {
+    //                 ...comment.likesInfo,
+    //                 myStatus: "None"
+    //             }
+    //         }
+    //         return new Result(StatusCode.Success, null, agregatedComment)
+    //     }
+    //     // если пользователь залогинен -> делаем запрос за likeStatus
+    //     const like = await this.likesRepository.getCommentLikeStatusByUserId(userId, commentId)
+    //     const agregatedComment = {
+    //         ...comment,
+    //         likesInfo: {
+    //             ...comment.likesInfo,
+    //             myStatus: like?.likeStatus ?? "None"
+    //         }
+    //     }
+    //     return new Result(StatusCode.Success, null, agregatedComment)
+    // }
 
     async createComment(postId: string, userId: string, content: string): Promise<Result<string>> {
         const post = await this.postsRepository.getPostById(postId)
@@ -29,8 +57,10 @@ export class CommentsService {
                 userLogin: user.login
             },
             createdAt: new Date().toISOString(),
-            likesCount: 0,
-            dislikesCount: 0,
+            likesInfo: {
+                likesCount: 0,
+                dislikesCount: 0,
+            },
         }
         const createdCommentId = await this.commentsRepository.createComment(newComment)
         if (!createdCommentId) {
@@ -86,7 +116,7 @@ export class CommentsService {
             commentId,
             likeStatus,
         }
-        const like = await this.likesRepository.getCommentLikeByUserId(userId, commentId)
+        const like = await this.likesRepository.getCommentLikeStatusByUserId(userId, commentId)
         // если лайка нет - создаем
         if (!like) {
             const createdLikeId = await this.likesRepository.create(newLike)

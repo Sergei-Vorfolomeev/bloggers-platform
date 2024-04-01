@@ -12,6 +12,18 @@ export class UsersService {
         protected bcryptService: BcryptService,
     ) {}
 
+    async getUserId(accessToken: string): Promise<string | null> {
+        const payload = await this.jwtService.verifyToken(accessToken, 'access')
+        if (!payload) {
+            return null
+        }
+        const user = await this.usersRepository.findUserById(payload.userId)
+        if (!user) {
+            return null
+        }
+        return payload.userId
+    }
+
     async createUser(login: string, email: string, password: string): Promise<Result<string>> {
         const hashedPassword = await this.bcryptService.generateHash(password)
         if (!hashedPassword) {
