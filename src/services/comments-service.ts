@@ -1,7 +1,7 @@
 import {CommentDBModel, LikeDBModel} from "../repositories/types";
 import {CommentsRepository, LikesRepository, PostsRepository, UsersRepository} from "../repositories";
 import {Result, StatusCode} from "../utils/result";
-import {CommentViewModel, LikeStatus} from "./types";
+import {LikeStatus} from "./types";
 
 export class CommentsService {
     constructor(
@@ -12,34 +12,6 @@ export class CommentsService {
     ) {
     }
 
-    // async getCommentById(commentId: string, userId: string | undefined): Promise<Result<CommentViewModel>> {
-    //     const comment = await this.commentsRepository.getCommentById(commentId)
-    //     if (!comment) {
-    //         return new Result(StatusCode.NotFound)
-    //     }
-    //     // если пользователь не залогинен
-    //     if (!userId) {
-    //         const agregatedComment = {
-    //             ...comment,
-    //             likesInfo: {
-    //                 ...comment.likesInfo,
-    //                 myStatus: "None"
-    //             }
-    //         }
-    //         return new Result(StatusCode.Success, null, agregatedComment)
-    //     }
-    //     // если пользователь залогинен -> делаем запрос за likeStatus
-    //     const like = await this.likesRepository.getCommentLikeStatusByUserId(userId, commentId)
-    //     const agregatedComment = {
-    //         ...comment,
-    //         likesInfo: {
-    //             ...comment.likesInfo,
-    //             myStatus: like?.likeStatus ?? "None"
-    //         }
-    //     }
-    //     return new Result(StatusCode.Success, null, agregatedComment)
-    // }
-
     async createComment(postId: string, userId: string, content: string): Promise<Result<string>> {
         const post = await this.postsRepository.getPostById(postId)
         if (!post) {
@@ -47,7 +19,7 @@ export class CommentsService {
         }
         const user = await this.usersRepository.findUserById(userId)
         if (!user) {
-            return new Result(StatusCode.NotFound, 'The user haven\'t been found')
+            return new Result(StatusCode.NotFound, 'The user hasn\'t been found')
         }
         const newComment: CommentDBModel = {
             content,
@@ -64,7 +36,7 @@ export class CommentsService {
         }
         const createdCommentId = await this.commentsRepository.createComment(newComment)
         if (!createdCommentId) {
-            return new Result(StatusCode.ServerError, 'The comment haven\'t been created in the DB')
+            return new Result(StatusCode.ServerError, 'The comment hasn\'t been created in the DB')
         }
         return new Result(StatusCode.Success, null, createdCommentId)
     }
@@ -78,14 +50,17 @@ export class CommentsService {
             return new Result(StatusCode.Forbidden, 'This user does not have credentials')
         }
         const updatedComment: CommentDBModel = {
-            ...comment,
+            likesInfo: comment.likesInfo,
+            commentatorInfo: comment.commentatorInfo,
+            postId: comment.postId,
+            createdAt: comment.createdAt,
             content
         }
         const isUpdated = await this.commentsRepository.updateComment(commentId, updatedComment)
         if (!isUpdated) {
-            return new Result(StatusCode.ServerError, 'The comment haven\'t been updated in the DB')
+            return new Result(StatusCode.ServerError, 'The comment hasn\'t been updated in the DB')
         }
-        return new Result(StatusCode.Success)
+        return new Result(StatusCode.NoContent)
     }
 
     async deleteComment(commentId: string, userId: string): Promise<Result> {
@@ -98,9 +73,9 @@ export class CommentsService {
         }
         const isDeleted = await this.commentsRepository.deleteCommentById(commentId)
         if (!isDeleted) {
-            return new Result(StatusCode.ServerError, 'The comment haven\'t been deleted')
+            return new Result(StatusCode.ServerError, 'The comment hasn\'t been deleted')
         }
-        return new Result(StatusCode.Success)
+        return new Result(StatusCode.NoContent)
     }
 
     async updateLikeStatus(commentId: string, userId: string, likeStatus: LikeStatus): Promise<Result> {
@@ -108,27 +83,45 @@ export class CommentsService {
         if (!comment) {
             return new Result(StatusCode.NotFound, 'The comment with provided id haven\'t been found')
         }
-        if (comment.commentatorInfo.userId !== userId) {
-            return new Result(StatusCode.Forbidden, 'This user does not have credentials')
-        }
-        const newLike: LikeDBModel = {
-            userId,
-            commentId,
-            likeStatus,
-        }
+        // проверяем есть ли лайк юзера на комменте
         const like = await this.likesRepository.getCommentLikeStatusByUserId(userId, commentId)
-        // если лайка нет - создаем
-        if (!like) {
-            const createdLikeId = await this.likesRepository.create(newLike)
+        // если лайка нет -> создаем + увеличиваем счетчик в объекте коммента
+        if (!like || like.likeStatus === 'None') {
+            const newLike: LikeDBModel = {
+                userId,
+                commentId,
+                likeStatus,
+            }
+            const createdLikeId = likeStatus === 'Like'
+                ? comment.addLike(commentId, newLike)
+                : comment.addDislike(commentId, newLike)
             if (!createdLikeId) {
-                return new Result(StatusCode.ServerError, 'The like haven\'t been created in the DB')
+                return new Result(StatusCode.ServerError, 'The like hasn\'t been created in the DB')
+            }
+            return new Result(StatusCode.NoContent)
+        }
+        // иначе -> обновляем статус + обновляем счетчик
+        switch (like.likeStatus) {
+            case 'Like': {
+                const dislike = {
+                    userId,
+                    commentId,
+                    likeStatus
+                }
+                comment.removeLike(commentId, userId)
+                comment.addDislike(commentId, dislike)
+                return new Result(StatusCode.NoContent)
+            }
+            case 'Dislike': {
+                const like: LikeDBModel = {
+                    userId,
+                    commentId,
+                    likeStatus,
+                }
+                comment.removeDislike(commentId, userId)
+                comment.addLike(commentId, like)
+                return new Result(StatusCode.NoContent)
             }
         }
-        // иначе - обновляем статус
-        const isUpdated = await this.likesRepository.updateLikeStatus(userId, commentId, newLike)
-        if (!isUpdated) {
-            return new Result(StatusCode.ServerError, 'The like haven\'t been updated in the DB')
-        }
-        return new Result(StatusCode.Success)
     }
 }

@@ -76,7 +76,7 @@ export class CommentsController {
             case StatusCode.ServerError:
                 res.sendStatus(555);
                 break
-            case StatusCode.Success:
+            case StatusCode.NoContent:
                 res.sendStatus(204);
                 break
         }
@@ -101,7 +101,7 @@ export class CommentsController {
             case StatusCode.ServerError:
                 res.sendStatus(555);
                 break
-            case StatusCode.Success:
+            case StatusCode.NoContent:
                 res.sendStatus(204);
                 break
         }
@@ -121,13 +121,10 @@ export class CommentsController {
             case StatusCode.NotFound:
                 res.sendStatus(404);
                 break
-            case StatusCode.Forbidden:
-                res.sendStatus(403);
-                break
             case StatusCode.ServerError:
                 res.sendStatus(555);
                 break
-            case StatusCode.Success:
+            case StatusCode.NoContent:
                 res.sendStatus(204);
                 break
         }

@@ -183,7 +183,6 @@ export class AuthService {
                 seconds: 20
             }).toISOString(),
         }
-        debugger
         const isUpdated = await this.devicesRepository.updateRefreshToken(deviceWithNewRefreshToken)
         if (!isUpdated) {
             return new Result(StatusCode.ServerError)

@@ -83,7 +83,12 @@ describe(PATHS.comments, () => {
                 userId: userInfo.userId,
                 userLogin: userInfo.login
             },
-            createdAt: expect.any(String)
+            createdAt: expect.any(String),
+            likesInfo: {
+                dislikesCount: 0,
+                likesCount: 0,
+                myStatus: "None",
+            },
         })
     })
 

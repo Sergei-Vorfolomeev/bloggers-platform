@@ -83,4 +83,36 @@ describe('LIKE-e2e', () => {
             },
         })
     })
+
+    it('change like to dislike', async () => {
+        await request(app)
+            .put(`${PATHS.comments}/${comment.id}/like-status`)
+            .set('Authorization', `Bearer ${tokens.accessToken}`)
+            .send({
+                "likeStatus": "Dislike"
+            })
+            .expect(204)
+    })
+
+    it('get changed comment by authorized user', async () => {
+        const response = await request(app)
+            .get(`${PATHS.comments}/${comment.id}`)
+            .set('Authorization', `Bearer ${tokens.accessToken}`)
+            .expect(200)
+
+        expect(response.body).toEqual({
+            id: comment.id,
+            content: comment.content,
+            commentatorInfo: {
+                userId: comment.commentatorInfo.userId,
+                userLogin: comment.commentatorInfo.userLogin
+            },
+            createdAt: expect.any(String),
+            likesInfo: {
+                dislikesCount: 1,
+                likesCount: 0,
+                myStatus: "Dislike",
+            },
+        })
+    })
 })
