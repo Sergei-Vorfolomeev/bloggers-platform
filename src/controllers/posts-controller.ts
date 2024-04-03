@@ -1,4 +1,4 @@
-import {PostsService, CommentsService} from "../services";
+import {PostsService, CommentsService, UsersService} from "../services";
 import {PostsQueryRepository, CommentsQueryRepository} from "../repositories";
 import {
     CommentInputModel,
@@ -21,6 +21,7 @@ export class PostsController {
         protected commentsService: CommentsService,
         protected postsQueryRepository: PostsQueryRepository,
         protected commentsQueryRepository: CommentsQueryRepository,
+        protected usersService: UsersService,
     ) {
     }
 
@@ -113,9 +114,9 @@ export class PostsController {
     }
 
     async getCommentByPostId(req: RequestWithParamsAndQuery<QueryParams>, res: ResponseWithBody<Paginator<CommentViewModel[]>>) {
-        const {id} = req.params
+        const {id: postId} = req.params
         const {sortBy, sortDirection, pageNumber, pageSize} = req.query
-        if (!ObjectId.isValid(id)) {
+        if (!ObjectId.isValid(postId)) {
             res.sendStatus(404)
             return
         }
@@ -125,7 +126,12 @@ export class PostsController {
             pageNumber: pageNumber ? +pageNumber : 1,
             pageSize: pageSize ? +pageSize : 10,
         }
-        const comments = await this.commentsQueryRepository.getCommentsByPostId(id, sortParams)
+        let userId = null
+        if (req.headers.authorization) {
+            const token = req.headers.authorization.split(' ')[1]
+            userId = await this.usersService.getUserId(token)
+        }
+        const comments = await this.commentsQueryRepository.getCommentsByPostId(postId, sortParams, userId)
         comments
             ? res.status(200).send(comments)
             : res.sendStatus(404)

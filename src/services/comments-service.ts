@@ -85,41 +85,61 @@ export class CommentsService {
         }
         // проверяем есть ли лайк юзера на комменте
         const like = await this.likesRepository.getCommentLikeStatusByUserId(userId, commentId)
-        // если лайка нет -> создаем + увеличиваем счетчик в объекте коммента
-        if (!like || like.likeStatus === 'None') {
+        // если лайка нет -> создаем
+        if (!like) {
             const newLike: LikeDBModel = {
                 userId,
                 commentId,
                 likeStatus,
             }
-            const createdLikeId = likeStatus === 'Like'
-                ? comment.addLike(commentId, newLike)
-                : comment.addDislike(commentId, newLike)
+            let createdLikeId
+            if (likeStatus === 'Like') {
+                createdLikeId = comment.addLike(commentId, newLike)
+            }
+            if (likeStatus === 'Dislike') {
+                createdLikeId = comment.addDislike(commentId, newLike)
+            }
+            if (likeStatus === 'None') {
+                createdLikeId = true
+            }
             if (!createdLikeId) {
                 return new Result(StatusCode.ServerError, 'The like hasn\'t been created in the DB')
             }
             return new Result(StatusCode.NoContent)
         }
-        // иначе -> обновляем статус + обновляем счетчик
-        switch (like.likeStatus) {
-            case 'Like': {
-                const dislike = {
-                    userId,
-                    commentId,
-                    likeStatus
+        // если лайк уже есть - обновляем
+        switch (likeStatus) {
+            case "None": {
+                if (like.likeStatus === 'Like') {
+                    comment.removeLike(commentId, userId)
                 }
-                comment.removeLike(commentId, userId)
-                comment.addDislike(commentId, dislike)
+                if (like.likeStatus === 'Dislike') {
+                    comment.removeDislike(commentId, userId)
+                }
                 return new Result(StatusCode.NoContent)
             }
-            case 'Dislike': {
-                const like: LikeDBModel = {
-                    userId,
-                    commentId,
-                    likeStatus,
+            case "Like": {
+                if (like.likeStatus === 'Dislike') {
+                    comment.removeDislike(commentId, userId)
+                    const newLike: LikeDBModel = {
+                        userId,
+                        commentId,
+                        likeStatus,
+                    }
+                    comment.addLike(commentId, newLike)
                 }
-                comment.removeDislike(commentId, userId)
-                comment.addLike(commentId, like)
+                return new Result(StatusCode.NoContent)
+            }
+            case "Dislike": {
+                if (like.likeStatus === 'Like') {
+                    comment.removeLike(commentId, userId)
+                    const dislike = {
+                        userId,
+                        commentId,
+                        likeStatus
+                    }
+                    comment.addDislike(commentId, dislike)
+                }
                 return new Result(StatusCode.NoContent)
             }
         }

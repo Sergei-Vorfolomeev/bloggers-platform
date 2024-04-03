@@ -1,7 +1,8 @@
 import {CommentsService, UsersService} from "../services";
 import {CommentsQueryRepository, LikesQueryRepository} from "../repositories";
 import {
-    CommentInputModel, LikeInputModel,
+    CommentInputModel,
+    LikeInputModel,
     RequestWithParams,
     RequestWithParamsAndBody,
     ResponseType,
@@ -42,7 +43,7 @@ export class CommentsController {
             res.status(200).send(commentView)
             return
         }
-        const [, token] = req.headers.authorization.split(' ')
+        const token = req.headers.authorization.split(' ')[1]
 
         const userId = await this.usersService.getUserId(token)
         if (!userId) {
@@ -50,11 +51,7 @@ export class CommentsController {
             return
         }
         const likeStatus = await this.likesQueryRepository.getLikeStatus(commentId, userId)
-        if (!likeStatus) {
-            res.sendStatus(555)
-            return
-        }
-        commentView.likesInfo.myStatus = likeStatus
+        commentView.likesInfo.myStatus = likeStatus ?? 'None'
         res.status(200).send(commentView)
     }
 
