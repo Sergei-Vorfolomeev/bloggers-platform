@@ -1,4 +1,4 @@
-import {CommentDBModel, LikeDBModel} from "../repositories/types";
+import {CommentDBModel, LikeEntityDBModel} from "../repositories/types";
 import {CommentsRepository, LikesRepository, PostsRepository, UsersRepository} from "../repositories";
 import {Result, StatusCode} from "../utils/result";
 import {LikeStatus} from "./types";
@@ -79,18 +79,25 @@ export class CommentsService {
     }
 
     async updateLikeStatus(commentId: string, userId: string, likeStatus: LikeStatus): Promise<Result> {
+        const user = await this.usersRepository.findUserById(userId)
+        if (!user) {
+            return new Result(StatusCode.Unauthorized)
+        }
         const comment = await this.commentsRepository.getCommentById(commentId)
         if (!comment) {
-            return new Result(StatusCode.NotFound, 'The comment with provided id haven\'t been found')
+            return new Result(StatusCode.NotFound, 'The comment with provided id hasn\'t been found')
         }
         // проверяем есть ли лайк юзера на комменте
-        const like = await this.likesRepository.getCommentLikeStatusByUserId(userId, commentId)
+        const likeFromDB = await this.likesRepository.getCommentLikeEntityByUserId(userId, commentId)
         // если лайка нет -> создаем
-        if (!like) {
-            const newLike: LikeDBModel = {
-                userId,
+        if (!likeFromDB) {
+            const newLike: LikeEntityDBModel = {
+                userId: user._id.toString(),
+                login: user.login,
                 commentId,
                 likeStatus,
+                description: '',
+                addedAt: new Date().toISOString()
             }
             let createdLikeId
             if (likeStatus === 'Like') {
@@ -110,33 +117,39 @@ export class CommentsService {
         // если лайк уже есть - обновляем
         switch (likeStatus) {
             case "None": {
-                if (like.likeStatus === 'Like') {
+                if (likeFromDB.likeStatus === 'Like') {
                     comment.removeLike(commentId, userId)
                 }
-                if (like.likeStatus === 'Dislike') {
+                if (likeFromDB.likeStatus === 'Dislike') {
                     comment.removeDislike(commentId, userId)
                 }
                 return new Result(StatusCode.NoContent)
             }
             case "Like": {
-                if (like.likeStatus === 'Dislike') {
+                if (likeFromDB.likeStatus === 'Dislike') {
                     comment.removeDislike(commentId, userId)
-                    const newLike: LikeDBModel = {
-                        userId,
+                    const newLike: LikeEntityDBModel = {
+                        userId: user._id.toString(),
+                        login: user.login,
                         commentId,
                         likeStatus,
+                        description: '',
+                        addedAt: new Date().toISOString()
                     }
                     comment.addLike(commentId, newLike)
                 }
                 return new Result(StatusCode.NoContent)
             }
             case "Dislike": {
-                if (like.likeStatus === 'Like') {
+                if (likeFromDB.likeStatus === 'Like') {
                     comment.removeLike(commentId, userId)
-                    const dislike = {
-                        userId,
+                    const dislike: LikeEntityDBModel = {
+                        userId: user._id.toString(),
+                        login: user.login,
                         commentId,
-                        likeStatus
+                        likeStatus,
+                        description: '',
+                        addedAt: new Date().toISOString()
                     }
                     comment.addDislike(commentId, dislike)
                 }

@@ -8,8 +8,7 @@ import {
     CommentsQueryRepository,
     PostsQueryRepository,
     DevicesRepository,
-    LikesRepository,
-    LikesQueryRepository,
+    LikesRepository, LikesQueryRepository,
 } from "./repositories";
 import {
     UsersService,
@@ -35,10 +34,10 @@ export const usersRepository = new UsersRepository()
 export const usersQueryRepository = new UsersQueryRepository()
 export const blogsRepository = new BlogsRepository()
 export const blogsQueryRepository = new BlogsQueryRepository()
-export const postsRepository = new PostsRepository()
-export const postsQueryRepository = new PostsQueryRepository(blogsQueryRepository)
 export const likesRepository = new LikesRepository()
 export const likesQueryRepository = new LikesQueryRepository()
+export const postsRepository = new PostsRepository()
+export const postsQueryRepository = new PostsQueryRepository(blogsQueryRepository, likesQueryRepository)
 export const commentsRepository = new CommentsRepository()
 export const commentsQueryRepository = new CommentsQueryRepository(postsQueryRepository, likesQueryRepository)
 export const devicesRepository = new DevicesRepository()
@@ -56,13 +55,13 @@ export const authService = new AuthService(
     bcryptService,
     cryptoService,
 )
-export const postsService = new PostsService(postsRepository, blogsRepository)
+export const postsService = new PostsService(postsRepository, blogsRepository, usersRepository, likesRepository)
 export const blogsService = new BlogsService(blogsRepository, postsService)
 export const commentsService = new CommentsService(commentsRepository, usersRepository, postsRepository, likesRepository)
 
 export const usersController = new UsersController(usersService, usersQueryRepository)
 export const authController = new AuthController(authService, usersQueryRepository)
 export const devicesController = new DevicesController(usersService)
-export const blogsController = new BlogsController(blogsService, blogsQueryRepository, postsQueryRepository)
+export const blogsController = new BlogsController(blogsService, blogsQueryRepository, postsQueryRepository, usersService)
 export const postsController = new PostsController(postsService, commentsService, postsQueryRepository, commentsQueryRepository, usersService)
-export const commentsController = new CommentsController(commentsService, commentsQueryRepository, likesQueryRepository, usersService)
+export const commentsController = new CommentsController(commentsService, commentsQueryRepository, usersService)

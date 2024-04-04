@@ -1,10 +1,9 @@
-import {CommentViewModel} from "../services/types";
+import {CommentViewModel, LikeStatus} from "../services/types";
 import {ObjectId, WithId} from "mongodb";
-import {PostsQueryRepository} from "./posts-query-repository";
+import {PostsQueryRepository, LikesQueryRepository} from "../repositories";
 import {Paginator} from "../routers/types";
 import {CommentDBModel, SortParams} from "./types";
 import {CommentModel} from "../db/mongoose/models/comment.model";
-import {LikesQueryRepository} from "./likes-query-repository";
 
 export class CommentsQueryRepository {
     constructor(
@@ -13,13 +12,13 @@ export class CommentsQueryRepository {
     ) {
     }
 
-    async getCommentById(id: string): Promise<CommentViewModel | null> {
+    async getCommentById(id: string, userId: string | null): Promise<CommentViewModel | null> {
         try {
             const comment = await CommentModel.findById(new ObjectId(id)).lean().exec()
             if (!comment) {
                 return null
             }
-            const res = await this.mapToView([comment], null)
+            const res = await this.mapToView([comment], userId)
             return res[0]
         } catch (error) {
             console.error(error)
@@ -30,7 +29,7 @@ export class CommentsQueryRepository {
     async getCommentsByPostId(postId: string, sortParams: SortParams, userId: string | null): Promise<Paginator<CommentViewModel[]> | null> {
         try {
             const {sortBy, sortDirection, pageNumber, pageSize} = sortParams
-            const post = await this.postsQueryRepository.getPostById(postId)
+            const post = await this.postsQueryRepository.getPostById(postId, userId)
             if (!post) {
                 return null
             }
@@ -58,9 +57,9 @@ export class CommentsQueryRepository {
 
     async mapToView(comments: WithId<CommentDBModel>[], userId: string | null): Promise<CommentViewModel[]> {
         return await Promise.all(comments.map(async comment => {
-            let status
+            let likeStatus: LikeStatus | null = null
             if (userId) {
-                status = await this.likesQueryRepository.getLikeStatus(comment._id.toString(), userId)
+                likeStatus = await this.likesQueryRepository.getCommentLikeStatus(comment._id.toString(), userId)
             }
             return {
                 id: comment._id.toString(),
@@ -70,7 +69,7 @@ export class CommentsQueryRepository {
                 likesInfo: {
                     likesCount: comment.likesInfo.likesCount,
                     dislikesCount: comment.likesInfo.dislikesCount,
-                    myStatus: status ?? 'None',
+                    myStatus: likeStatus ?? 'None',
                 }
             }
         }))

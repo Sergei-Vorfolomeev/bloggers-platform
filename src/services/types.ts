@@ -8,13 +8,14 @@ export type BlogViewModel = {
 }
 
 export type PostViewModel = {
-    id: string;
-    title: string;
-    shortDescription: string;
-    content: string;
-    blogId: string;
-    blogName: string;
+    id: string
+    title: string
+    shortDescription: string
+    content: string
+    blogId: string
+    blogName: string
     createdAt: string
+    extendedLikesInfo: ExtendedLikesInfoViewModel
 }
 
 export type UserViewModel = {
@@ -41,6 +42,17 @@ export type LikesInfoViewModel = {
     likesCount: number
     dislikesCount: number
     myStatus: LikeStatus
+}
+
+export type ExtendedLikesInfoViewModel = LikesInfoViewModel & {
+    newestLikes: LikeDetailsViewModel[]
+}
+
+export type LikeDetailsViewModel = {
+    description: string
+    addedAt: string
+    userId: string
+    login: string
 }
 
 export type LikeStatus = "None" | "Like" | "Dislike"

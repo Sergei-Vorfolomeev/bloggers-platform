@@ -1,4 +1,4 @@
-import {BlogsService} from "../services";
+import {BlogsService, UsersService} from "../services";
 import {BlogsQueryRepository, PostsQueryRepository} from "../repositories";
 import {
     BlogInputModel,
@@ -18,6 +18,7 @@ export class BlogsController {
         protected blogsService: BlogsService,
         protected blogsQueryRepository: BlogsQueryRepository,
         protected postsQueryRepository: PostsQueryRepository,
+        protected usersService: UsersService,
     ) {
     }
 
@@ -55,13 +56,18 @@ export class BlogsController {
             res.sendStatus(404)
             return
         }
+        let userId = null
+        if (req.headers.authorization) {
+            const token = req.headers.authorization.split(' ')[1]
+            userId = await this.usersService.getUserId(token)
+        }
         const sortParams = {
             sortBy: sortBy ?? 'createdAt',
             sortDirection: sortDirection ?? 'desc',
             pageNumber: pageNumber ? +pageNumber : 1,
             pageSize: pageSize ? +pageSize : 10,
         }
-        const posts = await this.postsQueryRepository.getPostsByBlogId(id, sortParams)
+        const posts = await this.postsQueryRepository.getPostsByBlogId(id, sortParams, userId)
         posts
             ? res.status(200).send(posts)
             : res.sendStatus(404)
@@ -89,6 +95,11 @@ export class BlogsController {
             res.sendStatus(404)
             return
         }
+        let userId = null
+        if (req.headers.authorization) {
+            const token = req.headers.authorization.split(' ')[1]
+            userId = await this.usersService.getUserId(token)
+        }
         const {statusCode, data: createdPostId} = await this.blogsService.createPostWithinBlog(id, req.body)
         switch (statusCode) {
             case StatusCode.BadRequest: {
@@ -104,7 +115,7 @@ export class BlogsController {
                 return
             }
             case StatusCode.Created: {
-                const post = await this.postsQueryRepository.getPostById(createdPostId!)
+                const post = await this.postsQueryRepository.getPostById(createdPostId!, userId)
                 post
                     ? res.status(201).send(post)
                     : res.sendStatus(400)

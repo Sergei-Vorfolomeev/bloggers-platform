@@ -1,4 +1,4 @@
-import {CommentDBModel, LikeDBModel} from "./types";
+import {CommentDBModel, LikeEntityDBModel} from "./types";
 import {Document} from 'mongoose'
 import {ObjectId} from "mongodb";
 import {CommentModel, CommentsInstanceMethods} from "../db/mongoose/models/comment.model";
@@ -49,24 +49,7 @@ export class CommentsRepository {
         }
     }
 
-    async changeLikesCount(commentId: string, act: 'inc' | 'dec', likeEntity: LikeStatus): Promise<boolean>  {
-        try {
-            const res = await CommentModel.updateOne(
-                {_id: new ObjectId(commentId)},
-                { $inc:
-                    likeEntity === 'Like'
-                        ? {"likesInfo.likesCount": act === 'inc' ? 1 : -1 }
-                        : {"likesInfo.dislikesCount": act === 'inc' ? 1 : -1 }
-                }
-            )
-            return res.matchedCount === 1
-        } catch (e) {
-            console.error(e)
-            return false
-        }
-    }
-
-    async addLike(commentId: string, like: LikeDBModel): Promise<string | null> {
+    async addLike(commentId: string, like: LikeEntityDBModel): Promise<string | null> {
         try {
             const comment = new CommentModel()
             console.log(comment)

@@ -1,5 +1,5 @@
 import {CommentsService, UsersService} from "../services";
-import {CommentsQueryRepository, LikesQueryRepository} from "../repositories";
+import {CommentsQueryRepository} from "../repositories";
 import {
     CommentInputModel,
     LikeInputModel,
@@ -16,7 +16,6 @@ export class CommentsController {
     constructor(
         protected commentsService: CommentsService,
         protected commentsQueryRepository: CommentsQueryRepository,
-        protected likesQueryRepository: LikesQueryRepository,
         protected usersService: UsersService,
     ) {
     }
@@ -27,32 +26,17 @@ export class CommentsController {
             res.sendStatus(404)
             return
         }
-        const comment = await this.commentsQueryRepository.getCommentById(commentId)
+        let userId = null
+        if (req.headers.authorization) {
+            const token = req.headers.authorization.split(' ')[1]
+            userId = await this.usersService.getUserId(token)
+        }
+        const comment = await this.commentsQueryRepository.getCommentById(commentId, userId)
         if (!comment) {
             res.sendStatus(404)
             return
         }
-        let commentView: CommentViewModel = {
-            ...comment,
-            likesInfo: {
-                ...comment.likesInfo,
-                myStatus: 'None'
-            }
-        }
-        if (!req.headers.authorization) {
-            res.status(200).send(commentView)
-            return
-        }
-        const token = req.headers.authorization.split(' ')[1]
-
-        const userId = await this.usersService.getUserId(token)
-        if (!userId) {
-            res.status(200).send(commentView)
-            return
-        }
-        const likeStatus = await this.likesQueryRepository.getLikeStatus(commentId, userId)
-        commentView.likesInfo.myStatus = likeStatus ?? 'None'
-        res.status(200).send(commentView)
+        res.status(200).send(comment)
     }
 
     async deleteComment(req: RequestWithParams, res: ResponseType) {
@@ -104,7 +88,6 @@ export class CommentsController {
         }
     }
 
-    /* TODO: validate LikeStatus */
     async updateLikeStatus(req: RequestWithParamsAndBody<LikeInputModel>, res: ResponseType) {
         const {id: commentId} = req.params
         const {likeStatus} = req.body
@@ -115,6 +98,9 @@ export class CommentsController {
         }
         const result = await this.commentsService.updateLikeStatus(commentId, userId, likeStatus)
         switch (result.statusCode) {
+            case StatusCode.Unauthorized:
+                res.sendStatus(401);
+                break
             case StatusCode.NotFound:
                 res.sendStatus(404);
                 break

@@ -8,6 +8,10 @@ export type PostDBModel = {
     blogId: string
     blogName: string
     createdAt: string
+    likesInfo: {
+        likesCount: number
+        dislikesCount: number
+    }
 }
 
 export type BlogDBModel = {
@@ -46,11 +50,14 @@ export type CommentDBModel = {
     }
 }
 
-export type LikeDBModel = {
+export type LikeEntityDBModel = {
     userId: string,
+    login: string,
     postId?: string
     commentId?: string,
     likeStatus: LikeStatus,
+    description: string
+    addedAt: string
 }
 
 export type DeviceDBModel = {

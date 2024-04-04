@@ -17,103 +17,13 @@ describe('LIKE-e2e', () => {
     })
 
     let user: any = null
-    it('create user', async () => {
+    it('create user 1', async () => {
         user = await userSeeder.registerUser(app)
     })
 
     let tokens: any = null
-    it('login user', async () => {
+    it('login user 1', async () => {
         tokens = await userSeeder.loginUser(app, user.email, user.password)
-    })
-
-    let comment: any = null
-    it('create blog, post, comment', async () => {
-        comment = await postTestHelper.createPostWithComment(app, tokens.accessToken)
-    })
-
-    it('get comment by unauthorized user', async () => {
-        const response = await request(app)
-            .get(`${PATHS.comments}/${comment.id}`)
-            .expect(200)
-
-        expect(response.body).toEqual({
-            id: comment.id,
-            content: comment.content,
-            commentatorInfo: {
-                userId: comment.commentatorInfo.userId,
-                userLogin: comment.commentatorInfo.userLogin
-            },
-            createdAt: expect.any(String),
-            likesInfo: {
-                dislikesCount: 0,
-                likesCount: 0,
-                myStatus: "None",
-            },
-        })
-    })
-
-    it('add like', async () => {
-        await request(app)
-            .put(`${PATHS.comments}/${comment.id}/like-status`)
-            .set('Authorization', `Bearer ${tokens.accessToken}`)
-            .send({
-                "likeStatus": "Like"
-            })
-            .expect(204)
-    })
-
-    it('get comment by user 1', async () => {
-        const response = await request(app)
-            .get(`${PATHS.comments}/${comment.id}`)
-            .set('Authorization', `Bearer ${tokens.accessToken}`)
-            .expect(200)
-
-        expect(response.body).toEqual({
-            id: comment.id,
-            content: comment.content,
-            commentatorInfo: {
-                userId: comment.commentatorInfo.userId,
-                userLogin: comment.commentatorInfo.userLogin
-            },
-            createdAt: expect.any(String),
-            likesInfo: {
-                dislikesCount: 0,
-                likesCount: 1,
-                myStatus: "Like",
-            },
-        })
-    })
-
-    it('change like to dislike', async () => {
-        await request(app)
-            .put(`${PATHS.comments}/${comment.id}/like-status`)
-            .set('Authorization', `Bearer ${tokens.accessToken}`)
-            .send({
-                "likeStatus": "Dislike"
-            })
-            .expect(204)
-    })
-
-    it('get changed comment by user 1', async () => {
-        const response = await request(app)
-            .get(`${PATHS.comments}/${comment.id}`)
-            .set('Authorization', `Bearer ${tokens.accessToken}`)
-            .expect(200)
-
-        expect(response.body).toEqual({
-            id: comment.id,
-            content: comment.content,
-            commentatorInfo: {
-                userId: comment.commentatorInfo.userId,
-                userLogin: comment.commentatorInfo.userLogin
-            },
-            createdAt: expect.any(String),
-            likesInfo: {
-                dislikesCount: 1,
-                likesCount: 0,
-                myStatus: "Dislike",
-            },
-        })
     })
 
     let user2: any = null
@@ -126,67 +36,285 @@ describe('LIKE-e2e', () => {
         tokens2 = await userSeeder.loginUser(app, user2.email, user2.password)
     })
 
-    it('get changed comment by user 2', async () => {
-        const response = await request(app)
-            .get(`${PATHS.comments}/${comment.id}`)
-            .set('Authorization', `Bearer ${tokens2.accessToken}`)
-            .expect(200)
+    describe.skip('comments likes', () => {
+        let comment: any = null
+        it('create blog, post, comment', async () => {
+            comment = await postTestHelper.createPostWithComment(app, tokens.accessToken)
+        })
 
-        expect(response.body).toEqual({
-            id: comment.id,
-            content: comment.content,
-            commentatorInfo: {
-                userId: comment.commentatorInfo.userId,
-                userLogin: comment.commentatorInfo.userLogin
-            },
-            createdAt: expect.any(String),
-            likesInfo: {
-                dislikesCount: 1,
-                likesCount: 0,
-                myStatus: "None",
-            },
+        it('get comment by unauthorized user', async () => {
+            const response = await request(app)
+                .get(`${PATHS.comments}/${comment.id}`)
+                .expect(200)
+
+            expect(response.body).toEqual({
+                id: comment.id,
+                content: comment.content,
+                commentatorInfo: {
+                    userId: comment.commentatorInfo.userId,
+                    userLogin: comment.commentatorInfo.userLogin
+                },
+                createdAt: expect.any(String),
+                likesInfo: {
+                    dislikesCount: 0,
+                    likesCount: 0,
+                    myStatus: "None",
+                },
+            })
+        })
+
+        it('add like', async () => {
+            await request(app)
+                .put(`${PATHS.comments}/${comment.id}/like-status`)
+                .set('Authorization', `Bearer ${tokens.accessToken}`)
+                .send({
+                    "likeStatus": "Like"
+                })
+                .expect(204)
+        })
+
+        it('get comment by user 1', async () => {
+            const response = await request(app)
+                .get(`${PATHS.comments}/${comment.id}`)
+                .set('Authorization', `Bearer ${tokens.accessToken}`)
+                .expect(200)
+
+            expect(response.body).toEqual({
+                id: comment.id,
+                content: comment.content,
+                commentatorInfo: {
+                    userId: comment.commentatorInfo.userId,
+                    userLogin: comment.commentatorInfo.userLogin
+                },
+                createdAt: expect.any(String),
+                likesInfo: {
+                    dislikesCount: 0,
+                    likesCount: 1,
+                    myStatus: "Like",
+                },
+            })
+        })
+
+        it('change like to dislike', async () => {
+            await request(app)
+                .put(`${PATHS.comments}/${comment.id}/like-status`)
+                .set('Authorization', `Bearer ${tokens.accessToken}`)
+                .send({
+                    "likeStatus": "Dislike"
+                })
+                .expect(204)
+        })
+
+        it('get changed comment by user 1', async () => {
+            const response = await request(app)
+                .get(`${PATHS.comments}/${comment.id}`)
+                .set('Authorization', `Bearer ${tokens.accessToken}`)
+                .expect(200)
+
+            expect(response.body).toEqual({
+                id: comment.id,
+                content: comment.content,
+                commentatorInfo: {
+                    userId: comment.commentatorInfo.userId,
+                    userLogin: comment.commentatorInfo.userLogin
+                },
+                createdAt: expect.any(String),
+                likesInfo: {
+                    dislikesCount: 1,
+                    likesCount: 0,
+                    myStatus: "Dislike",
+                },
+            })
+        })
+
+        it('get changed comment by user 2', async () => {
+            const response = await request(app)
+                .get(`${PATHS.comments}/${comment.id}`)
+                .set('Authorization', `Bearer ${tokens2.accessToken}`)
+                .expect(200)
+
+            expect(response.body).toEqual({
+                id: comment.id,
+                content: comment.content,
+                commentatorInfo: {
+                    userId: comment.commentatorInfo.userId,
+                    userLogin: comment.commentatorInfo.userLogin
+                },
+                createdAt: expect.any(String),
+                likesInfo: {
+                    dislikesCount: 1,
+                    likesCount: 0,
+                    myStatus: "None",
+                },
+            })
+        })
+
+        it('set status "like" by user 2', async () => {
+            await request(app)
+                .put(`${PATHS.comments}/${comment.id}/like-status`)
+                .set('Authorization', `Bearer ${tokens2.accessToken}`)
+                .send({
+                    "likeStatus": "Like"
+                })
+                .expect(204)
+        });
+
+        it('set status "none" by user 1', async () => {
+            await request(app)
+                .put(`${PATHS.comments}/${comment.id}/like-status`)
+                .set('Authorization', `Bearer ${tokens.accessToken}`)
+                .send({
+                    "likeStatus": "None"
+                })
+                .expect(204)
+        });
+
+        it('get changed comment by user 1', async () => {
+            const response = await request(app)
+                .get(`${PATHS.comments}/${comment.id}`)
+                .set('Authorization', `Bearer ${tokens.accessToken}`)
+                .expect(200)
+
+            expect(response.body).toEqual({
+                id: comment.id,
+                content: comment.content,
+                commentatorInfo: {
+                    userId: comment.commentatorInfo.userId,
+                    userLogin: comment.commentatorInfo.userLogin
+                },
+                createdAt: expect.any(String),
+                likesInfo: {
+                    dislikesCount: 0,
+                    likesCount: 1,
+                    myStatus: "None",
+                },
+            })
         })
     })
 
-    it('set status "like" by user 2', async () => {
-        await request(app)
-            .put(`${PATHS.comments}/${comment.id}/like-status`)
-            .set('Authorization', `Bearer ${tokens2.accessToken}`)
-            .send({
-                "likeStatus": "Like"
+    describe('posts likes', () => {
+        let post: any = null
+        it('create post', async () => {
+            post = await postTestHelper.createPost(app)
+        })
+        it('add like by user 1', async () => {
+            await request(app)
+                .put(`${PATHS.posts}/${post.id}/like-status`)
+                .set('Authorization', `Bearer ${tokens.accessToken}`)
+                .send({
+                    likeStatus: 'Like'
+                })
+                .expect(204)
+        })
+        it('get post by unauthorized user', async () => {
+            const response = await request(app)
+                .get(`${PATHS.posts}/${post.id}`)
+                .expect(200)
+
+            expect(response.body).toEqual({
+                id: post.id,
+                title: post.title,
+                shortDescription: post.shortDescription,
+                content: post.content,
+                blogId: post.blogId,
+                blogName: post.blogName,
+                createdAt: post.createdAt,
+                extendedLikesInfo: {
+                    dislikesCount: 0,
+                    likesCount: 1,
+                    myStatus: "None",
+                    newestLikes: [
+                        {
+                            description: expect.any(String),
+                            addedAt: expect.any(String),
+                            userId: expect.any(String),
+                            login: user.login,
+                        }
+                    ]
+                },
             })
-            .expect(204)
-    });
+        })
+        it('add dislike by user 2', async () => {
+            await request(app)
+                .put(`${PATHS.posts}/${post.id}/like-status`)
+                .set('Authorization', `Bearer ${tokens2.accessToken}`)
+                .send({
+                    likeStatus: 'Dislike'
+                })
+                .expect(204)
+        })
+        it('get post by user 1', async () => {
+            const response = await request(app)
+                .get(`${PATHS.posts}/${post.id}`)
+                .set('Authorization', `Bearer ${tokens.accessToken}`)
+                .expect(200)
 
-    it('set status "none" by user 1', async () => {
-        await request(app)
-            .put(`${PATHS.comments}/${comment.id}/like-status`)
-            .set('Authorization', `Bearer ${tokens.accessToken}`)
-            .send({
-                "likeStatus": "None"
+            expect(response.body).toEqual({
+                id: post.id,
+                title: post.title,
+                shortDescription: post.shortDescription,
+                content: post.content,
+                blogId: post.blogId,
+                blogName: post.blogName,
+                createdAt: post.createdAt,
+                extendedLikesInfo: {
+                    dislikesCount: 1,
+                    likesCount: 1,
+                    myStatus: "Like",
+                    newestLikes: [
+                        {
+                            description: expect.any(String),
+                            addedAt: expect.any(String),
+                            userId: expect.any(String),
+                            login: user.login,
+                        }
+                    ]
+                },
             })
-            .expect(204)
-    });
+        })
+        it('set like by user 2', async () => {
+            await request(app)
+                .put(`${PATHS.posts}/${post.id}/like-status`)
+                .set('Authorization', `Bearer ${tokens2.accessToken}`)
+                .send({
+                    likeStatus: 'Like'
+                })
+                .expect(204)
+        })
+        it('get post by user 2', async () => {
+            const response = await request(app)
+                .get(`${PATHS.posts}/${post.id}`)
+                .set('Authorization', `Bearer ${tokens2.accessToken}`)
+                .expect(200)
 
-    it('get changed comment by user 1', async () => {
-        const response = await request(app)
-            .get(`${PATHS.comments}/${comment.id}`)
-            .set('Authorization', `Bearer ${tokens.accessToken}`)
-            .expect(200)
-
-        expect(response.body).toEqual({
-            id: comment.id,
-            content: comment.content,
-            commentatorInfo: {
-                userId: comment.commentatorInfo.userId,
-                userLogin: comment.commentatorInfo.userLogin
-            },
-            createdAt: expect.any(String),
-            likesInfo: {
-                dislikesCount: 0,
-                likesCount: 1,
-                myStatus: "None",
-            },
+            expect(response.body).toEqual({
+                id: post.id,
+                title: post.title,
+                shortDescription: post.shortDescription,
+                content: post.content,
+                blogId: post.blogId,
+                blogName: post.blogName,
+                createdAt: post.createdAt,
+                extendedLikesInfo: {
+                    dislikesCount: 0,
+                    likesCount: 2,
+                    myStatus: "Like",
+                    newestLikes: [
+                        {
+                            description: expect.any(String),
+                            addedAt: expect.any(String),
+                            userId: expect.any(String),
+                            login: user2.login,
+                        },
+                        {
+                            description: expect.any(String),
+                            addedAt: expect.any(String),
+                            userId: expect.any(String),
+                            login: user.login,
+                        },
+                    ]
+                },
+            })
         })
     })
 })

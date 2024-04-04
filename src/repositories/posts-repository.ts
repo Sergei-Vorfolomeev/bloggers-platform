@@ -1,14 +1,14 @@
-import {ObjectId, WithId} from "mongodb";
+import {ObjectId} from "mongodb";
 import {PostDBModel} from "./types";
 import {PostInputModel} from "../routers/types";
-import {PostModel} from "../db/mongoose/models/post.model";
-import mongoose from "mongoose";
+import {PostModel, PostsInstanceMethods} from "../db/mongoose/models/post.model";
+import mongoose, {Document} from "mongoose";
 import {CommentModel} from "../db/mongoose/models/comment.model";
 
 export class PostsRepository {
-    async getPostById(postId: string): Promise<WithId<PostDBModel> | null> {
+    async getPostById(postId: string): Promise<PostDBModel & Document & PostsInstanceMethods | null> {
         try {
-            return PostModel.findById(new ObjectId(postId)).lean().exec()
+            return await PostModel.findById(new ObjectId(postId)).exec()
         } catch (e) {
             console.log(e)
             return null

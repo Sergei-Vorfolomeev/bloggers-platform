@@ -1,11 +1,11 @@
 import {model, Model, Schema} from "mongoose";
-import {CommentDBModel, LikeDBModel} from "../../../repositories/types";
+import {CommentDBModel, LikeEntityDBModel} from "../../../repositories/types";
 import {LikeModel} from "./like.model";
 import {ObjectId} from "mongodb";
 
 export type CommentsInstanceMethods = {
-    addLike(commentId: string, like: LikeDBModel): string | null
-    addDislike(commentId: string, dislike: LikeDBModel): string | null
+    addLike(commentId: string, like: LikeEntityDBModel): string | null
+    addDislike(commentId: string, dislike: LikeEntityDBModel): string | null
     removeLike(commentId: string, userId: string): boolean
     removeDislike(commentId: string, userId: string): boolean
     increaseLikesCount(commentId: string): boolean
@@ -14,7 +14,7 @@ export type CommentsInstanceMethods = {
     decreaseDislikesCount(commentId: string): boolean
 }
 
-export type CommentModelType = Model<CommentDBModel, {}, CommentsInstanceMethods>;
+type CommentModelType = Model<CommentDBModel, {}, CommentsInstanceMethods>;
 
 export const CommentSchema = new Schema<CommentDBModel, CommentModelType, CommentsInstanceMethods>({
     content: {type: String, required: true},
@@ -30,7 +30,7 @@ export const CommentSchema = new Schema<CommentDBModel, CommentModelType, Commen
     }
 })
 
-CommentSchema.method('addLike', async function addLike(commentId: string, like: LikeDBModel): Promise<string | null> {
+CommentSchema.method('addLike', async function addLike(commentId: string, like: LikeEntityDBModel): Promise<string | null> {
     try {
         this.increaseLikesCount(commentId)
         const newLike = new LikeModel(like)
@@ -41,7 +41,7 @@ CommentSchema.method('addLike', async function addLike(commentId: string, like: 
         return null
     }
 });
-CommentSchema.method('addDislike', async function addDislike(commentId: string, dislike: LikeDBModel): Promise<string | null> {
+CommentSchema.method('addDislike', async function addDislike(commentId: string, dislike: LikeEntityDBModel): Promise<string | null> {
     try {
         this.increaseDislikesCount(commentId)
         const newDislike = new LikeModel(dislike)
