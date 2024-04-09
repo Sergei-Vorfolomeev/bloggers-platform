@@ -36,7 +36,7 @@ describe('LIKE-e2e', () => {
         tokens2 = await userSeeder.loginUser(app, user2.email, user2.password)
     })
 
-    describe.skip('comments likes', () => {
+    describe('comments likes', () => {
         let comment: any = null
         it('create blog, post, comment', async () => {
             comment = await postTestHelper.createPostWithComment(app, tokens.accessToken)
@@ -225,7 +225,6 @@ describe('LIKE-e2e', () => {
                     myStatus: "None",
                     newestLikes: [
                         {
-                            description: expect.any(String),
                             addedAt: expect.any(String),
                             userId: expect.any(String),
                             login: user.login,
@@ -263,7 +262,6 @@ describe('LIKE-e2e', () => {
                     myStatus: "Like",
                     newestLikes: [
                         {
-                            description: expect.any(String),
                             addedAt: expect.any(String),
                             userId: expect.any(String),
                             login: user.login,
@@ -301,13 +299,11 @@ describe('LIKE-e2e', () => {
                     myStatus: "Like",
                     newestLikes: [
                         {
-                            description: expect.any(String),
                             addedAt: expect.any(String),
                             userId: expect.any(String),
                             login: user2.login,
                         },
                         {
-                            description: expect.any(String),
                             addedAt: expect.any(String),
                             userId: expect.any(String),
                             login: user.login,

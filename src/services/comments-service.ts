@@ -96,7 +96,6 @@ export class CommentsService {
                 login: user.login,
                 commentId,
                 likeStatus,
-                description: '',
                 addedAt: new Date().toISOString()
             }
             let createdLikeId
@@ -133,7 +132,6 @@ export class CommentsService {
                         login: user.login,
                         commentId,
                         likeStatus,
-                        description: '',
                         addedAt: new Date().toISOString()
                     }
                     comment.addLike(commentId, newLike)
@@ -148,7 +146,6 @@ export class CommentsService {
                         login: user.login,
                         commentId,
                         likeStatus,
-                        description: '',
                         addedAt: new Date().toISOString()
                     }
                     comment.addDislike(commentId, dislike)

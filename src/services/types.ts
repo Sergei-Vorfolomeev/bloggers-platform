@@ -49,7 +49,6 @@ export type ExtendedLikesInfoViewModel = LikesInfoViewModel & {
 }
 
 export type LikeDetailsViewModel = {
-    description: string
     addedAt: string
     userId: string
     login: string

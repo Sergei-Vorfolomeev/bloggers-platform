@@ -7,7 +7,6 @@ export const LikeSchema = new mongoose.Schema<LikeEntityDBModel>({
     postId: String,
     commentId: String,
     likeStatus: {type: String, required: true},
-    description: String,
     addedAt: {type: String, required: true},
 })
 

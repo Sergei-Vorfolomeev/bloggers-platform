@@ -80,7 +80,6 @@ export class PostsService {
                 login: user.login,
                 postId,
                 likeStatus,
-                description: '',
                 addedAt: new Date().toISOString()
             }
             let createdLikeId
@@ -116,7 +115,6 @@ export class PostsService {
                         login: user.login,
                         postId,
                         likeStatus,
-                        description: '',
                         addedAt: new Date().toISOString()
                     }
                     post.addLike(postId, newLike)
@@ -131,7 +129,6 @@ export class PostsService {
                         login: user.login,
                         postId,
                         likeStatus,
-                        description: '',
                         addedAt: new Date().toISOString()
                     }
                     post.addDislike(postId, dislike)

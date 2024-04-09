@@ -35,7 +35,6 @@ export class LikesQueryRepository {
                 .limit(3)
                 .lean().exec()
             return newestLikes.map(el => ({
-                description: el.description,
                 userId: el.userId,
                 login: el.login,
                 addedAt: el.addedAt,

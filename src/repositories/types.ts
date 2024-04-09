@@ -56,7 +56,6 @@ export type LikeEntityDBModel = {
     postId?: string
     commentId?: string,
     likeStatus: LikeStatus,
-    description: string
     addedAt: string
 }
 
