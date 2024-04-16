@@ -32,7 +32,7 @@ export const CommentSchema = new Schema<CommentDBModel, CommentModelType, Commen
 
 CommentSchema.method('addLike', async function addLike(commentId: string, like: LikeEntityDBModel): Promise<string | null> {
     try {
-        this.increaseLikesCount(commentId)
+        await this.increaseLikesCount(commentId)
         const newLike = new LikeModel(like)
         await newLike.save()
         return newLike._id.toString()
@@ -43,7 +43,7 @@ CommentSchema.method('addLike', async function addLike(commentId: string, like: 
 });
 CommentSchema.method('addDislike', async function addDislike(commentId: string, dislike: LikeEntityDBModel): Promise<string | null> {
     try {
-        this.increaseDislikesCount(commentId)
+        await this.increaseDislikesCount(commentId)
         const newDislike = new LikeModel(dislike)
         await newDislike.save()
         return newDislike._id.toString()
@@ -54,7 +54,7 @@ CommentSchema.method('addDislike', async function addDislike(commentId: string, 
 });
 CommentSchema.method('removeLike', async function removeLike(commentId: string, userId: string): Promise<boolean> {
     try {
-        this.decreaseLikesCount(commentId)
+        await this.decreaseLikesCount(commentId)
         const res = await LikeModel.deleteOne({commentId, userId})
         return res.deletedCount === 1
     } catch (e) {
@@ -64,7 +64,7 @@ CommentSchema.method('removeLike', async function removeLike(commentId: string, 
 });
 CommentSchema.method('removeDislike', async function removeDislike(commentId: string, userId: string): Promise<boolean> {
     try {
-        this.decreaseDislikesCount(commentId)
+        await this.decreaseDislikesCount(commentId)
         const res = await LikeModel.deleteOne({commentId, userId})
         return res.deletedCount === 1
     } catch (e) {

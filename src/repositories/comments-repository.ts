@@ -48,15 +48,4 @@ export class CommentsRepository {
             return false
         }
     }
-
-    async addLike(commentId: string, like: LikeEntityDBModel): Promise<string | null> {
-        try {
-            const comment = new CommentModel()
-            console.log(comment)
-            return comment.addLike(commentId, like)
-        } catch (e) {
-            console.error(e)
-            return null
-        }
-    }
 }

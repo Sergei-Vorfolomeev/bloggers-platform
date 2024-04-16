@@ -13,6 +13,6 @@ postsRouter.post('/', basicAuthGuard, postValidators(), postsController.createPo
 postsRouter.put('/:id', basicAuthGuard, postValidators(), postsController.updatePost.bind(postsController))
 postsRouter.delete('/:id', basicAuthGuard, postsController.deletePost.bind(postsController))
 postsRouter.put('/:id/like-status', accessTokenGuard, likeStatusValidator(), postsController.updateLikeStatus.bind(postsController))
-postsRouter.get('/:id/comments', postsController.getCommentByPostId.bind(postsController))
+postsRouter.get('/:id/comments', postsController.getCommentsByPostId.bind(postsController))
 postsRouter.post('/:id/comments', accessTokenGuard, commentValidators(), postsController.createComment.bind(postsController))
 

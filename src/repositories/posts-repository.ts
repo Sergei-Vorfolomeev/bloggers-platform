@@ -10,7 +10,7 @@ export class PostsRepository {
         try {
             return await PostModel.findById(new ObjectId(postId)).exec()
         } catch (e) {
-            console.log(e)
+            console.error(e)
             return null
         }
     }
@@ -21,7 +21,7 @@ export class PostsRepository {
             await newPost.save()
             return newPost._id.toString()
         } catch (e) {
-            console.log(e)
+            console.error(e)
             return null
         }
     }
@@ -31,7 +31,7 @@ export class PostsRepository {
             const res = await PostModel.updateOne({_id: new ObjectId(id)}, post)
             return res.matchedCount === 1
         } catch (e) {
-            console.log(e)
+            console.error(e)
             return false
         }
     }
@@ -45,7 +45,7 @@ export class PostsRepository {
             await session.commitTransaction()
             return res.deletedCount === 1
         } catch (e) {
-            console.log(e)
+            console.error(e)
             await session.abortTransaction()
             return false
         } finally {

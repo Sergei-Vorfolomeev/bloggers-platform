@@ -156,7 +156,7 @@ export class PostsController {
         }
     }
 
-    async getCommentByPostId(req: RequestWithParamsAndQuery<QueryParams>, res: ResponseWithBody<Paginator<CommentViewModel[]>>) {
+    async getCommentsByPostId(req: RequestWithParamsAndQuery<QueryParams>, res: ResponseWithBody<Paginator<CommentViewModel[]>>) {
         const {id: postId} = req.params
         const {sortBy, sortDirection, pageNumber, pageSize} = req.query
         if (!ObjectId.isValid(postId)) {

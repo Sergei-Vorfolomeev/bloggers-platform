@@ -62,9 +62,9 @@ export class PostsQueryRepository {
         }
     }
 
-    async getPostsByBlogId(postId: string, sortParams: SortParams, userId: string | null): Promise<Paginator<PostViewModel[]> | null> {
+    async getPostsByBlogId(blogId: string, sortParams: SortParams, userId: string | null): Promise<Paginator<PostViewModel[]> | null> {
         try {
-            const blog = await this.blogsQueryRepository.getBlogById(postId)
+            const blog = await this.blogsQueryRepository.getBlogById(blogId)
             if (!blog) {
                 return null
             }
